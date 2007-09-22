@@ -1,5 +1,11 @@
+.deps
 autom4te.cache
 build-aux
 configure
+config.*
+Makefile
 *.m4
 *.in
+*.o
+src/psend
+src/precv
