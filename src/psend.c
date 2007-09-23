@@ -10,5 +10,11 @@
 int
 main (int arcg, char **argv) {
 
+	/* TODO inizializzazioni con valori di default. */
+
+	/* TODO lettura opzioni da riga di comando. */
+
+	/* TODO lancio del core. */
+
 	return 0;
 }
