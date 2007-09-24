@@ -6,10 +6,13 @@
 #include "types.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <netinet/ip.h>
-#include <stdarg.h>
-#include <string.h>
 #include <sys/types.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 /*******************************************************************************
@@ -42,28 +45,44 @@ getargs (int argc, char **argv, char *fmt, ...) {
 	     ok == TRUE && i <= strlen (fmt) && j < argc;
 	     i++, j++) {
 		struct sockaddr_in *addr;
-		uint32_t *port;
+		port_t *port;
 
 		switch (fmt[i]) {
 
+		/* Indirizzo ip. */
 		case 'a' :
 			addr = va_arg (args, struct sockaddr_in *);
 			if (!streq (argv[j], "-")) {
-				/* TODO inet_aton argv[j] -> *addr */
-				/* TODO if (error) ok = FALSE */
+				if (!inet_aton (argv[j], &addr->sin_addr)) {
+					fprintf (stderr,
+					         "ip non valido: %s.\n",
+						 argv[j]);
+					ok = FALSE;
+				}
 			}
-			break;
+		break;
 
+		/* Porta. */
 		case 'p' :
-			port = va_arg (args, uint32_t *);
+			port = va_arg (args, port_t *);
 			if (!streq (argv[j], "-")) {
-				*port = atoi (argv[j]);
-				/* TODO if (error) ok = FALSE */
+				errno = 0;
+				*port = strtol (argv[j], NULL, 10);
+				if (errno != 0) {
+					fprintf (stderr,
+						 "porta non valida: %s.\n",
+						 argv[j]);
+					ok = FALSE;
+				} else {
+					*port = htons (*port);
+				}
 			}
-			break;
+		break;
 
+		/* Errore. */
 		default :
-			/* TODO error */
+			fprintf (stderr, "formato non riconosciuto: %c.\n",
+			         fmt[i]);
 			ok = FALSE;
 		}
 	}
