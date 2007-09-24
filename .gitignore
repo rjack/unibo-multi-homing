@@ -7,5 +7,6 @@ Makefile
 *.m4
 *.in
 *.o
+*.swp
 src/psend
 src/precv
