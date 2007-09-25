@@ -12,6 +12,10 @@
 				  Prototipi
 *******************************************************************************/
 
+char *
+addrstr (struct sockaddr_in *addr, char *buf);
+
+
 bool
 streq (const char *str1, const char *str2);
 

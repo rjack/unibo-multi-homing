@@ -21,20 +21,12 @@
 
 bool
 getargs (int argc, char **argv, char *fmt, ...) {
-	/* Secondo il formato fmt, converte i vari argv[i] in indirizzi o
-	 * porte e li scrive negli indirizzi dati.
-	 *
-	 * Ogni carattere della stringa fmt specifica o un indirizzo ip ('a')
-	 * o una porta ('p').
-	 *
-	 * Se il valore da linea di comando è '-', lascia il valore di default.
-	 *
-	 * Ritorna TRUE se riesce, FALSE se fallisce. */
 
 	bool ok = TRUE;
 	int i;	/* su fmt */
 	int j;	/* su argv */
 	va_list args;
+	int err;
 
 	assert (argv != NULL);
 	assert (fmt != NULL);
@@ -53,7 +45,10 @@ getargs (int argc, char **argv, char *fmt, ...) {
 		case 'a' :
 			addr = va_arg (args, struct sockaddr_in *);
 			if (!streq (argv[j], "-")) {
-				if (!inet_aton (argv[j], &addr->sin_addr)) {
+				err = inet_pton (AF_INET, argv[j],
+				                 &addr->sin_addr);
+				assert (err >= 0);
+				if (err == 0) {
 					fprintf (stderr,
 					         "ip non valido: %s.\n",
 						 argv[j]);
@@ -66,9 +61,12 @@ getargs (int argc, char **argv, char *fmt, ...) {
 		case 'p' :
 			port = va_arg (args, port_t *);
 			if (!streq (argv[j], "-")) {
+				char *endptr;
 				errno = 0;
-				*port = strtol (argv[j], NULL, 10);
-				if (errno != 0) {
+				*port = strtol (argv[j], &endptr, 10);
+				if (errno != 0
+				    || argv[j] == endptr
+				    || *endptr != '\0') {
 					fprintf (stderr,
 						 "porta non valida: %s.\n",
 						 argv[j]);

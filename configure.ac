@@ -22,7 +22,7 @@ AC_C_CONST
 AC_TYPE_UINT16_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([memset strtol])
+AC_CHECK_FUNCS([memset strchr strtol])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])

@@ -2,10 +2,13 @@
 autom4te.cache
 build-aux
 configure
-config.*
+configure.scan
+config.status
 Makefile
+tags
 *.m4
 *.in
+*.log
 *.o
 *.swp
 src/psend

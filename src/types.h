@@ -12,8 +12,13 @@
 				   Costanti
 *******************************************************************************/
 
+/* Numero di canali di rete. */
 #define     NETCHANNELS    3
-#define     CHANNELS     (NETCHANNELS + 1)
+/* Numero di canali totali. */
+#define     CHANNELS       (NETCHANNELS + 1)
+/* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
+#define     HOST           (NETCHANNELS)
+
 
 /*******************************************************************************
 			     Definizioni di tipo

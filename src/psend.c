@@ -2,8 +2,6 @@
  *
  * Giacomo Ritucci, 22/09/2007 */
 
-
-
 #include "util.h"
 #include "types.h"
 
@@ -58,7 +56,7 @@ main (int argc, char **argv) {
 		channel_init (&chnl[i]);
 
 		/* Canali con il Ritardatore. */
-		if (i < CHANNELS - 1) {
+		if (i != HOST) {
 			ok = set_addr (&chnl[i].c_raddr,
 			               defconnaddr[i],
 			               defconnport[i]);
@@ -71,15 +69,23 @@ main (int argc, char **argv) {
 		}
 	}
 
-	/* Lettura opzioni da riga di comando. */
+	/* Eventuali argomenti a linea di comando possono modificare le
+	 * impostazioni dei canali. */
 	ok = getargs (argc, argv, "papapap",
-	              &chnl[0].c_laddr.sin_port,
+	              &chnl[HOST].c_laddr.sin_port,
+		      &chnl[0].c_raddr, &chnl[0].c_raddr.sin_port,
 		      &chnl[1].c_raddr, &chnl[1].c_raddr.sin_port,
-		      &chnl[2].c_raddr, &chnl[2].c_raddr.sin_port,
-		      &chnl[3].c_raddr, &chnl[3].c_raddr.sin_port);
+		      &chnl[2].c_raddr, &chnl[2].c_raddr.sin_port);
 	if (ok == FALSE) {
 		print_help (argv[0]);
 		exit (EXIT_FAILURE);
+	}
+
+	/* Stampa informazioni. */
+	printf ("Canale il Sender: %s\n", channel_name (&chnl[HOST]));
+	for (i = 0; i < NETCHANNELS; i++) {
+		printf ("Canale %d con il Ritardatore: %s\n",
+		         i + 1, channel_name (&chnl[i]));
 	}
 
 	/* TODO Lancio del core. */
@@ -96,9 +102,9 @@ static void
 print_help (const char *program_name) {
 	printf ("%s [[[ porta_locale ] ip ] porta ] ...\n",
 	        program_name);
-	printf (
+	printf ("\n"
 "Attende la connessione dal Sender su porta_locale e si connette al\n"
-"Ritardatore, in ascolto sugli indirizzi ip:porta.\n"
-"Se un argomento è -, viene usato il valore predefinito.\n"
+"Ritardatore, che deve essere in ascolto sugli indirizzi ip:porta. Se un\n"
+"argomento è -, viene usato il valore predefinito.\n"
 	);
 }

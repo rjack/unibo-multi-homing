@@ -2,20 +2,42 @@
  *
  * Giacomo Ritucci, 23/09/2007 */
 
-#define _GNU_SOURCE	/* per inet_aton */
-
 #include "util.h"
 #include "types.h"
 
 #include <assert.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
+#include <stdio.h>
 #include <string.h>
 
 
 /*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
+
+char *
+addrstr (struct sockaddr_in *addr, char *buf) {
+	/* Copia la stringa in formato xxx.xxx.xxx.xxx:yyyyy nel buffer buf,
+	 * che deve essere grande a sufficienza. */
+
+	char *name;
+
+	/* Copia dell'indirizzo ip. */
+	name = (char *) inet_ntop (AF_INET, &addr->sin_addr, buf, INET_ADDRSTRLEN);
+	assert (name != NULL);
+
+	/* Copia del numero di porta. */
+	name = strchr (name, '\0');
+	sprintf (name, ":%d", ntohs (addr->sin_port));
+	/* Posiziona name alla fine della stringa. */
+	name = strchr (name, '\0');
+	/* Overflow? */
+	assert (name < (buf + INET_ADDRSTRLEN + 1 + 5));
+
+	return name;
+}
+
 
 bool
 streq (const char *str1, const char *str2) {
