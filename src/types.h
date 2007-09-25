@@ -16,6 +16,8 @@
 #define     NETCHANNELS    3
 /* Numero di canali totali. */
 #define     CHANNELS       (NETCHANNELS + 1)
+/* Id del primo canale di rete. */
+#define     NET            0
 /* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
 #define     HOST           (NETCHANNELS)
 

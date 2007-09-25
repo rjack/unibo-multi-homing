@@ -15,19 +15,25 @@
 			       Variabili locali
 *******************************************************************************/
 
-/* Valori di default. */
+/* 
+ * Valori di default.
+ */
+
+/* Indirizzi per connessioni al Ritardatore. */
 static const char* defconnaddr[NETCHANNELS] = {
 	"127.0.0.1",
 	"127.0.0.1",
 	"127.0.0.1"
 };
 
+/* Porte per connessioni al Ritardatore. */
 static const port_t defconnport[NETCHANNELS] = {
 	7001,
 	7002,
 	7003
 };
 
+/* Porta di ascolto per accettare la connessione del Sender. */
 static const port_t deflistport = 6001;
 
 
@@ -47,35 +53,35 @@ main (int argc, char **argv) {
 
 	int i;
 	bool ok;
-	/* I primi tre sono canali con il Ritardatore, l'ultimo quello con il
-	 * Sender. */
 	struct chan chnl[CHANNELS];
 
-	/* Inizializzazioni con valori di default. */
-	for (i = 0; i < CHANNELS; i++) {
+	/*
+	 * Inizializzazioni con valori di default.
+	 */
+
+	/* Canali con il Ritardatore. */
+	for (i = NET; i < NETCHANNELS; i++) {
 		channel_init (&chnl[i]);
 
-		/* Canali con il Ritardatore. */
-		if (i != HOST) {
-			ok = set_addr (&chnl[i].c_raddr,
-			               defconnaddr[i],
-			               defconnport[i]);
-			assert (ok == TRUE);
-		}
-		/* Canale con il Sender. */
-		else {
-			ok = set_addr (&chnl[i].c_laddr, NULL, deflistport);
-			assert (ok == TRUE);
-		}
+		ok = set_addr (&chnl[i].c_raddr, defconnaddr[i],
+		               defconnport[i]);
+		assert (ok == TRUE);
 	}
 
-	/* Eventuali argomenti a linea di comando possono modificare le
-	 * impostazioni dei canali. */
+	/* Canale con il Sender. */
+	channel_init (&chnl[HOST]);
+	ok = set_addr (&chnl[HOST].c_laddr, NULL, deflistport);
+	assert (ok == TRUE);
+
+	/*
+	 * Personalizzazioni da riga di comando.
+	 */
+
 	ok = getargs (argc, argv, "papapap",
 	              &chnl[HOST].c_laddr.sin_port,
-		      &chnl[0].c_raddr, &chnl[0].c_raddr.sin_port,
-		      &chnl[1].c_raddr, &chnl[1].c_raddr.sin_port,
-		      &chnl[2].c_raddr, &chnl[2].c_raddr.sin_port);
+		      &chnl[NET].c_raddr, &chnl[NET].c_raddr.sin_port,
+		      &chnl[NET+1].c_raddr, &chnl[NET+1].c_raddr.sin_port,
+		      &chnl[NET+2].c_raddr, &chnl[NET+2].c_raddr.sin_port);
 	if (ok == FALSE) {
 		print_help (argv[0]);
 		exit (EXIT_FAILURE);
@@ -83,9 +89,9 @@ main (int argc, char **argv) {
 
 	/* Stampa informazioni. */
 	printf ("Canale il Sender: %s\n", channel_name (&chnl[HOST]));
-	for (i = 0; i < NETCHANNELS; i++) {
+	for (i = NET; i < NETCHANNELS; i++) {
 		printf ("Canale %d con il Ritardatore: %s\n",
-		         i + 1, channel_name (&chnl[i]));
+		         i - NET, channel_name (&chnl[i]));
 	}
 
 	/* TODO Lancio del core. */
@@ -105,6 +111,7 @@ print_help (const char *program_name) {
 	printf ("\n"
 "Attende la connessione dal Sender su porta_locale e si connette al\n"
 "Ritardatore, che deve essere in ascolto sugli indirizzi ip:porta. Se un\n"
-"argomento è -, viene usato il valore predefinito.\n"
-	);
+"un argomento non viene specificato oppure è -, viene usato il valore\n"
+"predefinito.\n"
+		);
 }
