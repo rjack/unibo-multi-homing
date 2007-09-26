@@ -1,3 +1,3 @@
 bin_PROGRAMS=precv psend
-precv_SOURCES=precv.c types.h util.c util.h channel.c channel.h getargs.c getargs.h
-psend_SOURCES=psend.c types.h util.c util.h channel.c channel.h getargs.c getargs.h
+precv_SOURCES=precv.c h/types.h util.c h/util.h channel.c h/channel.h getargs.c h/getargs.h
+psend_SOURCES=psend.c h/types.h util.c h/util.h channel.c h/channel.h getargs.c h/getargs.h

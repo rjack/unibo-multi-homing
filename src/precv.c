@@ -2,8 +2,8 @@
  *
  * Giacomo Ritucci, 22/09/2007 */
 
-#include "util.h"
-#include "types.h"
+#include "h/util.h"
+#include "h/types.h"
 
 #include <assert.h>
 #include <stdio.h>
