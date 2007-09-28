@@ -8,6 +8,10 @@
 #include "types.h"
 
 
+/*******************************************************************************
+				  Prototipi
+*******************************************************************************/
+
 bool
 getargs (int argc, char **argv, char *fmt, ...);
 /* Secondo il formato fmt, converte i vari argv[i] in indirizzi o porte e li

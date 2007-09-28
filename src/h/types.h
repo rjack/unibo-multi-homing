@@ -47,6 +47,11 @@ typedef unsigned char bool;
  */
 typedef uint16_t port_t;
 
+/*
+ * File descriptor.
+ */
+typedef int fd_t;
+
 
 /*******************************************************************************
 				  Strutture
