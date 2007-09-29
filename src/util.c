@@ -7,19 +7,32 @@
 
 #include <assert.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 
 /*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
 
+/*
+ * Funzioni su struct sockaddr_in.
+ */
+
 bool
 addr_is_set (struct sockaddr_in *addr) {
-	/* Per controllare che sia stata impostata e' sufficiente controllare
+	/* Ritorna FALSE se addr e' ancora inizializzata a zero, TRUE
+	 * altrimenti.
+	 *
+	 * XXX Non controlla tutta la struttura, si affida al valore di
 	 * sin_family. */
+
+	assert (addr != NULL);
 
 	if (addr->sin_family == AF_INET) {
 		return TRUE;
@@ -34,6 +47,9 @@ addrstr (struct sockaddr_in *addr, char *buf) {
 	 * che deve essere grande a sufficienza. */
 
 	char *name;
+
+	assert (addr != NULL);
+	assert (buf != NULL);
 
 	/* Copia dell'indirizzo ip. */
 	name = (char *) inet_ntop (AF_INET, &addr->sin_addr, buf, INET_ADDRSTRLEN);
@@ -52,21 +68,12 @@ addrstr (struct sockaddr_in *addr, char *buf) {
 
 
 bool
-streq (const char *str1, const char *str2) {
-	int cmp;
-
-	assert (str1 != NULL);
-	assert (str2 != NULL);
-
-	cmp = strcmp (str1, str2);
-	
-	if (cmp == 0) return TRUE;
-	return FALSE;
-}
-
-
-bool
 set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
+	/* Imposta addr secondo l'indirizzo ip, in formato xxx.xxx.xxx.xxx, e
+	 * la porta port.
+	 *
+	 * Ritorna FALSE se fallisce, TRUE se riesce. */
+
 	assert (addr != NULL);
 
 	memset (addr, 0, sizeof (struct sockaddr_in));
@@ -81,4 +88,121 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
 	addr->sin_port = htons (port);
 
 	return TRUE;
+}
+
+
+/*
+ * Funzioni su stringhe.
+ */
+
+bool
+streq (const char *str1, const char *str2) {
+	/* Ritorna TRUE se due stringhe sono uguali. */
+
+	int cmp;
+
+	assert (str1 != NULL);
+	assert (str2 != NULL);
+
+	cmp = strcmp (str1, str2);
+	
+	if (cmp == 0) return TRUE;
+	return FALSE;
+}
+
+
+/*
+ * Funzioni per la gestione della memoria.
+ */
+
+void
+xfree (void *ptr) {
+	/* Free sicura. */
+
+	if (ptr != NULL) {
+		free (ptr);
+	}
+}
+
+
+void *
+xmalloc (size_t size) {
+	/* Malloc sicura. */
+
+	assert (size > 0);
+
+	void *ptr = malloc (size);
+	if (ptr == NULL) {
+		perror ("Impossibile allocare memoria");
+		exit (EXIT_FAILURE);
+	}
+	return ptr;
+}
+
+
+/* 
+ * Funzioni su socket e operazioni di rete.
+ */
+
+bool
+tcp_set_block (fd_t fd, bool must_block) {
+	/* Se must_block = TRUE, imposta fd come bloccante, altrimenti come
+	 * non bloccante.
+	 *
+	 * Ritorna TRUE se riesce, FALSE altrimenti. */
+
+	int flags;
+
+	assert (fd >= 0);
+	assert (must_block == TRUE || must_block == FALSE);
+
+	flags = fcntl (fd, F_GETFL, 0);
+	if (flags != -1) {
+		if (must_block) {
+			flags &= ~O_NONBLOCK;
+		} else {
+			flags |= O_NONBLOCK;
+		}
+		if (fcntl (fd, F_SETFL, flags) != -1) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
+bool
+tcp_set_nagle (fd_t fd, bool active) {
+	/* Se active = TRUE imposta l'algoritmo di Nagle sul file descriptor
+	 * fd, altrimenti attiva l'opzione TCP_NODELAY.
+	 *
+	 * Ritorna TRUE se riesce, FALSE altrimenti. */
+
+	int err;
+	int optval;
+
+	assert (fd >= 0);
+	assert (active == TRUE || active == FALSE);
+
+	optval = (active == TRUE )? 0 : 1;
+
+	err = setsockopt (fd, IPPROTO_TCP, TCP_NODELAY,
+	                  &optval, sizeof (optval));
+	if (!err) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+fd_t
+xtcp_socket (void) {
+	/* Socket sicura. */
+
+	fd_t newfd = socket (AF_INET, SOCK_STREAM, 0);
+	if (newfd < 0) {
+		perror ("Impossibile creare il socket");
+		exit (EXIT_FAILURE);
+	}
+	return newfd;
 }
