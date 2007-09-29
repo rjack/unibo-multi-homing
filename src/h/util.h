@@ -5,7 +5,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+
 #include "types.h"
+
+#include <netinet/ip.h>
 
 
 /*******************************************************************************
@@ -14,6 +17,10 @@
 
 char *
 addrstr (struct sockaddr_in *addr, char *buf);
+
+
+bool
+addr_is_set (struct sockaddr_in *addr);
 
 
 bool

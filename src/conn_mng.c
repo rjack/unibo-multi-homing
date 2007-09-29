@@ -1,4 +1,5 @@
 #include "h/types.h"
+#include "h/util.h"
 
 #include <assert.h>
 #include <sys/select.h>
@@ -20,12 +21,28 @@ manage_connections (struct chan* chnl) {
 	 * e iniziata una accept non bloccante; altrimenti viene creato un
 	 * socket e iniziata una connect non bloccante. */
 
-	/* TODO */
+	int i;
+
+	for (i = 0; i < CHANNELS; i++) {
+		if (!addr_is_set (&chnl[i].c_laddr)
+		    && addr_is_set (&chnl[i].c_raddr)) {
+			/* TODO
+			 * - nuovo socket
+			 * - connect non bloccante */
+		}
+		if (addr_is_set (&chnl[i].c_laddr)
+		    && !addr_is_set (&chnl[i].c_raddr)) {
+			/* TODO
+			 * - nuovo socket listening
+			 * - accept non bloccante */
+		}
+	}
 }
 
 
 fd_t
 set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 	/* TODO */
+
 	return -1;
 }

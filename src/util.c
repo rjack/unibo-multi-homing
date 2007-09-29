@@ -16,6 +16,18 @@
 			      Funzioni pubbliche
 *******************************************************************************/
 
+bool
+addr_is_set (struct sockaddr_in *addr) {
+	/* Per controllare che sia stata impostata e' sufficiente controllare
+	 * sin_family. */
+
+	if (addr->sin_family == AF_INET) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 char *
 addrstr (struct sockaddr_in *addr, char *buf) {
 	/* Copia la stringa in formato xxx.xxx.xxx.xxx:yyyyy nel buffer buf,
