@@ -6,6 +6,7 @@
 #include "h/types.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/ip.h>
@@ -144,6 +145,24 @@ xmalloc (size_t size) {
  * Funzioni su socket e operazioni di rete.
  */
 
+void
+tcp_close (fd_t *fd) {
+	/* Chiude il file descriptor puntato da fd e lo inizializza a -1. */
+
+	int err;
+
+	assert (fd != NULL);
+	assert (*fd >= 0);
+
+	do {
+		err = close (*fd);
+	} while (err == -1 && errno == EINTR);
+	assert (!err); /* FIXME e' giusto essere cosi' drastici? */
+
+	*fd = -1;
+}
+
+
 bool
 tcp_set_block (fd_t fd, bool must_block) {
 	/* Se must_block = TRUE, imposta fd come bloccante, altrimenti come
@@ -192,6 +211,24 @@ tcp_set_nagle (fd_t fd, bool active) {
 		return TRUE;
 	}
 	return FALSE;
+}
+
+
+void
+tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
+	/* Wrapper per nascondere le bruttezze di getsockname. */
+
+	bool ok;
+	socklen_t len;
+
+	assert (fd >= 0);
+	assert (laddr != NULL);
+	assert (!addr_is_set (laddr));
+	
+	len = sizeof (*laddr);
+
+	ok = getsockname (fd, (struct sockaddr *) laddr, &len);
+	assert (ok);
 }
 
 

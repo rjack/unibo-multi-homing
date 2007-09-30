@@ -55,12 +55,24 @@ xmalloc (size_t size);
  * Funzioni su socket e operazioni di rete.
  */
 
+void
+tcp_close (fd_t *fd);
+
+
 bool
 tcp_set_block (fd_t fd, bool must_block);
 
 
 bool
 tcp_set_nagle (fd_t fd, bool active);
+
+
+void
+tcp_sockname (fd_t fd, struct sockaddr_in *laddr);
+
+
+fd_t
+xtcp_socket (void);
 
 
 #endif /* UTIL_H */

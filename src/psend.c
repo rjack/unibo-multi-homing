@@ -94,9 +94,7 @@ main (int argc, char **argv) {
 		         i - NET, channel_name (&chnl[i]));
 	}
 
-	/* TODO Lancio del core. */
-
-	return 0;
+	return core (chnl);
 }
 
 

@@ -21,24 +21,36 @@ bool connect_noblock (struct chan *ch);
 
 void
 manage_connections (struct chan* chnl) {
-	/* Attiva tutti i canali che hanno una struct sockaddr_in impostata e
-	 * una ancora inizializzata.
+	/* Attiva tutti i canali che hanno una struct sockaddr_in impostata,
+	 * una ancora inizializzata e il socket non valido.
+	 *
 	 * I canali con entrambe le struct impostate sono considerati gia'
-	 * connessi; quelli con entrambe le struct inizializzate non
-	 * piu' utilizzabili.
+	 * connessi; quelli con entrambe le struct inizializzate non piu'
+	 * utilizzabili; quelli con i socket validi sono gia' attivati.
 	 *
 	 * Se e' impostata la struct locale, viene creato un socket listening
 	 * e iniziata una accept non bloccante; altrimenti viene creato un
 	 * socket e iniziata una connect non bloccante. */
 
 	int i;
-	int err;
+	bool ok;
 
 	for (i = 0; i < CHANNELS; i++) {
 		if (!addr_is_set (&chnl[i].c_laddr)
-		    && addr_is_set (&chnl[i].c_raddr)) {
-			err = connect_noblock (&chnl[i]);
-			/* TODO if err... */
+		    && addr_is_set (&chnl[i].c_raddr)
+		    && chnl[i].c_sockfd < 0) {
+
+			ok = connect_noblock (&chnl[i]);
+			assert (ok); /* FIXME controllo errore decente. */
+
+			/* Connect gia' conclusa, recupera nome del socket. */
+			if (errno != EINPROGRESS) {
+				tcp_sockname (chnl[i].c_sockfd,
+				              &chnl[i].c_laddr);
+		       	}
+			printf ("Canale %s %s.\n", channel_name (&chnl[i]),
+			        addr_is_set (&chnl[i].c_laddr) ?
+			        "connesso" : "in connessione");
 		}
 		if (addr_is_set (&chnl[i].c_laddr)
 		    && !addr_is_set (&chnl[i].c_raddr)) {
@@ -68,8 +80,12 @@ connect_noblock (struct chan *ch) {
 	 * ed esegue una connect (senza bind) usando la struct sockaddr_in del
 	 * canale.
 	 *
-	 * Ritorna TRUE se la connect riesce subito o e' in corso, FALSE se
-	 * fallisce. */
+	 * XXX del canale ch viene modificato esclusivamente il valore di
+	 * c_sockfd, e solo quando la funzione riesce. Altre modifiche sono a
+	 * carico del chiamante.
+	 *
+	 * Ritorna FALSE se fallisce, TRUE se riesce subito o e' in corso. In
+	 * quest'ultimo caso, errno = EINPROGRESS. */
 
 	int err;
 
@@ -83,15 +99,16 @@ connect_noblock (struct chan *ch) {
 	/* Non bloccante, se fallisce RITORNA subito. */
 	if (!tcp_set_block (ch->c_sockfd, FALSE)) {
 		fprintf (stderr,
-		         "Canale %s, impossibile disabilitare Nagle: %s\n",
-		         channel_name (ch), strerror (errno));
-		close (ch->c_sockfd);
-		ch->c_sockfd = -1;
+			 "Canale %s, impossibile impostarlo non bloccante: "
+			 "%s\n", channel_name (ch), strerror (errno));
+		tcp_close (&ch->c_sockfd);
 		return FALSE;
 	}
 
+	/* FIXME dove disabilitare Nagle? */
 	/* TODO se necessario modificare i buffer TCP qui. */
 
+	/* Tentativo di connessione. */
 	do {
 		err = connect (ch->c_sockfd,
 	                      (struct sockaddr *)&ch->c_raddr,
@@ -100,12 +117,11 @@ connect_noblock (struct chan *ch) {
 
 	/* Se riuscita subito o in corso, ritorna TRUE; altrimenti FALSE. */
 	if (err == 0 || errno == EINPROGRESS) {
-		printf ("Canale %s %s.\n", channel_name (ch),
-		        (err == 0) ? "connesso" : "in connessione");
 		return TRUE;
 	} else {
 		fprintf (stderr, "Canale %s, errore di connessione: %s\n",
 		         channel_name (ch), strerror (errno));
+		tcp_close (&ch->c_sockfd);
 		return FALSE;
 	}
 }
