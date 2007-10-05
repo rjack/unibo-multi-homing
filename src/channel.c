@@ -31,7 +31,6 @@ channel_name (struct chan *ch) {
 	 * forma "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il
 	 * primo è l'indirizzo locale, il secondo quello remoto. */
 
-	int i;
 	char *bufptr;
 	static char bufname[46];
 

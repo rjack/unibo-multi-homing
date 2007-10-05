@@ -2,6 +2,8 @@
  *
  * Giacomo Ritucci, 22/09/2007 */
 
+#include "h/channel.h"
+#include "h/getargs.h"
 #include "h/util.h"
 #include "h/types.h"
 

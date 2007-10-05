@@ -1,7 +1,9 @@
+#include "h/conn_mng.h"
 #include "h/types.h"
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/select.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -49,4 +51,6 @@ core (struct chan *chnl) {
 			assert (FALSE);
 		}
 	}
+
+	return 0;
 }
