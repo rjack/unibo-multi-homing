@@ -82,7 +82,7 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
 
 	if (ip == NULL) {
 		addr->sin_addr.s_addr = htonl (INADDR_ANY);
-	} else if (!inet_aton (ip, &addr->sin_addr)) {
+	} else if (inet_pton (AF_INET, ip, &addr->sin_addr) == 0) {
 		/* La stringa ip non ha un formato valido. */
 		return FALSE;
 	}
@@ -129,10 +129,11 @@ xfree (void *ptr) {
 void *
 xmalloc (size_t size) {
 	/* Malloc sicura. */
+	void *ptr;
 
 	assert (size > 0);
 
-	void *ptr = malloc (size);
+	ptr = malloc (size);
 	if (ptr == NULL) {
 		perror ("Impossibile allocare memoria");
 		exit (EXIT_FAILURE);
