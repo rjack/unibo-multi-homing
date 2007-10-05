@@ -77,17 +77,14 @@ set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 		/* Connessioni. */
 		if (channel_is_connecting (&chnl[i])) {
 			FD_SET (chnl[i].c_sockfd, wrset);
+			max = MAX (chnl[i].c_sockfd, max);
 		} else if (channel_is_listening (&chnl[i])) {
 			FD_SET (chnl[i].c_listfd, rdset);
+			max = MAX (chnl[i].c_listfd, max);
 		}
 
 		/* TODO 
 		 * traffico con ritardatore e host. */
-
-		if (FD_ISSET (chnl[i].c_sockfd, rdset)
-		    || FD_ISSET (chnl[i].c_sockfd, wrset)) {
-			max = MAX (chnl[i].c_sockfd, max);
-		}
 	}
 
 	return max;
