@@ -14,15 +14,18 @@ AC_PROG_CC
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
+AC_TYPE_SIZE_T
 AC_TYPE_UINT16_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([memset strchr strtol])
+AC_FUNC_MALLOC
+AC_FUNC_SELECT_ARGTYPES
+AC_CHECK_FUNCS([memset select socket strchr strerror strtol])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
