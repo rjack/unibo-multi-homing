@@ -25,6 +25,37 @@ channel_init (struct chan *ch) {
 }
 
 
+bool
+channel_is_connecting (struct chan *ch) {
+	/* Se il socket del canale e' valido ed e' impostato solo l'addr
+	 * remoto e non quello locale, allora c'e' una connect non bloccante
+	 * in corso. */
+
+	if (ch->c_sockfd >= 0
+	    && !addr_is_set (&ch->c_laddr)
+	    && addr_is_set (&ch->c_raddr)) {
+		assert (ch->c_listfd < 0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+bool
+channel_is_listening (struct chan *ch) {
+	/* Se il socket listening del canale e' valido ed e' impostato l'addr
+	 * locale ma non quello remoto, allora il canale e' in ascolto. */
+
+	if (ch->c_listfd >= 0
+	    && addr_is_set (&ch->c_laddr)
+	    && !addr_is_set (&ch->c_raddr)) {
+		assert (ch->c_sockfd < 0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 char *
 channel_name (struct chan *ch) {
 	/* Ritorna una stringa allocata staticamente e terminata da '\0' della

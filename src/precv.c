@@ -2,6 +2,7 @@
  *
  * Giacomo Ritucci, 22/09/2007 */
 
+#include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"
 #include "h/util.h"
@@ -88,9 +89,7 @@ main (int argc, char **argv) {
 	}
 	printf ("Canale il Receiver: %s\n", channel_name (&chnl[HOST]));
 
-	/* TODO lancio del core. */
-
-	return 0;
+	return core (chnl);
 }
 
 

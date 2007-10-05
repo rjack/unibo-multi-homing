@@ -65,9 +65,32 @@ manage_connections (struct chan* chnl) {
 
 fd_t
 set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
-	/* TODO */
+	int i;
+	fd_t max;
 
-	return -1;
+	assert (chnl != NULL);
+	assert (rdset != NULL);
+	assert (wrset != NULL);
+
+	max = -1;
+	for (i = 0; i < CHANNELS; i++) {
+		/* Connessioni. */
+		if (channel_is_connecting (&chnl[i])) {
+			FD_SET (chnl[i].c_sockfd, wrset);
+		} else if (channel_is_listening (&chnl[i])) {
+			FD_SET (chnl[i].c_listfd, rdset);
+		}
+
+		/* TODO 
+		 * traffico con ritardatore e host. */
+
+		if (FD_ISSET (chnl[i].c_sockfd, rdset)
+		    || FD_ISSET (chnl[i].c_sockfd, wrset)) {
+			max = MAX (chnl[i].c_sockfd, max);
+		}
+	}
+
+	return max;
 }
 
 
@@ -117,12 +140,15 @@ connect_noblock (struct chan *ch) {
 	} while (err == -1 && errno == EINTR);
 
 	/* Se riuscita subito o in corso, ritorna TRUE; altrimenti FALSE. */
-	if (err == 0 || errno == EINPROGRESS) {
+	if (!err || errno == EINPROGRESS) {
+		if (!err) {
+			errno = 0;
+		}
 		return TRUE;
-	} else {
-		fprintf (stderr, "Canale %s, errore di connessione: %s\n",
-		         channel_name (ch), strerror (errno));
-		tcp_close (&ch->c_sockfd);
-		return FALSE;
 	}
+
+	fprintf (stderr, "Canale %s, errore di connessione: %s\n",
+	         channel_name (ch), strerror (errno));
+	tcp_close (&ch->c_sockfd);
+	return FALSE;
 }
