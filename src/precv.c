@@ -38,6 +38,7 @@ static const port_t defconnport = 9001;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
+static bool activable_if_almost_one_connected (void *arg);
 static void print_help (const char *);
 
 
@@ -69,6 +70,11 @@ main (int argc, char **argv) {
 	ok = set_addr (&chnl[HOST].c_raddr, defconnaddr, defconnport);
 	assert (ok == TRUE);
 
+	/* Il canale con il Receiver e' attivabile quando e' connesso almeno
+	 * un canale con il Ritardatore. */
+	chnl[HOST].c_is_activable = activable_if_almost_one_connected;
+	chnl[HOST].c_activable_arg = (void *)&chnl[NET];
+
 	/*
 	 * Personalizzazioni da riga di comando.
 	 */
@@ -96,6 +102,26 @@ main (int argc, char **argv) {
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
+
+static bool
+activable_if_almost_one_connected (void *arg) {
+	int i;
+	bool ok;
+	struct chan *ch;
+
+	assert (arg != NULL);
+
+	ch = (struct chan *)arg;
+
+	for (i = 0, ok = FALSE;
+	     i < NETCHANNELS && !ok;
+	     i++) {
+		ok = channel_is_connected (&ch[i]);
+	}
+
+	return ok;
+}
+
 
 static void
 print_help (const char *program_name) {

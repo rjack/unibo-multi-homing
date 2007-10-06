@@ -10,6 +10,13 @@
 
 
 /*******************************************************************************
+		       Prototipi delle funzioni locali
+*******************************************************************************/
+
+static bool always_activable (void *discard);
+
+
+/*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
 
@@ -22,6 +29,38 @@ channel_init (struct chan *ch) {
 
 	memset (&ch->c_laddr, 0, sizeof (ch->c_laddr));
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
+
+	ch->c_is_activable = &always_activable;
+	ch->c_activable_arg = NULL;
+}
+
+
+bool
+channel_is_activable (struct chan *ch) {
+	/* Chiama la funzione associata a ch che decide se il canale sia
+	 * attivabile o meno. */
+
+	assert (ch != NULL);
+	assert (ch->c_is_activable != NULL);
+
+	return ch->c_is_activable (ch->c_activable_arg);
+}
+
+
+bool
+channel_is_connected (struct chan *ch) {
+	/* Il canale e' connesso quando entrambi gli addr sono impostati, il
+	 * socket listening e' chiuso e il socket e' connesso. */
+
+	assert (ch != NULL);
+
+	if (ch->c_listfd < 0
+	    && ch->c_sockfd >= 0
+	    && addr_is_set (&ch->c_laddr)
+	    && addr_is_set (&ch->c_raddr)) {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 
@@ -85,4 +124,14 @@ channel_name (struct chan *ch) {
 	assert (bufname[45] == '\0');
 
 	return bufname;
+}
+
+
+/*******************************************************************************
+			       Funzioni locali
+*******************************************************************************/
+
+static bool
+always_activable (void *discard) {
+	return TRUE;
 }

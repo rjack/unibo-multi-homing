@@ -18,6 +18,14 @@ channel_init (struct chan *ch);
 
 
 bool
+channel_is_activable (struct chan *ch);
+
+
+bool
+channel_is_connected (struct chan *ch);
+
+
+bool
 channel_is_connecting (struct chan *ch);
 
 

@@ -44,6 +44,7 @@ static const port_t deflistport = 6001;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
+static bool activable_if_connected (void *arg);
 static void print_help (const char *);
 
 
@@ -69,6 +70,11 @@ main (int argc, char **argv) {
 		ok = set_addr (&chnl[i].c_raddr, defconnaddr[i],
 		               defconnport[i]);
 		assert (ok == TRUE);
+
+		/* Ogni canale con il Ritardatore va attivato solo dopo che
+		 * l'host si e' connesso. */
+		chnl[i].c_is_activable = &activable_if_connected;
+		chnl[i].c_activable_arg = (void *)&chnl[HOST];
 	}
 
 	/* Canale con il Sender. */
@@ -104,6 +110,23 @@ main (int argc, char **argv) {
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
+
+static bool
+activable_if_connected (void *arg) {
+	/* Condizione di connessione per i canali con il Ritardatore. */
+
+	struct chan *ch;
+
+	assert (arg != NULL);
+
+	ch = (struct chan *)arg;
+
+	if (channel_is_connected (ch)) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
 static void
 print_help (const char *program_name) {

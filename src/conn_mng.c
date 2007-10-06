@@ -37,7 +37,8 @@ manage_connections (struct chan* chnl) {
 	int i;
 	bool ok;
 
-	for (i = 0; i < CHANNELS; i++) {
+	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (&chnl[i])) {
+
 		if (!addr_is_set (&chnl[i].c_laddr)
 		    && addr_is_set (&chnl[i].c_raddr)
 		    && chnl[i].c_sockfd < 0) {

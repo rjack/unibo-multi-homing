@@ -87,6 +87,12 @@ struct chan {
 	/* Indirizzi locale e remoto. */
 	struct sockaddr_in c_laddr;
 	struct sockaddr_in c_raddr;
+
+	/* Funzione che decide quando il canale sia attivabile. */
+	bool (*c_is_activable)(void *);
+
+	/* Argomento alla funzione. */
+	void *c_activable_arg;
 };
 
 #endif /* MH_TYPES_H */
