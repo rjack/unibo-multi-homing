@@ -1,3 +1,4 @@
+#include "h/channel.h"
 #include "h/conn_mng.h"
 #include "h/types.h"
 
@@ -16,14 +17,13 @@
 
 int
 core (struct chan *chnl) {
-	bool fatal = FALSE;
-
+	int i;
 	int rdy;
 	fd_t maxfd;
 	fd_set rdset;
 	fd_set wrset;
 
-	while (!fatal) {
+	for (;;) {
 		/*
 		 * Gestione connessioni.
 		 */
@@ -45,12 +45,39 @@ core (struct chan *chnl) {
 		if (rdy < 0) {
 			fprintf (stderr, "Errore irrimediabile select: %s\n",
 			         strerror (errno));
-			fatal = TRUE;
-		} else {
-			/* TODO gestione eventi. */
-			assert (FALSE);
+			exit (EXIT_FAILURE);
+		}
+
+		/* Gestione eventi. */
+		for (i = 0; i < CHANNELS; i++) {
+			/* Connessione da concludere. */
+			if (channel_is_connecting (&chnl[i])
+			    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
+				/* TODO finalize_connection */
+				assert (FALSE);
+			}
+			
+			/* Connessione da accettare. */
+			else if (channel_is_listening (&chnl[i])
+			         && FD_ISSET (chnl[i].c_listfd, &rdset)) {
+				/* TODO accept_connection */
+				assert (FALSE);
+			}
+			
+			/* Dati da leggere. */
+			else if (channel_is_connected (&chnl[i])
+			         && FD_ISSET (chnl[i].c_sockfd, &rdset)) {
+				/* TODO lettura */
+				assert (FALSE);
+			}
+
+			/* Dati da scrivere. */
+			if (channel_is_connected (&chnl[i])
+			    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
+				/* TODO scrittura */
+				assert (FALSE);
+			}
 		}
 	}
-
 	return 0;
 }
