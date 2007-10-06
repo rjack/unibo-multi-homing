@@ -194,6 +194,12 @@ listen_noblock (struct chan *ch) {
 		goto error;
 	}
 
+	ok = tcp_set_block (ch->c_listfd, FALSE);
+	if (!ok) {
+		errmsg = "tcp_set_block fallita";
+		goto error;
+	}
+
 	return TRUE;
 
 error:
