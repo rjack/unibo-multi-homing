@@ -215,6 +215,26 @@ tcp_set_nagle (fd_t fd, bool active) {
 }
 
 
+bool
+tcp_set_reusable (fd_t fd, bool reusable) {
+	int err;
+	int optval;
+
+	assert (fd >= 0);
+	assert (reusable == TRUE || reusable == FALSE);
+	
+	optval = (reusable == TRUE) ? 1 : 0;
+
+	err = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval,
+	                  sizeof (optval));
+
+	if (!err) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 void
 tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
 	/* Wrapper per nascondere le bruttezze di getsockname. */

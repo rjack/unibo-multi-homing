@@ -67,6 +67,10 @@ bool
 tcp_set_nagle (fd_t fd, bool active);
 
 
+bool
+tcp_set_reusable (fd_t fd, bool reusable);
+
+
 void
 tcp_sockname (fd_t fd, struct sockaddr_in *laddr);
 

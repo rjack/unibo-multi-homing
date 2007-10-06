@@ -14,6 +14,7 @@
 *******************************************************************************/
 
 bool connect_noblock (struct chan *ch);
+bool listen_noblock (struct chan *ch);
 
 
 /*******************************************************************************
@@ -54,10 +55,16 @@ manage_connections (struct chan* chnl) {
 			        "connesso" : "in connessione");
 		}
 		if (addr_is_set (&chnl[i].c_laddr)
-		    && !addr_is_set (&chnl[i].c_raddr)) {
-			/* TODO
-			 * - nuovo socket listening
-			 * - accept non bloccante */
+		    && !addr_is_set (&chnl[i].c_raddr)
+		    && chnl[i].c_listfd < 0) {
+
+			assert (chnl[i].c_sockfd < 0);
+
+			ok = listen_noblock (&chnl[i]);
+			assert (ok); /* FIXME controllo errore decente. */
+
+			printf ("Canale %s in ascolto.\n",
+			        channel_name (&chnl[i]));
 		}
 	}
 }
@@ -111,7 +118,9 @@ connect_noblock (struct chan *ch) {
 	int err;
 
 	assert (ch != NULL);
+	assert (!addr_is_set (&ch->c_laddr));
 	assert (addr_is_set (&ch->c_raddr));
+	assert (ch->c_listfd < 0);
 	assert (ch->c_sockfd < 0);
 
 	/* Nuovo socket tcp. */
@@ -147,5 +156,49 @@ connect_noblock (struct chan *ch) {
 	fprintf (stderr, "Canale %s, errore di connessione: %s\n",
 	         channel_name (ch), strerror (errno));
 	tcp_close (&ch->c_sockfd);
+	return FALSE;
+}
+
+
+bool
+listen_noblock (struct chan *ch) {
+	int err;
+	bool ok;
+	char *errmsg;
+
+	assert (ch != NULL);
+	assert (addr_is_set (&ch->c_laddr));
+	assert (!addr_is_set (&ch->c_raddr));
+	assert (ch->c_listfd < 0);
+	assert (ch->c_sockfd < 0);
+
+	ch->c_listfd = xtcp_socket ();
+
+	err = bind (ch->c_listfd,
+	            (struct sockaddr *)&ch->c_laddr,
+	            sizeof (ch->c_laddr));
+	if (err) {
+		errmsg = "bind fallita";
+		goto error;
+	}
+
+	ok = tcp_set_reusable (ch->c_listfd, TRUE);
+	if (!ok) {
+		errmsg = "tcp_set_reusable fallita";
+		goto error;
+	}
+
+	err = listen (ch->c_listfd, 0);
+	if (err) {
+		errmsg = "listen fallita";
+		goto error;
+	}
+
+	return TRUE;
+
+error:
+	fprintf (stderr, "Canale %s, %s: %s\n",
+	         channel_name (ch), errmsg, strerror (errno));
+	tcp_close (&ch->c_listfd);
 	return FALSE;
 }
