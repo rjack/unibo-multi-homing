@@ -9,6 +9,14 @@
 				  Prototipi
 *******************************************************************************/
 
+int
+accept_connection (struct chan *ch);
+
+
+int
+finalize_connection (struct chan *ch);
+
+
 void
 manage_connections (struct chan* chnl);
 

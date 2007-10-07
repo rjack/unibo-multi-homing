@@ -17,6 +17,11 @@ channel_init (struct chan *ch);
 /* Inizializza i campi della struttura ch. */
 
 
+void
+channel_invalidate (struct chan *ch);
+/* Rende il canale inutilizzabile. */
+
+
 bool
 channel_is_activable (struct chan *ch);
 

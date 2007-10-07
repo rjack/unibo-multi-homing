@@ -18,6 +18,7 @@
 int
 core (struct chan *chnl) {
 	int i;
+	int err;
 	int rdy;
 	fd_t maxfd;
 	fd_set rdset;
@@ -53,8 +54,10 @@ core (struct chan *chnl) {
 			/* Connessione da concludere. */
 			if (channel_is_connecting (&chnl[i])
 			    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
-				/* TODO finalize_connection */
-				assert (FALSE);
+				err = finalize_connection (&chnl[i]);
+				if (err) {
+					channel_invalidate (&chnl[i]);
+				}
 			}
 			
 			/* Connessione da accettare. */

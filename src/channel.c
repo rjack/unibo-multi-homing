@@ -14,6 +14,7 @@
 *******************************************************************************/
 
 static bool always_activable (void *discard);
+static bool never_activable (void *discard);
 
 
 /*******************************************************************************
@@ -31,6 +32,14 @@ channel_init (struct chan *ch) {
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
 	ch->c_is_activable = &always_activable;
+	ch->c_activable_arg = NULL;
+}
+
+
+void
+channel_invalidate (struct chan *ch) {
+	channel_init (ch);
+	ch->c_is_activable = &never_activable;
 	ch->c_activable_arg = NULL;
 }
 
@@ -134,4 +143,10 @@ channel_name (struct chan *ch) {
 static bool
 always_activable (void *discard) {
 	return TRUE;
+}
+
+
+static bool
+never_activable (void *discard) {
+	return FALSE;
 }

@@ -21,6 +21,55 @@ bool listen_noblock (struct chan *ch);
 			      Funzioni pubbliche
 *******************************************************************************/
 
+int
+accept_connection (struct chan *ch) {
+	/* TODO */
+	assert (FALSE);
+	return -1;
+}
+
+
+int
+finalize_connection (struct chan *ch) {
+	int err;
+	int optval;
+	size_t optsize;
+
+	assert (ch != NULL);
+	assert (ch->c_sockfd >= 0);
+	assert (ch->c_listfd < 0);
+	assert (!addr_is_set (&ch->c_laddr));
+	assert (addr_is_set (&ch->c_raddr));
+	
+	optsize = sizeof (optval);
+
+	/*
+	 * Verifica esito connessione.
+	 */
+	err = getsockopt (ch->c_sockfd, SOL_SOCKET, SO_ERROR, &optval,
+	                  &optsize);
+	if (err) {
+		fprintf (stderr,
+		         "Canale %s, getsockopt in finalize_connection "
+		         "fallita: %s\n",
+		         channel_name (ch), strerror (errno));
+		return -1;
+       	}
+
+	if (optval != 0) {
+		fprintf (stderr,
+		         "Canale %s, tentativo di connessione fallito: "
+		         "%s\n", channel_name (ch), strerror (errno));
+		return -1;
+	}
+
+	/* Connessione riuscita. */
+	tcp_sockname (ch->c_sockfd, &ch->c_laddr);
+
+	return 0;
+}
+
+
 void
 manage_connections (struct chan* chnl) {
 	/* Attiva tutti i canali che hanno una struct sockaddr_in impostata,
@@ -39,9 +88,14 @@ manage_connections (struct chan* chnl) {
 
 	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (&chnl[i])) {
 
+		/*
+		 * Canale da connettere.
+		 */
 		if (!addr_is_set (&chnl[i].c_laddr)
 		    && addr_is_set (&chnl[i].c_raddr)
 		    && chnl[i].c_sockfd < 0) {
+
+			assert (chnl[i].c_listfd < 0);
 
 			ok = connect_noblock (&chnl[i]);
 			assert (ok); /* FIXME controllo errore decente. */
@@ -55,7 +109,11 @@ manage_connections (struct chan* chnl) {
 			        addr_is_set (&chnl[i].c_laddr) ?
 			        "connesso" : "in connessione");
 		}
-		if (addr_is_set (&chnl[i].c_laddr)
+
+		/*
+		 * Canale da mettere in ascolto.
+		 */
+		else if (addr_is_set (&chnl[i].c_laddr)
 		    && !addr_is_set (&chnl[i].c_raddr)
 		    && chnl[i].c_listfd < 0) {
 
@@ -66,6 +124,13 @@ manage_connections (struct chan* chnl) {
 
 			printf ("Canale %s in ascolto.\n",
 			        channel_name (&chnl[i]));
+		}
+
+		else {
+			/* Se arriva qui c'e' un problema: un canale
+			 * attivabile o deve essere connesso o messo in
+			 * ascolto, una delle due. */
+			assert (FALSE);
 		}
 	}
 }
