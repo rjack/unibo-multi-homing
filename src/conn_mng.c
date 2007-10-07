@@ -62,7 +62,7 @@ int
 finalize_connection (struct chan *ch) {
 	int err;
 	int optval;
-	size_t optsize;
+	socklen_t optsize;
 
 	assert (ch != NULL);
 	assert (ch->c_sockfd >= 0);
