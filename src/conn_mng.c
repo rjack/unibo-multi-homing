@@ -23,9 +23,38 @@ bool listen_noblock (struct chan *ch);
 
 int
 accept_connection (struct chan *ch) {
-	/* TODO */
-	assert (FALSE);
-	return -1;
+	socklen_t raddr_len;
+
+	assert (ch != NULL);
+	assert (ch->c_sockfd < 0);
+	assert (ch->c_listfd >= 0);
+	assert (addr_is_set (&ch->c_laddr));
+	assert (!addr_is_set (&ch->c_raddr));
+
+	do {
+		raddr_len = sizeof (ch->c_raddr);
+		ch->c_sockfd = accept (ch->c_listfd,
+		                       (struct sockaddr *)&ch->c_raddr,
+		                       &raddr_len);
+	} while (ch->c_sockfd < 0 && errno == EINTR);
+
+	assert (!(ch->c_sockfd < 0
+	          && (errno == EAGAIN || errno == EWOULDBLOCK)));
+
+	if (ch->c_sockfd < 0) {
+		fprintf (stderr,
+		         "Canale %s, accept fallita: %s\n",
+		         channel_name (ch), strerror (errno));
+	}
+
+	/* A prescindere dall'esito dell'accept, chiusura del socket
+	 * listening. */
+	tcp_close (&ch->c_listfd);
+
+	if (ch->c_sockfd < 0) {
+		return -1;
+	}
+	return 0;
 }
 
 
@@ -58,12 +87,14 @@ finalize_connection (struct chan *ch) {
 
 	if (optval != 0) {
 		fprintf (stderr,
-		         "Canale %s, tentativo di connessione fallito: "
-		         "%s\n", channel_name (ch), strerror (errno));
+		         "Canale %s, tentativo di connessione fallito.\n",
+		         channel_name (ch));
 		return -1;
 	}
 
-	/* Connessione riuscita. */
+	/* 
+	 * Connessione riuscita.
+	 */
 	tcp_sockname (ch->c_sockfd, &ch->c_laddr);
 
 	return 0;
@@ -108,6 +139,8 @@ manage_connections (struct chan* chnl) {
 			printf ("Canale %s %s.\n", channel_name (&chnl[i]),
 			        addr_is_set (&chnl[i].c_laddr) ?
 			        "connesso" : "in connessione");
+
+			channel_set_activation_condition (&chnl[i], NULL, NULL);
 		}
 
 		/*
@@ -124,6 +157,8 @@ manage_connections (struct chan* chnl) {
 
 			printf ("Canale %s in ascolto.\n",
 			        channel_name (&chnl[i]));
+
+			channel_set_activation_condition (&chnl[i], NULL, NULL);
 		}
 
 		else {

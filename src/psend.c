@@ -73,8 +73,9 @@ main (int argc, char **argv) {
 
 		/* Ogni canale con il Ritardatore va attivato solo dopo che
 		 * l'host si e' connesso. */
-		chnl[i].c_is_activable = &activable_if_connected;
-		chnl[i].c_activable_arg = (void *)&chnl[HOST];
+		channel_set_activation_condition (&chnl[i],
+		                                  &activable_if_connected,
+		                                  &chnl[HOST]);
 	}
 
 	/* Canale con il Sender. */
@@ -97,7 +98,7 @@ main (int argc, char **argv) {
 	}
 
 	/* Stampa informazioni. */
-	printf ("Canale il Sender: %s\n", channel_name (&chnl[HOST]));
+	printf ("Canale con il Sender: %s\n", channel_name (&chnl[HOST]));
 	for (i = NET; i < NETCHANNELS; i++) {
 		printf ("Canale %d con il Ritardatore: %s\n",
 		         i - NET, channel_name (&chnl[i]));

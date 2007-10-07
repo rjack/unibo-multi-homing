@@ -57,18 +57,25 @@ core (struct chan *chnl) {
 				err = finalize_connection (&chnl[i]);
 				if (err) {
 					channel_invalidate (&chnl[i]);
+				} else {
+					printf ("Canale %s connesso.\n",
+					        channel_name (&chnl[i]));
 				}
 			}
-			
+
 			/* Connessione da accettare. */
 			else if (channel_is_listening (&chnl[i])
 			         && FD_ISSET (chnl[i].c_listfd, &rdset)) {
 				err = accept_connection (&chnl[i]);
 				if (err) {
 					channel_invalidate (&chnl[i]);
+				} else {
+					printf ("Canale %s, connessione "
+					        "accettata.\n",
+						channel_name (&chnl[i]));
 				}
 			}
-			
+
 			else {
 				/* Dati da leggere. */
 				if (channel_is_connected (&chnl[i])

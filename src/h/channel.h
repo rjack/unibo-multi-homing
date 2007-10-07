@@ -45,4 +45,9 @@ channel_name (struct chan *ch);
  * l'indirizzo locale, il secondo quello remoto. */
 
 
+void
+channel_set_activation_condition
+(struct chan *ch, bool (*funct)(void *), void *arg);
+
+
 #endif /* CHANNEL_H */

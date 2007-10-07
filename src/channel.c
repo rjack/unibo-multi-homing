@@ -2,6 +2,7 @@
  *
  * Giacomo Ritucci, 24/09/2007 */
 
+#include "h/channel.h"
 #include "h/types.h"
 #include "h/util.h"
 
@@ -31,16 +32,14 @@ channel_init (struct chan *ch) {
 	memset (&ch->c_laddr, 0, sizeof (ch->c_laddr));
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
-	ch->c_is_activable = &always_activable;
-	ch->c_activable_arg = NULL;
+	channel_set_activation_condition (ch, &always_activable, NULL);
 }
 
 
 void
 channel_invalidate (struct chan *ch) {
 	channel_init (ch);
-	ch->c_is_activable = &never_activable;
-	ch->c_activable_arg = NULL;
+	channel_set_activation_condition (ch, NULL, NULL);
 }
 
 
@@ -133,6 +132,17 @@ channel_name (struct chan *ch) {
 	assert (bufname[45] == '\0');
 
 	return bufname;
+}
+
+
+void
+channel_set_activation_condition
+(struct chan *ch, bool (*funct)(void *), void *arg) {
+	assert (ch != NULL);
+	
+	ch->c_is_activable = (funct == NULL ?
+	                      &never_activable : funct);
+	ch->c_activable_arg = arg;
 }
 
 

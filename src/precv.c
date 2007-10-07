@@ -72,8 +72,9 @@ main (int argc, char **argv) {
 
 	/* Il canale con il Receiver e' attivabile quando e' connesso almeno
 	 * un canale con il Ritardatore. */
-	chnl[HOST].c_is_activable = activable_if_almost_one_connected;
-	chnl[HOST].c_activable_arg = (void *)&chnl[NET];
+	channel_set_activation_condition (&chnl[i],
+	                                  &activable_if_almost_one_connected,
+	                                  &chnl[NET]);
 
 	/*
 	 * Personalizzazioni da riga di comando.
@@ -93,7 +94,7 @@ main (int argc, char **argv) {
 		printf ("Canale %d con il Ritardatore: %s\n",
 		         i - NET, channel_name (&chnl[i]));
 	}
-	printf ("Canale il Receiver: %s\n", channel_name (&chnl[HOST]));
+	printf ("Canale con il Receiver: %s\n", channel_name (&chnl[HOST]));
 
 	return core (chnl);
 }

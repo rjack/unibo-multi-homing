@@ -239,7 +239,7 @@ void
 tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
 	/* Wrapper per nascondere le bruttezze di getsockname. */
 
-	bool ok;
+	int err;
 	socklen_t len;
 
 	assert (fd >= 0);
@@ -248,8 +248,8 @@ tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
 	
 	len = sizeof (*laddr);
 
-	ok = getsockname (fd, (struct sockaddr *) laddr, &len);
-	assert (ok);
+	err = getsockname (fd, (struct sockaddr *) laddr, &len);
+	assert (!err);
 }
 
 
