@@ -63,22 +63,26 @@ core (struct chan *chnl) {
 			/* Connessione da accettare. */
 			else if (channel_is_listening (&chnl[i])
 			         && FD_ISSET (chnl[i].c_listfd, &rdset)) {
-				/* TODO accept_connection */
-				assert (FALSE);
+				err = accept_connection (&chnl[i]);
+				if (err) {
+					channel_invalidate (&chnl[i]);
+				}
 			}
 			
-			/* Dati da leggere. */
-			else if (channel_is_connected (&chnl[i])
-			         && FD_ISSET (chnl[i].c_sockfd, &rdset)) {
-				/* TODO lettura */
-				assert (FALSE);
-			}
+			else {
+				/* Dati da leggere. */
+				if (channel_is_connected (&chnl[i])
+				    && FD_ISSET (chnl[i].c_sockfd, &rdset)) {
+					/* TODO lettura */
+					assert (FALSE);
+				}
 
-			/* Dati da scrivere. */
-			if (channel_is_connected (&chnl[i])
-			    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
-				/* TODO scrittura */
-				assert (FALSE);
+				/* Dati da scrivere. */
+				if (channel_is_connected (&chnl[i])
+				    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
+					/* TODO scrittura */
+					assert (FALSE);
+				}
 			}
 		}
 	}
