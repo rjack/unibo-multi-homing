@@ -1,0 +1,6 @@
+	  Progetto di Laboratorio di Programmazione di Rete 2006/07
+     "Fornire interattività a comunicazione TCP sfruttando multi-homing"
+
+			   PROTOCOLLO APPLICAZIONE
+
+		    Giacomo Ritucci <ritucci@cs.unibo.it>
