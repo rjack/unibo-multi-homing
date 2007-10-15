@@ -23,24 +23,6 @@
 
 
 /*******************************************************************************
-				    Macro
-*******************************************************************************/
-
-/*
- * Massimo e minimo.
- */
-#ifdef MAX
-#undef MAX
-#endif
-#define     MAX(a,b)     ((a) > (b) ? (a) : (b))
-
-#ifdef MIN
-#undef MIN
-#endif
-#define     MIN(a,b)     ((a) < (b) ? (a) : (b))
-
-
-/*******************************************************************************
 			     Definizioni di tipo
 *******************************************************************************/
 
@@ -78,7 +60,6 @@ typedef int fd_t;
 /*
  * Canali di rete.
  */
-
 struct chan {
 	/* Connected e listening socket. */
 	int c_sockfd;
@@ -96,10 +77,24 @@ struct chan {
 };
 
 
+/* 
+ * Buffer per trasferimento dati.
+ */
+struct buffer {
+	/* Dimensione del buffer. */
+	size_t b_len;
+	/* Numero di byte utilizzati. */
+	size_t b_used;
+	/* Se TRUE, e' possibile reallocare il buffer. */
+	bool b_resizable;
+	/* Puntatore al buffer vero e proprio. */
+	char *b_data;
+};
+
+
 /*
  * Proxy: i vari canali, i buffer e i contatori.
  */
-
 struct proxy {
 	/* Canale con l'host. */
 	struct chan p_host;
