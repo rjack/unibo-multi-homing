@@ -95,4 +95,30 @@ struct chan {
 	void *c_activable_arg;
 };
 
+
+/*
+ * Proxy: i vari canali, i buffer e i contatori.
+ */
+
+struct proxy {
+	/* Canale con l'host. */
+	struct chan p_host;
+	/* Canali con il ritardatore. */
+	struct chan p_net[NETCHANNELS];
+	/* Array di puntatori ai canali, per facilitare iterazioni. */
+	struct chan *p_chptr[CHANNELS];
+
+	/* TODO
+	 * - buffer di trasferimento con l'host
+	 * - coda accodamento dati in attesa di smistamento ai canali
+	 * - buffer di trasferimento con il ritardatore
+	 * - contatori:
+	 *   - ultimo seqnum inviato
+	 *   - ack/nack
+	 *   - etc
+	 * - coda segmenti da ritrasmettere
+	 * - OPPURE coda segmenti da ricostruire. */
+};
+
+
 #endif /* MH_TYPES_H */
