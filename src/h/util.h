@@ -81,6 +81,10 @@ void
 tcp_close (fd_t *fd);
 
 
+ssize_t
+tcp_get_buffer_size (fd_t sockfd, int bufname);
+
+
 bool
 tcp_set_block (fd_t fd, bool must_block);
 

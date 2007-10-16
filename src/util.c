@@ -164,6 +164,24 @@ tcp_close (fd_t *fd) {
 }
 
 
+ssize_t
+tcp_get_buffer_size (fd_t sockfd, int bufname) {
+
+	int err;
+	int optval;
+	socklen_t optlen;
+
+	assert (sockfd >= 0);
+	assert (bufname == SO_SNDBUF || bufname == SO_RCVBUF);
+
+	err = getsockopt (sockfd, SOL_SOCKET, bufname, &optval, &optlen);
+	if (err < 0) {
+		return -1;
+	}
+	return (optval / 2);
+}
+
+
 bool
 tcp_set_block (fd_t fd, bool must_block) {
 	/* Se must_block = TRUE, imposta fd come bloccante, altrimenti come
