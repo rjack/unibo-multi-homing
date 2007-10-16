@@ -8,10 +8,6 @@
 				  Prototipi
 *******************************************************************************/
 
-size_t
-buffer_available (struct buffer *buf);
-
-
 void
 buffer_destroy (struct buffer *buf);
 

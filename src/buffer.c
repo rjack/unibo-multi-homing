@@ -9,17 +9,17 @@
 
 
 /*******************************************************************************
-			      Funzioni pubbliche
+		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-size_t
-buffer_available (struct buffer *buf) {
-	assert (buf != NULL);
-	assert (buf->b_used <= buf->b_len);
-	
-	return (buf->b_len - buf->b_used);
-}
+static size_t buffer_get_available (struct buffer *buf);
+static int buffer_grant_available (struct buffer *buf, size_t needed);
+static int buffer_realloc (struct buffer *buf, size_t new_len);
 
+
+/*******************************************************************************
+			      Funzioni pubbliche
+*******************************************************************************/
 
 void
 buffer_destroy (struct buffer *buf) {
@@ -45,27 +45,28 @@ int
 buffer_read (fd_t fd, struct buffer *buf) {
 	/* Legge da fd e salva in buf. */
 
+	int err;
 	size_t bytes_to_read;
+	size_t available_bytes;
 	ssize_t nread;
 
 	assert (fd >= 0);
 	assert (buf != NULL);
 	assert (BOOL_VALUE (buf->b_resizable));
 
+	bytes_to_read = buffer_get_available (buf);
+
 	if (buf->b_resizable == TRUE) {
-		/* TODO
-		 bytes_to_read = tcp_get_buffer_len (fd);
-		 */
-		assert (FALSE);
-		if (buffer_available (buf) < bytes_to_read) {
-			/* TODO
-			buffer_realloc (bytes_to_read);
-			*/
-			assert (FALSE);
+		bytes_to_read = tcp_get_buffer_size (fd, SO_RCVBUF);
+		err = buffer_grant_available (buf, bytes_to_read);
+		if (err) {
+			bytes_to_read = available_bytes;
 		}
 	} else {
-		bytes_to_read = buffer_available (buf);
+		bytes_to_read = available_bytes;
 	}
+	/* fd non deve essere impostato in lettura se non c'e' spazio nei
+	 * buffer. */
 	assert (bytes_to_read > 0);
 
 	do {
@@ -77,4 +78,58 @@ buffer_read (fd_t fd, struct buffer *buf) {
 	 * manutenzione contatori */
 
 	return -1;
+}
+
+
+/*******************************************************************************
+			       Funzioni locali
+*******************************************************************************/
+
+static size_t
+buffer_get_available (struct buffer *buf) {
+	assert (buf != NULL);
+	assert (buf->b_used <= buf->b_len);
+	
+	return (buf->b_len - buf->b_used);
+}
+
+
+static int
+buffer_realloc (struct buffer *buf, size_t new_len) {
+	char *new_data;
+
+	assert (buf != NULL);
+	assert (buf->b_resizable == TRUE);
+	assert (new_len > 0);
+
+	new_data = realloc (buf->b_data, new_len);
+	if (new_data != NULL) {
+		buf->b_data = new_data;
+		buf->b_len = new_len;
+
+		return 0;
+	}
+	return -1;
+}
+
+
+static int
+buffer_grant_available (struct buffer *buf, size_t needed) {
+	/* Cerca di garantire che buf abbia almeno needed byte liberi nel
+	 * buffer, riallocando se necessario.
+	 *
+	 * Ritorna 0 se riesce, -1 se fallisce. */
+
+	size_t available_bytes;
+
+	assert (buf != NULL);
+	assert (buf->b_resizable == TRUE);
+	assert (needed > 0);
+
+	available_bytes = buffer_get_available (buf);
+	if (available_bytes < needed) {
+		return buffer_realloc (buf, buf->b_len +
+		                       (needed - available_bytes));
+	}
+	return 0;
 }
