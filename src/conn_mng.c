@@ -182,7 +182,7 @@ set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 
 	max = -1;
 	for (i = 0; i < CHANNELS; i++) {
-		/* Connessioni. */
+		/* Connessioni da completare o accettare. */
 		if (channel_is_connecting (&chnl[i])) {
 			FD_SET (chnl[i].c_sockfd, wrset);
 			max = MAX (chnl[i].c_sockfd, max);
@@ -190,9 +190,17 @@ set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 			FD_SET (chnl[i].c_listfd, rdset);
 			max = MAX (chnl[i].c_listfd, max);
 		}
-
-		/* TODO 
-		 * traffico con ritardatore e host. */
+		/* Dati da leggere e/o scrivere. */
+		else {
+			if (channel_can_read (&chnl[i])) {
+				FD_SET (chnl[i].c_sockfd, rdset);
+				max = MAX (chnl[i].c_sockfd, max);
+			}
+			if (channel_can_write (&chnl[i])) {
+				FD_SET (chnl[i].c_sockfd, wrset);
+				max = MAX (chnl[i].c_sockfd, max);
+			}
+		}
 	}
 
 	return max;

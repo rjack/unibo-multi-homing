@@ -73,11 +73,11 @@ buffer_read (fd_t fd, struct buffer *buf) {
 		nread = read (fd, &(buf->b_data[buf->b_used]), bytes_to_read);
 	} while (nread < 0 && errno == EINTR);
 
-	/* TODO
-	 * controllo esito
-	 * manutenzione contatori */
+	if (nread > 0) {
+		buf->b_used += nread;
+	}
 
-	return -1;
+	return nread;
 }
 
 

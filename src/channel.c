@@ -22,6 +22,26 @@ static bool never_activable (void *discard);
 			      Funzioni pubbliche
 *******************************************************************************/
 
+bool
+channel_can_read (struct chan *ch) {
+	assert (ch != NULL);
+
+	/* TODO */
+
+	return FALSE;
+}
+
+
+bool
+channel_can_write (struct chan *ch) {
+	assert (ch != NULL);
+
+	/* TODO */
+
+	return FALSE;
+}
+
+
 void
 channel_init (struct chan *ch) {
 	assert (ch != NULL);

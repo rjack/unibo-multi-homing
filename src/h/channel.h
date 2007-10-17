@@ -12,6 +12,14 @@
 				  Prototipi
 *******************************************************************************/
 
+bool
+channel_can_read (struct chan *ch);
+
+
+bool
+channel_can_write (struct chan *ch);
+
+
 void
 channel_init (struct chan *ch);
 /* Inizializza i campi della struttura ch. */
