@@ -49,7 +49,7 @@ char *
 addrstr (struct sockaddr_in *addr, char *buf);
 
 
-bool
+int
 set_addr (struct sockaddr_in *addr, const char *ip, port_t port);
 
 
@@ -85,15 +85,15 @@ ssize_t
 tcp_get_buffer_size (fd_t sockfd, int bufname);
 
 
-bool
+int
 tcp_set_block (fd_t fd, bool must_block);
 
 
-bool
+int
 tcp_set_nagle (fd_t fd, bool active);
 
 
-bool
+int
 tcp_set_reusable (fd_t fd, bool reusable);
 
 

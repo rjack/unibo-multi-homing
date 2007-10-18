@@ -53,7 +53,8 @@ addrstr (struct sockaddr_in *addr, char *buf) {
 	assert (buf != NULL);
 
 	/* Copia dell'indirizzo ip. */
-	name = (char *) inet_ntop (AF_INET, &addr->sin_addr, buf, INET_ADDRSTRLEN);
+	name = (char *) inet_ntop (AF_INET, &addr->sin_addr, buf,
+	                           INET_ADDRSTRLEN);
 	assert (name != NULL);
 
 	/* Copia del numero di porta. */
@@ -68,12 +69,12 @@ addrstr (struct sockaddr_in *addr, char *buf) {
 }
 
 
-bool
+int
 set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
 	/* Imposta addr secondo l'indirizzo ip, in formato xxx.xxx.xxx.xxx, e
 	 * la porta port.
 	 *
-	 * Ritorna FALSE se fallisce, TRUE se riesce. */
+	 * Ritorna -1 se fallisce, 0 se riesce. */
 
 	assert (addr != NULL);
 
@@ -84,11 +85,11 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
 		addr->sin_addr.s_addr = htonl (INADDR_ANY);
 	} else if (inet_pton (AF_INET, ip, &addr->sin_addr) == 0) {
 		/* La stringa ip non ha un formato valido. */
-		return FALSE;
+		return -1;
 	}
 	addr->sin_port = htons (port);
 
-	return TRUE;
+	return 0;
 }
 
 
@@ -182,12 +183,12 @@ tcp_get_buffer_size (fd_t sockfd, int bufname) {
 }
 
 
-bool
+int
 tcp_set_block (fd_t fd, bool must_block) {
 	/* Se must_block = TRUE, imposta fd come bloccante, altrimenti come
 	 * non bloccante.
 	 *
-	 * Ritorna TRUE se riesce, FALSE altrimenti. */
+	 * Ritorna 0 se riesce, -1 altrimenti. */
 
 	int flags;
 
@@ -202,14 +203,14 @@ tcp_set_block (fd_t fd, bool must_block) {
 			flags |= O_NONBLOCK;
 		}
 		if (fcntl (fd, F_SETFL, flags) != -1) {
-			return TRUE;
+			return 0;
 		}
 	}
-	return FALSE;
+	return -1;
 }
 
 
-bool
+int
 tcp_set_nagle (fd_t fd, bool active) {
 	/* Se active = TRUE imposta l'algoritmo di Nagle sul file descriptor
 	 * fd, altrimenti attiva l'opzione TCP_NODELAY.
@@ -226,14 +227,11 @@ tcp_set_nagle (fd_t fd, bool active) {
 
 	err = setsockopt (fd, IPPROTO_TCP, TCP_NODELAY,
 	                  &optval, sizeof (optval));
-	if (!err) {
-		return TRUE;
-	}
-	return FALSE;
+	return err;
 }
 
 
-bool
+int
 tcp_set_reusable (fd_t fd, bool reusable) {
 	int err;
 	int optval;
@@ -246,10 +244,7 @@ tcp_set_reusable (fd_t fd, bool reusable) {
 	err = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval,
 	                  sizeof (optval));
 
-	if (!err) {
-		return TRUE;
-	}
-	return FALSE;
+	return err;
 }
 
 

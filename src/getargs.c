@@ -3,7 +3,6 @@
  * Giacomo Ritucci, 23/09/2007 */
 
 #include "h/util.h"
-#include "h/types.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -19,14 +18,13 @@
 			      Funzioni pubbliche
 *******************************************************************************/
 
-bool
+int
 getargs (int argc, char **argv, char *fmt, ...) {
 
-	bool ok = TRUE;
+	int err = 0;
 	int i;	/* su fmt */
 	int j;	/* su argv */
 	va_list args;
-	int err;
 
 	assert (argv != NULL);
 	assert (fmt != NULL);
@@ -34,7 +32,7 @@ getargs (int argc, char **argv, char *fmt, ...) {
 	va_start (args, fmt);
 
 	for (i = 0, j = 1;
-	     ok == TRUE && i <= strlen (fmt) && j < argc;
+	     !err && i <= strlen (fmt) && j < argc;
 	     i++, j++) {
 		struct sockaddr_in *addr;
 		port_t *port;
@@ -52,7 +50,9 @@ getargs (int argc, char **argv, char *fmt, ...) {
 					fprintf (stderr,
 					         "ip non valido: %s.\n",
 						 argv[j]);
-					ok = FALSE;
+					err = -1;
+				} else {
+					err = 0;
 				}
 			}
 		break;
@@ -70,7 +70,7 @@ getargs (int argc, char **argv, char *fmt, ...) {
 					fprintf (stderr,
 						 "porta non valida: %s.\n",
 						 argv[j]);
-					ok = FALSE;
+					err = -1;
 				} else {
 					*port = htons (*port);
 				}
@@ -81,11 +81,11 @@ getargs (int argc, char **argv, char *fmt, ...) {
 		default :
 			fprintf (stderr, "formato non riconosciuto: %c.\n",
 			         fmt[i]);
-			ok = FALSE;
+			err = -1;
 		}
 	}
 
 	va_end (args);
 
-	return ok;
+	return err;
 }

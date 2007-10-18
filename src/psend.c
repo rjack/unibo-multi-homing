@@ -56,7 +56,7 @@ int
 main (int argc, char **argv) {
 
 	int i;
-	bool ok;
+	int err;
 	struct chan chnl[CHANNELS];
 
 	/*
@@ -67,9 +67,9 @@ main (int argc, char **argv) {
 	for (i = NET; i < NETCHANNELS; i++) {
 		channel_init (&chnl[i]);
 
-		ok = set_addr (&chnl[i].c_raddr, defconnaddr[i],
+		err = set_addr (&chnl[i].c_raddr, defconnaddr[i],
 		               defconnport[i]);
-		assert (ok == TRUE);
+		assert (!err);
 
 		/* Ogni canale con il Ritardatore va attivato solo dopo che
 		 * l'host si e' connesso. */
@@ -80,19 +80,19 @@ main (int argc, char **argv) {
 
 	/* Canale con il Sender. */
 	channel_init (&chnl[HOST]);
-	ok = set_addr (&chnl[HOST].c_laddr, NULL, deflistport);
-	assert (ok == TRUE);
+	err = set_addr (&chnl[HOST].c_laddr, NULL, deflistport);
+	assert (!err);
 
 	/*
 	 * Personalizzazioni da riga di comando.
 	 */
 
-	ok = getargs (argc, argv, "papapap",
+	err = getargs (argc, argv, "papapap",
 	              &chnl[HOST].c_laddr.sin_port,
 		      &chnl[NET].c_raddr, &chnl[NET].c_raddr.sin_port,
 		      &chnl[NET+1].c_raddr, &chnl[NET+1].c_raddr.sin_port,
 		      &chnl[NET+2].c_raddr, &chnl[NET+2].c_raddr.sin_port);
-	if (ok == FALSE) {
+	if (err) {
 		print_help (argv[0]);
 		exit (EXIT_FAILURE);
 	}

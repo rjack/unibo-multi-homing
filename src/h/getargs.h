@@ -5,14 +5,12 @@
 #ifndef GETARGS_H
 #define GETARGS_H
 
-#include "types.h"
-
 
 /*******************************************************************************
 				  Prototipi
 *******************************************************************************/
 
-bool
+int
 getargs (int argc, char **argv, char *fmt, ...);
 /* Secondo il formato fmt, converte i vari argv[i] in indirizzi o porte e li
  * scrive negli indirizzi dati.

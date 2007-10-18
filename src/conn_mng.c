@@ -13,8 +13,8 @@
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-bool connect_noblock (struct chan *ch);
-bool listen_noblock (struct chan *ch);
+static int connect_noblock (struct chan *ch);
+static int listen_noblock (struct chan *ch);
 
 
 /*******************************************************************************
@@ -115,7 +115,7 @@ manage_connections (struct chan* chnl) {
 	 * socket e iniziata una connect non bloccante. */
 
 	int i;
-	bool ok;
+	int err;
 
 	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (&chnl[i])) {
 
@@ -128,8 +128,8 @@ manage_connections (struct chan* chnl) {
 
 			assert (chnl[i].c_listfd < 0);
 
-			ok = connect_noblock (&chnl[i]);
-			assert (ok); /* FIXME controllo errore decente. */
+			err = connect_noblock (&chnl[i]);
+			assert (!err); /* FIXME controllo errore decente. */
 
 			/* Connect gia' conclusa, recupera nome del socket. */
 			if (errno != EINPROGRESS) {
@@ -140,7 +140,8 @@ manage_connections (struct chan* chnl) {
 			        addr_is_set (&chnl[i].c_laddr) ?
 			        "connesso" : "in connessione");
 
-			channel_set_activation_condition (&chnl[i], NULL, NULL);
+			channel_set_activation_condition (&chnl[i],
+			                                  NULL, NULL);
 		}
 
 		/*
@@ -152,8 +153,8 @@ manage_connections (struct chan* chnl) {
 
 			assert (chnl[i].c_sockfd < 0);
 
-			ok = listen_noblock (&chnl[i]);
-			assert (ok); /* FIXME controllo errore decente. */
+			err = listen_noblock (&chnl[i]);
+			assert (!err); /* FIXME controllo errore decente. */
 
 			printf ("Canale %s in ascolto.\n",
 			        channel_name (&chnl[i]));
@@ -211,7 +212,7 @@ set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 			       Funzioni locali
 *******************************************************************************/
 
-bool
+static int
 connect_noblock (struct chan *ch) {
 	/* Connessione non bloccante. Crea un socket, lo imposta non bloccante
 	 * ed esegue una connect (senza bind) usando la struct sockaddr_in del
@@ -221,7 +222,7 @@ connect_noblock (struct chan *ch) {
 	 * c_sockfd, e solo quando la funzione riesce. Altre modifiche sono a
 	 * carico del chiamante.
 	 *
-	 * Ritorna FALSE se fallisce, TRUE se riesce subito o e' in corso. In
+	 * Ritorna -1 se fallisce, 0 se riesce subito o e' in corso. In
 	 * quest'ultimo caso, errno = EINPROGRESS. */
 
 	int err;
@@ -233,15 +234,12 @@ connect_noblock (struct chan *ch) {
 	assert (ch->c_sockfd < 0);
 
 	/* Nuovo socket tcp. */
-	ch->c_sockfd = xtcp_socket();
+	ch->c_sockfd = xtcp_socket ();
 
 	/* Non bloccante, se fallisce RITORNA subito. */
-	if (!tcp_set_block (ch->c_sockfd, FALSE)) {
-		fprintf (stderr,
-			 "Canale %s, impossibile impostarlo non bloccante: "
-			 "%s\n", channel_name (ch), strerror (errno));
-		tcp_close (&ch->c_sockfd);
-		return FALSE;
+	err = tcp_set_block (ch->c_sockfd, FALSE);
+	if (err) {
+		goto error;
 	}
 
 	/* FIXME dove disabilitare Nagle? */
@@ -254,25 +252,25 @@ connect_noblock (struct chan *ch) {
 	                      sizeof (ch->c_raddr));
 	} while (err == -1 && errno == EINTR);
 
-	/* Se riuscita subito o in corso, ritorna TRUE; altrimenti FALSE. */
+	/* Se riuscita subito o in corso, fix errno e ritorna. */
 	if (!err || errno == EINPROGRESS) {
 		if (!err) {
 			errno = 0;
 		}
-		return TRUE;
+		return 0;
 	}
 
+error:
 	fprintf (stderr, "Canale %s, errore di connessione: %s\n",
 	         channel_name (ch), strerror (errno));
 	tcp_close (&ch->c_sockfd);
-	return FALSE;
+	return -1;
 }
 
 
-bool
+static int
 listen_noblock (struct chan *ch) {
 	int err;
-	bool ok;
 	char *errmsg;
 
 	assert (ch != NULL);
@@ -291,8 +289,8 @@ listen_noblock (struct chan *ch) {
 		goto error;
 	}
 
-	ok = tcp_set_reusable (ch->c_listfd, TRUE);
-	if (!ok) {
+	err = tcp_set_reusable (ch->c_listfd, TRUE);
+	if (err) {
 		errmsg = "tcp_set_reusable fallita";
 		goto error;
 	}
@@ -303,17 +301,17 @@ listen_noblock (struct chan *ch) {
 		goto error;
 	}
 
-	ok = tcp_set_block (ch->c_listfd, FALSE);
-	if (!ok) {
+	err = tcp_set_block (ch->c_listfd, FALSE);
+	if (err) {
 		errmsg = "tcp_set_block fallita";
 		goto error;
 	}
 
-	return TRUE;
+	return 0;
 
 error:
 	fprintf (stderr, "Canale %s, %s: %s\n",
 	         channel_name (ch), errmsg, strerror (errno));
 	tcp_close (&ch->c_listfd);
-	return FALSE;
+	return -1;
 }
