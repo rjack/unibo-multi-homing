@@ -5,6 +5,7 @@
 #include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"
+#include "h/proxy.h"
 #include "h/util.h"
 #include "h/types.h"
 
@@ -51,52 +52,54 @@ main (int argc, char **argv) {
 
 	int i;
 	int err;
-	struct chan chnl[CHANNELS];
-
+	struct proxy pr;
+	
 	/*
 	 * Inizializzazioni con valori di default.
 	 */
 
-	/* Canali con il Ritardatore. */
-	for (i = NET; i < NETCHANNELS; i++) {
-		channel_init (&chnl[i]);
+	proxy_init (&pr);
 
-		err = set_addr (&chnl[i].c_laddr, NULL, deflistport[i]);
+	/* Canali con il Ritardatore. */
+	for (i = 0; i < NETCHANNELS; i++) {
+		channel_init (&pr.p_net[i]);
+
+		err = set_addr (&pr.p_net[i].c_laddr, NULL, deflistport[i]);
 		assert (!err);
 	}
 
 	/* Canale con il Receiver. */
-	channel_init (&chnl[HOST]);
-	err = set_addr (&chnl[HOST].c_raddr, defconnaddr, defconnport);
+	channel_init (&pr.p_host);
+	err = set_addr (&pr.p_host.c_raddr, defconnaddr, defconnport);
 	assert (!err);
 
 	/* Il canale con il Receiver e' attivabile quando e' connesso almeno
 	 * un canale con il Ritardatore. */
-	channel_set_activation_condition (&chnl[i],
+	channel_set_activation_condition (&pr.p_host,
 	                                  &activable_if_almost_one_connected,
-	                                  &chnl[NET]);
+	                                  pr.p_net);
 
 	/*
 	 * Personalizzazioni da riga di comando.
 	 */
 	err = getargs (argc, argv, "pppap",
-	              &chnl[NET].c_laddr.sin_port,
-	              &chnl[NET+1].c_laddr.sin_port,
-	              &chnl[NET+2].c_laddr.sin_port,
-		      &chnl[HOST].c_raddr, &chnl[HOST].c_raddr.sin_port);
+	              &pr.p_net[0].c_laddr.sin_port,
+	              &pr.p_net[1].c_laddr.sin_port,
+	              &pr.p_net[2].c_laddr.sin_port,
+		      &pr.p_host.c_raddr, &pr.p_host.c_raddr.sin_port);
 	if (err) {
 		print_help (argv[0]);
 		exit (EXIT_FAILURE);
 	}
 
 	/* Stampa informazioni. */
-	for (i = NET; i < NETCHANNELS; i++) {
+	for (i = 0; i < NETCHANNELS; i++) {
 		printf ("Canale %d con il Ritardatore: %s\n",
-		         i - NET, channel_name (&chnl[i]));
+		         i, channel_name (&pr.p_net[i]));
 	}
-	printf ("Canale con il Receiver: %s\n", channel_name (&chnl[HOST]));
+	printf ("Canale con il Receiver: %s\n", channel_name (&pr.p_host));
 
-	return core (chnl);
+	return core (&pr);
 }
 
 

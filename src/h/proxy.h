@@ -1,15 +1,15 @@
-#ifndef CORE_H
-#define CORE_H
+#ifndef PROXY_H
+#define PROXY_H
 
-#include "types.h"
+#include "h/types.h"
 
 
 /*******************************************************************************
 				  Prototipi
 *******************************************************************************/
 
-int
-core (struct proxy *px);
+void
+proxy_init (struct proxy *px);
 
 
-#endif /* CORE_H */
+#endif /* PROXY_H */

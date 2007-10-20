@@ -16,7 +16,7 @@
 *******************************************************************************/
 
 int
-core (struct chan *chnl) {
+core (struct proxy *px) {
 	int i;
 	int err;
 	int rdy;
@@ -28,7 +28,7 @@ core (struct chan *chnl) {
 		/*
 		 * Gestione connessioni.
 		 */
-		manage_connections (chnl);
+		manage_connections (px->p_chptr);
 
 		/*
 		 * Select

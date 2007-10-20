@@ -158,7 +158,12 @@ channel_name (struct chan *ch) {
 void
 channel_set_activation_condition
 (struct chan *ch, bool (*funct)(void *), void *arg) {
+	/* Imposta la funzione e relativo argomento per verificare la
+	 * condizione di attivazione di ch. Se funct e' NULL, il canale non
+	 * verra' mai attivato. */
+
 	assert (ch != NULL);
+	assert (funct != NULL || arg == NULL);
 	
 	ch->c_is_activable = (funct == NULL ?
 	                      &never_activable : funct);
