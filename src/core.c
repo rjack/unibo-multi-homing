@@ -39,7 +39,8 @@ core (struct proxy *px) {
 			FD_ZERO (&wrset);
 
 			/* Selezione dei fd in base allo stato dei canali. */
-			maxfd = set_file_descriptors (chnl, &rdset, &wrset);
+			maxfd = set_file_descriptors (px->p_chptr,
+			                              &rdset, &wrset);
 
 			rdy = select (maxfd + 1, &rdset, &wrset, NULL, NULL);
 		} while (rdy == -1 && errno == EINTR);
@@ -51,42 +52,45 @@ core (struct proxy *px) {
 
 		/* Gestione eventi. */
 		for (i = 0; i < CHANNELS; i++) {
+			struct chan *ch;
+			ch = px->p_chptr[i];
+
 			/* Connessione da concludere. */
-			if (channel_is_connecting (&chnl[i])
-			    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
-				err = finalize_connection (&chnl[i]);
+			if (channel_is_connecting (ch)
+			    && FD_ISSET (ch->c_sockfd, &wrset)) {
+				err = finalize_connection (ch);
 				if (err) {
-					channel_invalidate (&chnl[i]);
+					channel_invalidate (ch);
 				} else {
 					printf ("Canale %s connesso.\n",
-					        channel_name (&chnl[i]));
+					        channel_name (ch));
 				}
 			}
 
 			/* Connessione da accettare. */
-			else if (channel_is_listening (&chnl[i])
-			         && FD_ISSET (chnl[i].c_listfd, &rdset)) {
-				err = accept_connection (&chnl[i]);
+			else if (channel_is_listening (ch)
+			         && FD_ISSET (ch->c_listfd, &rdset)) {
+				err = accept_connection (ch);
 				if (err) {
-					channel_invalidate (&chnl[i]);
+					channel_invalidate (ch);
 				} else {
 					printf ("Canale %s, connessione "
 					        "accettata.\n",
-						channel_name (&chnl[i]));
+						channel_name (ch));
 				}
 			}
 
 			else {
 				/* Dati da leggere. */
-				if (channel_is_connected (&chnl[i])
-				    && FD_ISSET (chnl[i].c_sockfd, &rdset)) {
+				if (channel_is_connected (ch)
+				    && FD_ISSET (ch->c_sockfd, &rdset)) {
 					/* TODO lettura */
 					assert (FALSE);
 				}
 
 				/* Dati da scrivere. */
-				if (channel_is_connected (&chnl[i])
-				    && FD_ISSET (chnl[i].c_sockfd, &wrset)) {
+				if (channel_is_connected (ch)
+				    && FD_ISSET (ch->c_sockfd, &wrset)) {
 					/* TODO scrittura */
 					assert (FALSE);
 				}

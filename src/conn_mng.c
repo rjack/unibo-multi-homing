@@ -102,7 +102,7 @@ finalize_connection (struct chan *ch) {
 
 
 void
-manage_connections (struct chan* chnl) {
+manage_connections (struct chan* chnl[CHANNELS]) {
 	/* Attiva tutti i canali che hanno una struct sockaddr_in impostata,
 	 * una ancora inizializzata e il socket non valido.
 	 *
@@ -117,49 +117,49 @@ manage_connections (struct chan* chnl) {
 	int i;
 	int err;
 
-	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (&chnl[i])) {
+	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (chnl[i])) {
 
 		/*
 		 * Canale da connettere.
 		 */
-		if (!addr_is_set (&chnl[i].c_laddr)
-		    && addr_is_set (&chnl[i].c_raddr)
-		    && chnl[i].c_sockfd < 0) {
+		if (!addr_is_set (&chnl[i]->c_laddr)
+		    && addr_is_set (&chnl[i]->c_raddr)
+		    && chnl[i]->c_sockfd < 0) {
 
-			assert (chnl[i].c_listfd < 0);
+			assert (chnl[i]->c_listfd < 0);
 
-			err = connect_noblock (&chnl[i]);
+			err = connect_noblock (chnl[i]);
 			assert (!err); /* FIXME controllo errore decente. */
 
 			/* Connect gia' conclusa, recupera nome del socket. */
 			if (errno != EINPROGRESS) {
-				tcp_sockname (chnl[i].c_sockfd,
-				              &chnl[i].c_laddr);
+				tcp_sockname (chnl[i]->c_sockfd,
+				              &chnl[i]->c_laddr);
 		       	}
-			printf ("Canale %s %s.\n", channel_name (&chnl[i]),
-			        addr_is_set (&chnl[i].c_laddr) ?
+			printf ("Canale %s %s.\n", channel_name (chnl[i]),
+			        addr_is_set (&chnl[i]->c_laddr) ?
 			        "connesso" : "in connessione");
 
-			channel_set_activation_condition (&chnl[i],
+			channel_set_activation_condition (chnl[i],
 			                                  NULL, NULL);
 		}
 
 		/*
 		 * Canale da mettere in ascolto.
 		 */
-		else if (addr_is_set (&chnl[i].c_laddr)
-		    && !addr_is_set (&chnl[i].c_raddr)
-		    && chnl[i].c_listfd < 0) {
+		else if (addr_is_set (&chnl[i]->c_laddr)
+		    && !addr_is_set (&chnl[i]->c_raddr)
+		    && chnl[i]->c_listfd < 0) {
 
-			assert (chnl[i].c_sockfd < 0);
+			assert (chnl[i]->c_sockfd < 0);
 
-			err = listen_noblock (&chnl[i]);
+			err = listen_noblock (chnl[i]);
 			assert (!err); /* FIXME controllo errore decente. */
 
 			printf ("Canale %s in ascolto.\n",
-			        channel_name (&chnl[i]));
+			        channel_name (chnl[i]));
 
-			channel_set_activation_condition (&chnl[i], NULL, NULL);
+			channel_set_activation_condition (chnl[i], NULL, NULL);
 		}
 
 		else {
@@ -173,7 +173,7 @@ manage_connections (struct chan* chnl) {
 
 
 fd_t
-set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
+set_file_descriptors (struct chan *chnl[CHANNELS], fd_set *rdset, fd_set *wrset) {
 	int i;
 	fd_t max;
 
@@ -184,22 +184,22 @@ set_file_descriptors (struct chan *chnl, fd_set *rdset, fd_set *wrset) {
 	max = -1;
 	for (i = 0; i < CHANNELS; i++) {
 		/* Connessioni da completare o accettare. */
-		if (channel_is_connecting (&chnl[i])) {
-			FD_SET (chnl[i].c_sockfd, wrset);
-			max = MAX (chnl[i].c_sockfd, max);
-		} else if (channel_is_listening (&chnl[i])) {
-			FD_SET (chnl[i].c_listfd, rdset);
-			max = MAX (chnl[i].c_listfd, max);
+		if (channel_is_connecting (chnl[i])) {
+			FD_SET (chnl[i]->c_sockfd, wrset);
+			max = MAX (chnl[i]->c_sockfd, max);
+		} else if (channel_is_listening (chnl[i])) {
+			FD_SET (chnl[i]->c_listfd, rdset);
+			max = MAX (chnl[i]->c_listfd, max);
 		}
 		/* Dati da leggere e/o scrivere. */
 		else {
-			if (channel_can_read (&chnl[i])) {
-				FD_SET (chnl[i].c_sockfd, rdset);
-				max = MAX (chnl[i].c_sockfd, max);
+			if (channel_can_read (chnl[i])) {
+				FD_SET (chnl[i]->c_sockfd, rdset);
+				max = MAX (chnl[i]->c_sockfd, max);
 			}
-			if (channel_can_write (&chnl[i])) {
-				FD_SET (chnl[i].c_sockfd, wrset);
-				max = MAX (chnl[i].c_sockfd, max);
+			if (channel_can_write (chnl[i])) {
+				FD_SET (chnl[i]->c_sockfd, wrset);
+				max = MAX (chnl[i]->c_sockfd, max);
 			}
 		}
 	}
