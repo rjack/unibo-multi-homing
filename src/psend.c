@@ -1,7 +1,3 @@
-/* psend.c - proxy sender
- *
- * Giacomo Ritucci, 22/09/2007 */
-
 #include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"

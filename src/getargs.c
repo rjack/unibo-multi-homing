@@ -1,7 +1,3 @@
-/* getargs.c - lettura argomenti da linea di comando.
- *
- * Giacomo Ritucci, 23/09/2007 */
-
 #include "h/util.h"
 
 #include <assert.h>

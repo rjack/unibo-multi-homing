@@ -1,7 +1,3 @@
-/* util.c - funzioni di utilità generale.
- *
- * Giacomo Ritucci, 23/09/2007 */
-
 #include "h/util.h"
 #include "h/types.h"
 

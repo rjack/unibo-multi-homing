@@ -1,7 +1,3 @@
-/* channel.c - funzioni di gestione dei canali.
- *
- * Giacomo Ritucci, 24/09/2007 */
-
 #include "h/channel.h"
 #include "h/types.h"
 #include "h/util.h"

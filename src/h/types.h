@@ -1,7 +1,3 @@
-/* types.h - definizioni dei tipi per tutto il progetto.
- *
- * Giacomo Ritucci, 23/09/2007 */
-
 #ifndef MH_TYPES_H
 #define MH_TYPES_H
 

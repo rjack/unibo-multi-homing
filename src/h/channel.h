@@ -1,7 +1,3 @@
-/* channel.h - funzioni di gestione dei canali.
- *
- * Giacomo Ritucci, 24/09/2007 */
-
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
