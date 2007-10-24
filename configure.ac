@@ -20,10 +20,12 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h stdlib.h string.h unistd.h])
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 AC_TYPE_UINT16_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
+AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_CHECK_FUNCS([memset select socket strchr strerror strtol])
 
