@@ -58,6 +58,15 @@ accept_connection (struct chan *ch) {
 }
 
 
+void
+close_idle_channels (struct chan ch[NETCHANNELS]) {
+	/* TODO
+	 * aggiorna tutti gli activity timeout
+	 * se il timeout è scaduto invalida il canale
+	 * !!! dirottare i segmenti in uscita sulle altre connessioni! */
+}
+
+
 int
 finalize_connection (struct chan *ch) {
 	int err;
@@ -173,7 +182,8 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 
 
 fd_t
-set_file_descriptors (struct chan *chnl[CHANNELS], fd_set *rdset, fd_set *wrset) {
+set_file_descriptors (struct chan *chnl[CHANNELS],
+                      fd_set *rdset, fd_set *wrset) {
 	int i;
 	fd_t max;
 

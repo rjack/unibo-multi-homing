@@ -54,7 +54,7 @@ buffer_read (fd_t fd, struct buffer *buf) {
 	assert (buf != NULL);
 	assert (BOOL_VALUE (buf->b_resizable));
 
-	bytes_to_read = buffer_get_available (buf);
+	available_bytes = buffer_get_available (buf);
 
 	if (buf->b_resizable == TRUE) {
 		bytes_to_read = tcp_get_buffer_size (fd, SO_RCVBUF);

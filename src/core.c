@@ -38,6 +38,9 @@ core (struct proxy *px) {
 			FD_ZERO (&rdset);
 			FD_ZERO (&wrset);
 
+			/* Chiusura canali bloccati dal Ritardatore. */
+			close_idle_channels (px->p_net);
+
 			/* Selezione dei fd in base allo stato dei canali. */
 			maxfd = set_file_descriptors (px->p_chptr,
 			                              &rdset, &wrset);

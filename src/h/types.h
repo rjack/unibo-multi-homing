@@ -2,6 +2,7 @@
 #define MH_TYPES_H
 
 #include <arpa/inet.h>
+#include <sys/time.h>
 
 
 /*******************************************************************************
@@ -25,7 +26,6 @@
 /* 
  * Booleani e relativi valori.
  */
-
 typedef unsigned char bool;
 
 #ifdef TRUE
@@ -52,6 +52,15 @@ typedef int fd_t;
 /*******************************************************************************
 				  Strutture
 *******************************************************************************/
+
+/*
+ * Cronometri, per misurazioni temporali.
+ */
+typedef struct {
+	struct timeval cr_start;
+	double cr_elapsed;
+} crono_t;
+
 
 /*
  * Canali di rete.

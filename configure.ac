@@ -21,13 +21,14 @@ AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+AC_HEADER_TIME
 AC_TYPE_UINT16_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
-AC_CHECK_FUNCS([memset select socket strchr strerror strtol])
+AC_CHECK_FUNCS([gettimeofday memset select socket strchr strerror strtol])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])

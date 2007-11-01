@@ -13,6 +13,10 @@ int
 accept_connection (struct chan *ch);
 
 
+void
+close_idle_channels (struct chan ch[NETCHANNELS]);
+
+
 int
 finalize_connection (struct chan *ch);
 
