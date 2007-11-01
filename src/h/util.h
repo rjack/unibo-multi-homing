@@ -68,7 +68,7 @@ void *
 xmalloc (size_t size);
 
 
-/* 
+/*
  * Funzioni su socket e operazioni di rete.
  */
 

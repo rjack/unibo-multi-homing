@@ -78,7 +78,7 @@ finalize_connection (struct chan *ch) {
 	assert (ch->c_listfd < 0);
 	assert (!addr_is_set (&ch->c_laddr));
 	assert (addr_is_set (&ch->c_raddr));
-	
+
 	optsize = sizeof (optval);
 
 	/*
@@ -101,7 +101,7 @@ finalize_connection (struct chan *ch) {
 		return -1;
 	}
 
-	/* 
+	/*
 	 * Connessione riuscita.
 	 */
 	tcp_sockname (ch->c_sockfd, &ch->c_laddr);

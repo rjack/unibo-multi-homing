@@ -103,7 +103,7 @@ streq (const char *str1, const char *str2) {
 	assert (str2 != NULL);
 
 	cmp = strcmp (str1, str2);
-	
+
 	if (cmp == 0) return TRUE;
 	return FALSE;
 }
@@ -139,7 +139,7 @@ xmalloc (size_t size) {
 }
 
 
-/* 
+/*
  * Funzioni su socket e operazioni di rete.
  */
 
@@ -234,7 +234,7 @@ tcp_set_reusable (fd_t fd, bool reusable) {
 
 	assert (fd >= 0);
 	assert (reusable == TRUE || reusable == FALSE);
-	
+
 	optval = (reusable == TRUE) ? 1 : 0;
 
 	err = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval,
@@ -254,7 +254,7 @@ tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
 	assert (fd >= 0);
 	assert (laddr != NULL);
 	assert (!addr_is_set (laddr));
-	
+
 	len = sizeof (*laddr);
 
 	err = getsockname (fd, (struct sockaddr *) laddr, &len);

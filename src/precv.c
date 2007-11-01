@@ -15,7 +15,7 @@
 			       Variabili locali
 *******************************************************************************/
 
-/* 
+/*
  * Valori di default.
  */
 
@@ -49,7 +49,7 @@ main (int argc, char **argv) {
 	int i;
 	int err;
 	struct proxy pr;
-	
+
 	/*
 	 * Inizializzazioni con valori di default.
 	 */

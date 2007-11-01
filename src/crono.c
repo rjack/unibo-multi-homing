@@ -24,7 +24,7 @@ static void tv_normalize (struct timeval *tv);
 			      Funzioni pubbliche
 *******************************************************************************/
 
-/* 
+/*
  * Cronometri.
  */
 
@@ -61,7 +61,7 @@ crono_start (crono_t *cr) {
 }
 
 
-/* 
+/*
  * Strutture timeval.
  */
 
@@ -78,7 +78,7 @@ gettime (struct timeval *tv) {
 			       Funzioni locali
 *******************************************************************************/
 
-/* 
+/*
  * Strutture timeval.
  */
 

@@ -89,7 +89,7 @@ static size_t
 buffer_get_available (struct buffer *buf) {
 	assert (buf != NULL);
 	assert (buf->b_used <= buf->b_len);
-	
+
 	return (buf->b_len - buf->b_used);
 }
 

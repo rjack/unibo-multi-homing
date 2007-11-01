@@ -160,7 +160,7 @@ channel_set_activation_condition
 
 	assert (ch != NULL);
 	assert (funct != NULL || arg == NULL);
-	
+
 	ch->c_is_activable = (funct == NULL ?
 	                      &never_activable : funct);
 	ch->c_activable_arg = arg;

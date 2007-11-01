@@ -23,7 +23,7 @@
 			     Definizioni di tipo
 *******************************************************************************/
 
-/* 
+/*
  * Booleani e relativi valori.
  */
 typedef unsigned char bool;
@@ -82,7 +82,7 @@ struct chan {
 };
 
 
-/* 
+/*
  * Buffer per trasferimento dati.
  */
 struct buffer {
