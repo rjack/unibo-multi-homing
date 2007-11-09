@@ -92,18 +92,19 @@ struct chan {
 
 
 /*
- * Buffer per trasferimento dati.
+ * Coda circolare a dimensione fissa.
  */
-struct buffer {
+typedef struct {
+	/* Puntatore al buffer. */
+	char *cq_data;
+
 	/* Dimensione del buffer. */
-	size_t b_len;
-	/* Numero di byte utilizzati. */
-	size_t b_used;
-	/* Se TRUE, e' possibile reallocare il buffer. */
-	bool b_resizable;
-	/* Puntatore al buffer vero e proprio. */
-	char *b_data;
-};
+	size_t cq_len;
+
+	/* Testa e coda. */
+	size_t cq_head;
+	size_t cq_tail;
+} cqueue_t;
 
 
 /*
