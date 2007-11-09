@@ -1,6 +1,7 @@
 	  Progetto di Laboratorio di Programmazione di Rete 2006/07
      "Fornire interattività a comunicazione TCP sfruttando multi-homing"
 
+
 			   PROTOCOLLO APPLICAZIONE
 
 		    Giacomo Ritucci <ritucci@cs.unibo.it>
@@ -11,11 +12,29 @@
 - conformazione: 		flags
 - ordine ricostruzione: 	seqnum
 
+
+  Info opzionali nei segmenti
+
+- lunghezza payload:		pldlen
+
+
 Flags:
 - critico: è stato spedito su tutti i canali
 - dati: ha il payload
+- lunghezza non standard: se acceso e' presente il capo pldlen, ignorato se
+  non c'e' il payload.
 
 NB: se è critico e non ha il payload è un NACK.
+
+
+  Lettura dal Sender
+
+quando:	c'e' spazio nel buffer
+quanto:	il massimo possibile
+dove:	in un buffer circolare grande come il buffer TCP
+poi:	i canali attivi devono fare dequeue sul buffer per prelevare i dati
+	con cui costruire i segmenti.
+note:	buffer TCP dimensione massima
 
 
   Ricostruzione segmenti
