@@ -95,6 +95,10 @@ struct chan {
  * Coda circolare a dimensione fissa.
  */
 typedef struct {
+	/* TRUE quando tail e' minore di head, distingue coda completamente
+	 * vuota da completamente piena. */
+	bool cq_wrap;
+
 	/* Puntatore al buffer. */
 	char *cq_data;
 
