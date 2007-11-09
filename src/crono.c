@@ -74,6 +74,27 @@ gettime (struct timeval *tv) {
 }
 
 
+/*
+ * Timeout.
+ */
+
+double
+timeout_left (timeout_t *to) {
+	assert (to != NULL);
+	return (to->to_maxval - crono_measure (&to->to_crono));
+}
+
+
+void
+timeout_set (timeout_t *to, double value) {
+	assert (to != NULL);
+	assert (value > 0);
+
+	to->to_maxval = value;
+	crono_start (&to->to_crono);
+}
+
+
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/

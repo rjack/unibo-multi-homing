@@ -57,9 +57,18 @@ typedef int fd_t;
  * Cronometri, per misurazioni temporali.
  */
 typedef struct {
-	struct timeval cr_start;
 	double cr_elapsed;
+	struct timeval cr_start;
 } crono_t;
+
+
+/*
+ * Timeout, per controllare scadenze.
+ */
+typedef struct {
+	double to_maxval;
+	crono_t to_crono;
+} timeout_t;
 
 
 /*
