@@ -39,8 +39,7 @@ cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
 		memcpy (&cq->cq_data[cq->cq_tail], buf, chunk_1);
 		CINC (cq->cq_tail, chunk_1, cq->cq_len);
 		buf += chunk_1;
-		if (cq->cq_tail < chunk_1) {
-			assert (cq->cq_tail <= cq->cq_head);
+		if (cq->cq_tail == 0) {
 			cq->cq_wrap = TRUE;
 		}
 
