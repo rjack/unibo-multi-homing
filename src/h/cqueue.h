@@ -16,6 +16,10 @@ size_t
 cqueue_get_aval (cqueue_t *cq);
 
 
+size_t
+cqueue_get_used (cqueue_t *cq);
+
+
 void
 cqueue_init (cqueue_t *cq, size_t len);
 

@@ -40,6 +40,7 @@ cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
 		CINC (cq->cq_tail, chunk_1, cq->cq_len);
 		buf += chunk_1;
 		if (cq->cq_tail == 0) {
+			assert (!cq->cq_wrap);
 			cq->cq_wrap = TRUE;
 		}
 
@@ -70,6 +71,13 @@ cqueue_get_aval (cqueue_t *cq) {
 }
 
 
+size_t
+cqueue_get_used (cqueue_t *cq) {
+	assert (cq != NULL);
+	return (cq->cq_len - cqueue_get_aval (cq));
+}
+
+
 void
 cqueue_init (cqueue_t *cq, size_t len) {
 	assert (cq != NULL);
@@ -91,8 +99,37 @@ cqueue_read (fd_t fd, cqueue_t *cq, size_t nbytes) {
 
 
 int
-cqueue_remove (cqueue_t *cq, char *buf, size_t buflen) {
-	/* TODO */
+cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes) {
+	size_t chunk_1;
+	size_t chunk_2;
+
+	assert (cq != NULL);
+	assert (buf != NULL);
+	assert (nbytes > 0);
+
+	if (cqueue_get_used (cq) >= nbytes) {
+		assert (cq->cq_wrap || cq->cq_tail > cq->cq_head);
+		assert (!cq->cq_wrap || cq->cq_tail <= cq->cq_head);
+
+		chunk_1 = (cq->cq_wrap ?
+		           cq->cq_len - cq->cq_head :
+		           cq->cq_tail - cq->cq_head);
+		chunk_2 = nbytes - chunk_1;
+
+		memcpy (buf, &cq->cq_data[cq->cq_head], chunk_1);
+		CINC (cq->cq_head, chunk_1, cq->cq_len);
+		buf += chunk_1;
+		if (cq->cq_head == 0) {
+			assert (cq->cq_wrap);
+			cq->cq_wrap = FALSE;
+		}
+
+		if (chunk_2 > 0) {
+			memcpy (buf, &cq->cq_data[cq->cq_head], chunk_2);
+			cq->cq_head += chunk_2;
+		}
+		return 0;
+	}
 	return -1;
 }
 
