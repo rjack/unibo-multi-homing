@@ -15,6 +15,12 @@
 /* Incremento circolare. */
 #define     CINC(x,inc,len)     ((x) = ((x) + (inc)) % (len))
 
+#ifndef MSG_NOSIGNAL
+#ifdef SO_NOSIGPIPE
+#define MSG_NOSIGNAL SO_NOSIGPIPE
+#endif
+#endif
+
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
