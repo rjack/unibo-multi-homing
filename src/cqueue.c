@@ -47,9 +47,7 @@ cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
 		assert (cq->cq_wrap || cq->cq_tail >= cq->cq_head);
 		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
 
-		chunk_1 = (cq->cq_wrap ?
-		           cq->cq_head - cq->cq_tail :
-		           cq->cq_len - cq->cq_tail);
+		chunk_1 = cqueue_get_aval_chunk (cq);
 		chunk_2 = nbytes - chunk_1;
 
 		memcpy (&cq->cq_data[cq->cq_tail], buf, chunk_1);
@@ -154,9 +152,7 @@ cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes) {
 		assert (cq->cq_wrap || cq->cq_tail > cq->cq_head);
 		assert (!cq->cq_wrap || cq->cq_tail <= cq->cq_head);
 
-		chunk_1 = (cq->cq_wrap ?
-		           cq->cq_len - cq->cq_head :
-		           cq->cq_tail - cq->cq_head);
+		chunk_1 = cqueue_get_used_chunk (cq);
 		chunk_2 = nbytes - chunk_1;
 
 		memcpy (buf, &cq->cq_data[cq->cq_head], chunk_1);
