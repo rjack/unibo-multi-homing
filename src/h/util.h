@@ -72,7 +72,7 @@ xmalloc (size_t size);
  * Funzioni su socket e operazioni di rete.
  */
 
-void
+int
 tcp_close (fd_t *fd);
 
 

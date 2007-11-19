@@ -143,7 +143,7 @@ xmalloc (size_t size) {
  * Funzioni su socket e operazioni di rete.
  */
 
-void
+int
 tcp_close (fd_t *fd) {
 	/* Chiude il file descriptor puntato da fd e lo inizializza a -1. */
 
@@ -155,9 +155,9 @@ tcp_close (fd_t *fd) {
 	do {
 		err = close (*fd);
 	} while (err == -1 && errno == EINTR);
-	assert (!err); /* FIXME e' giusto essere cosi' drastici? */
 
 	*fd = -1;
+	return err;
 }
 
 
