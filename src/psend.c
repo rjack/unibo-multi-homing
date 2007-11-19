@@ -72,9 +72,8 @@ main (int argc, char **argv) {
 
 		/* Ogni canale con il Ritardatore va attivato solo dopo che
 		 * l'host si e' connesso. */
-		channel_set_activation_condition (&ps.p_net[i],
-		                                  &activable_if_connected,
-		                                  &ps.p_host);
+		channel_set_condition (&ps.p_net[i], SET_ACTIVABLE,
+		                       &activable_if_connected, &ps.p_host);
 	}
 
 	/* Canale con il Sender. */

@@ -86,8 +86,15 @@ struct chan {
 	/* Funzione che decide quando il canale sia attivabile. */
 	bool (*c_is_activable)(void *);
 
-	/* Argomento alla funzione. */
+	/* Funzioni che controllano le condizioni in cui il canale puo' fare
+	 * I/O sul suo c_sockfd. */
+	bool (*c_can_read)(void *);
+	bool (*c_can_write)(void *);
+
+	/* Puntatori per gli argomenti delle funzioni. */
 	void *c_activable_arg;
+	void *c_can_read_arg;
+	void *c_can_write_arg;
 };
 
 

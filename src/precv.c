@@ -71,9 +71,8 @@ main (int argc, char **argv) {
 
 	/* Il canale con il Receiver e' attivabile quando e' connesso almeno
 	 * un canale con il Ritardatore. */
-	channel_set_activation_condition (&pr.p_host,
-	                                  &activable_if_almost_one_connected,
-	                                  pr.p_net);
+	channel_set_condition (&pr.p_host, SET_ACTIVABLE,
+			       &activable_if_almost_one_connected, pr.p_net);
 
 	/*
 	 * Personalizzazioni da riga di comando.

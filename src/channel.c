@@ -10,8 +10,8 @@
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static bool always_activable (void *discard);
-static bool never_activable (void *discard);
+static bool always (void *discard);
+static bool never (void *discard);
 
 
 /*******************************************************************************
@@ -20,21 +20,25 @@ static bool never_activable (void *discard);
 
 bool
 channel_can_read (struct chan *ch) {
+	/* Chiama la funzione associata a ch->c_can_read, che ritorna TRUE se
+	 * ch e' pronto per leggere da ch->c_sockfd. */
+
 	assert (ch != NULL);
+	assert (ch->c_can_read != NULL);
 
-	/* TODO */
-
-	return FALSE;
+	return ch->c_can_read (ch->c_can_read_arg);
 }
 
 
 bool
 channel_can_write (struct chan *ch) {
+	/* Chiama la funzione associata a ch->c_can_write, che ritorna TRUE se
+	 * ch e' pronto per scrivere su ch->c_sockfd. */
+
 	assert (ch != NULL);
+	assert (ch->c_can_write != NULL);
 
-	/* TODO */
-
-	return FALSE;
+	return ch->c_can_write (ch->c_can_write_arg);
 }
 
 
@@ -48,14 +52,16 @@ channel_init (struct chan *ch) {
 	memset (&ch->c_laddr, 0, sizeof (ch->c_laddr));
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
-	channel_set_activation_condition (ch, &always_activable, NULL);
+	channel_set_condition (ch, SET_ACTIVABLE, &always, NULL);
+	channel_set_condition (ch, SET_CAN_READ, &never, NULL);
+	channel_set_condition (ch, SET_CAN_WRITE, &never, NULL);
 }
 
 
 void
 channel_invalidate (struct chan *ch) {
 	channel_init (ch);
-	channel_set_activation_condition (ch, NULL, NULL);
+	channel_set_condition (ch, SET_ACTIVABLE, NULL, NULL);
 }
 
 
@@ -152,18 +158,31 @@ channel_name (struct chan *ch) {
 
 
 void
-channel_set_activation_condition
-(struct chan *ch, bool (*funct)(void *), void *arg) {
-	/* Imposta la funzione e relativo argomento per verificare la
-	 * condizione di attivazione di ch. Se funct e' NULL, il canale non
-	 * verra' mai attivato. */
+channel_set_condition
+(struct chan *ch, enum set_condition cond, bool (*funct)(void *), void *arg) {
+	/* Imposta la funzione e relativo argomento per verificare se ch e'
+	 * nella condizione richiesta. Se funct e' NULL la risposta sara'
+	 * sempre negativa. */
 
 	assert (ch != NULL);
 	assert (funct != NULL || arg == NULL);
 
-	ch->c_is_activable = (funct == NULL ?
-	                      &never_activable : funct);
-	ch->c_activable_arg = arg;
+	switch (cond) {
+	case SET_ACTIVABLE:
+		ch->c_is_activable = (funct == NULL ? &never : funct);
+		ch->c_activable_arg = arg;
+		break;
+	case SET_CAN_READ:
+		ch->c_can_read = (funct == NULL ? &never : funct);
+		ch->c_can_read_arg = arg;
+		break;
+	case SET_CAN_WRITE:
+		ch->c_can_write = (funct == NULL ? &never : funct);
+		ch->c_can_write_arg = arg;
+		break;
+	default:
+		assert (FALSE);
+	}
 }
 
 
@@ -172,12 +191,12 @@ channel_set_activation_condition
 *******************************************************************************/
 
 static bool
-always_activable (void *discard) {
+always (void *discard) {
 	return TRUE;
 }
 
 
 static bool
-never_activable (void *discard) {
+never (void *discard) {
 	return FALSE;
 }

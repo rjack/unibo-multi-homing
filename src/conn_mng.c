@@ -148,9 +148,6 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 			printf ("Canale %s %s.\n", channel_name (chnl[i]),
 			        addr_is_set (&chnl[i]->c_laddr) ?
 			        "connesso" : "in connessione");
-
-			channel_set_activation_condition (chnl[i],
-			                                  NULL, NULL);
 		}
 
 		/*
@@ -167,8 +164,6 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 
 			printf ("Canale %s in ascolto.\n",
 			        channel_name (chnl[i]));
-
-			channel_set_activation_condition (chnl[i], NULL, NULL);
 		}
 
 		else {
@@ -177,6 +172,8 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 			 * ascolto, una delle due. */
 			assert (FALSE);
 		}
+
+		channel_set_condition (chnl[i], SET_ACTIVABLE, NULL, NULL);
 	}
 }
 

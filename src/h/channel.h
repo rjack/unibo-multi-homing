@@ -5,6 +5,17 @@
 
 
 /*******************************************************************************
+				     Enum
+*******************************************************************************/
+
+enum set_condition {
+	SET_ACTIVABLE,
+	SET_CAN_READ,
+	SET_CAN_WRITE
+};
+
+
+/*******************************************************************************
 				  Prototipi
 *******************************************************************************/
 
@@ -50,8 +61,8 @@ channel_name (struct chan *ch);
 
 
 void
-channel_set_activation_condition
-(struct chan *ch, bool (*funct)(void *), void *arg);
+channel_set_condition
+(struct chan *ch, enum set_condition, bool (*funct)(void *), void *arg);
 
 
 #endif /* CHANNEL_H */
