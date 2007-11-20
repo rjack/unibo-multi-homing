@@ -53,8 +53,8 @@ channel_init (struct chan *ch) {
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
 	channel_set_condition (ch, SET_ACTIVABLE, &always, NULL);
-	channel_set_condition (ch, SET_CAN_READ, &never, NULL);
-	channel_set_condition (ch, SET_CAN_WRITE, &never, NULL);
+	channel_set_condition (ch, SET_CAN_READ, &always, NULL);
+	channel_set_condition (ch, SET_CAN_WRITE, &always, NULL);
 }
 
 

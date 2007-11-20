@@ -68,6 +68,46 @@ cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
 }
 
 
+bool
+cqueue_can_read (void *arg) {
+	cqueue_t *cq;
+
+	assert (arg != NULL);
+       
+	cq = (cqueue_t *) arg;
+	if (cqueue_get_aval (cq) > 0) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+cqueue_t *
+cqueue_create (size_t len) {
+	cqueue_t *cq;
+
+	assert (len > 0);
+
+	cq = xmalloc (sizeof (cqueue_t));
+	cq->cq_data = xmalloc (len * sizeof (char));
+	cq->cq_len = len;
+	cq->cq_head = 0;
+	cq->cq_tail = 0;
+	cq->cq_wrap = FALSE;
+
+	return cq;
+}
+
+
+void
+cqueue_destroy (cqueue_t *cq) {
+	assert (cq != NULL);
+
+	xfree (cq->cq_data);
+	xfree (cq);
+}
+
+
 size_t
 cqueue_get_aval (cqueue_t *cq) {
 	size_t aval;
@@ -89,19 +129,6 @@ size_t
 cqueue_get_used (cqueue_t *cq) {
 	assert (cq != NULL);
 	return (cq->cq_len - cqueue_get_aval (cq));
-}
-
-
-void
-cqueue_init (cqueue_t *cq, size_t len) {
-	assert (cq != NULL);
-	assert (len > 0);
-
-	cq->cq_data = xmalloc (len * sizeof (char));
-	cq->cq_len = len;
-	cq->cq_head = 0;
-	cq->cq_tail = 0;
-	cq->cq_wrap = FALSE;
 }
 
 

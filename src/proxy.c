@@ -1,4 +1,6 @@
 #include "h/types.h"
+#include "h/util.h"
+#include "h/cqueue.h"
 
 #include <assert.h>
 
@@ -20,4 +22,34 @@ proxy_init (struct proxy *px) {
 		px->p_chptr[i] = &px->p_net[i];
 	}
 	px->p_chptr[i] = &px->p_host;
+
+	px->p_host_rcvbuf = NULL;
+	px->p_host_sndbuf = NULL;
+}
+
+
+void
+proxy_create_buffers (struct proxy *px, int chanid) {
+	/* Crea i buffer di I/O relativi al canale chanid. */
+
+	assert (px != NULL);
+	assert (chanid > 0);
+	assert (chanid < CHANNELS);
+
+	if (chanid == HOST) {
+		size_t buflen;
+		assert (px->p_chptr[chanid] == &px->p_host);
+
+		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
+		                              SO_RCVBUF);
+		px->p_host_rcvbuf = cqueue_create (buflen);
+
+		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
+		                              SO_SNDBUF);
+		px->p_host_sndbuf = cqueue_create (buflen);
+	}
+	/* NET */
+	else {
+		/* TODO */
+	}
 }

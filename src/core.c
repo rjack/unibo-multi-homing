@@ -1,5 +1,6 @@
 #include "h/channel.h"
 #include "h/conn_mng.h"
+#include "h/proxy.h"
 #include "h/types.h"
 
 #include <assert.h>
@@ -53,7 +54,9 @@ core (struct proxy *px) {
 			exit (EXIT_FAILURE);
 		}
 
-		/* Gestione eventi. */
+		/*
+		 * Gestione eventi.
+		 */
 		for (i = 0; i < CHANNELS; i++) {
 			struct chan *ch;
 			ch = px->p_chptr[i];
@@ -65,6 +68,7 @@ core (struct proxy *px) {
 				if (err) {
 					channel_invalidate (ch);
 				} else {
+					proxy_create_buffers (px, i);
 					printf ("Canale %s connesso.\n",
 					        channel_name (ch));
 				}
@@ -77,6 +81,7 @@ core (struct proxy *px) {
 				if (err) {
 					channel_invalidate (ch);
 				} else {
+					proxy_create_buffers (px, i);
 					printf ("Canale %s, connessione "
 					        "accettata.\n",
 						channel_name (ch));

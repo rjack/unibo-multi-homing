@@ -12,16 +12,24 @@ int
 cqueue_add (cqueue_t *cq, char *buf, size_t nbytes);
 
 
+bool
+cqueue_can_read (void *arg);
+
+
+cqueue_t *
+cqueue_create (size_t len);
+
+
+void
+cqueue_destroy (cqueue_t *cq);
+
+
 size_t
 cqueue_get_aval (cqueue_t *cq);
 
 
 size_t
 cqueue_get_used (cqueue_t *cq);
-
-
-void
-cqueue_init (cqueue_t *cq, size_t len);
 
 
 int

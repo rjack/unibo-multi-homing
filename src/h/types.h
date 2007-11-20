@@ -129,8 +129,9 @@ struct proxy {
 	/* Array di puntatori ai canali, per facilitare iterazioni. */
 	struct chan *p_chptr[CHANNELS];
 
+	cqueue_t *p_host_rcvbuf;
+	cqueue_t *p_host_sndbuf;
 	/* TODO
-	 * - buffer di trasferimento con l'host
 	 * - coda accodamento dati in attesa di smistamento ai canali
 	 * - buffer di trasferimento con il ritardatore
 	 * - contatori:
