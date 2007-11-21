@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-#include <netinet/ip.h>
+#include <netinet/in.h>
 
 
 /*******************************************************************************

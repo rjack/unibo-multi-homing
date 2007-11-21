@@ -2,12 +2,13 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <netinet/ip.h>
+#include <netinet/in.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
 
 
 /*******************************************************************************

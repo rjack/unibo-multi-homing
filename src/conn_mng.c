@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/select.h>
+#include <sys/socket.h>
 #include <stdio.h>
 
 
@@ -199,7 +200,7 @@ set_file_descriptors (struct chan *chnl[CHANNELS],
 			max = MAX (chnl[i]->c_listfd, max);
 		}
 		/* Dati da leggere e/o scrivere. */
-		else {
+		else if (channel_is_connected (chnl[i])) {
 			if (channel_can_read (chnl[i])) {
 				FD_SET (chnl[i]->c_sockfd, rdset);
 				max = MAX (chnl[i]->c_sockfd, max);

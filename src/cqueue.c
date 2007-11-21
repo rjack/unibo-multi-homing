@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 
@@ -18,6 +19,8 @@
 #ifndef MSG_NOSIGNAL
 #ifdef SO_NOSIGPIPE
 #define MSG_NOSIGNAL SO_NOSIGPIPE
+#else
+#define MSG_NOSIGNAL 0
 #endif
 #endif
 
