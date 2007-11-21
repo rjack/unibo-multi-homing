@@ -14,7 +14,7 @@ AC_PROG_CC
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h stdlib.h string.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netinet/in.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -23,6 +23,15 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_HEADER_TIME
 AC_TYPE_UINT16_T
+
+AC_MSG_CHECKING(for MSG_NOSIGNAL)
+AC_TRY_COMPILE([#include <sys/socket.h>],
+	[ int f = MSG_NOSIGNAL; ],
+	[ AC_MSG_RESULT(yes)
+	  AC_DEFINE(HAVE_MSG_NOSIGNAL, 1,
+	  	[Define this symbol if you have MSG_NOSIGNAL]) ],
+	[ AC_MSG_RESULT(no)]
+)
 
 # Checks for library functions.
 AC_FUNC_MALLOC
