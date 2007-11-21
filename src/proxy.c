@@ -3,6 +3,7 @@
 #include "h/cqueue.h"
 
 #include <assert.h>
+#include <signal.h>
 #include <sys/socket.h>
 
 
@@ -26,6 +27,22 @@ proxy_init (struct proxy *px) {
 
 	px->p_host_rcvbuf = NULL;
 	px->p_host_sndbuf = NULL;
+
+#if ! HAVE_MSG_NOSIGNAL
+	/* Gestione SIGPIPE.
+	 * NetBSD non ha un equivalente di MSG_NOSIGNAL, quindi l'unico modo
+	 * e' ignorare il segnale. */
+	{
+		int err;
+		struct sigaction act;
+
+		act.sa_handler = SIG_IGN;
+		sigemptyset (&act.sa_mask);
+		act.sa_flags = 0;
+		err = sigaction (SIGPIPE, &act, NULL);
+		assert (!err);
+	}
+#endif
 }
 
 

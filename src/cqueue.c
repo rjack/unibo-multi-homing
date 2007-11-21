@@ -16,12 +16,8 @@
 /* Incremento circolare. */
 #define     CINC(x,inc,len)     ((x) = ((x) + (inc)) % (len))
 
-#ifndef MSG_NOSIGNAL
-#ifdef SO_NOSIGPIPE
-#define MSG_NOSIGNAL SO_NOSIGPIPE
-#else
-#define MSG_NOSIGNAL 0
-#endif
+#if ! HAVE_MSG_NOSIGNAL
+#define     MSG_NOSIGNAL     0
 #endif
 
 
