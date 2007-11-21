@@ -28,7 +28,7 @@ proxy_init (struct proxy *px) {
 	px->p_host_rcvbuf = NULL;
 	px->p_host_sndbuf = NULL;
 
-#if ! HAVE_MSG_NOSIGNAL
+#if !HAVE_MSG_NOSIGNAL
 	/* Gestione SIGPIPE.
 	 * NetBSD non ha un equivalente di MSG_NOSIGNAL, quindi l'unico modo
 	 * e' ignorare il segnale. */
