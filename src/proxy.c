@@ -41,6 +41,7 @@ proxy_init (struct proxy *px) {
 		act.sa_flags = 0;
 		err = sigaction (SIGPIPE, &act, NULL);
 		assert (!err);
+		printf ("Flag MSG_NOSIGNAL non presente, tutti i SIGPIPE ignorati.");
 	}
 #endif
 }
