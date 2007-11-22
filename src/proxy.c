@@ -4,6 +4,7 @@
 
 #include <assert.h>
 #include <signal.h>
+#include <stdio.h>
 #include <sys/socket.h>
 
 
@@ -41,8 +42,8 @@ proxy_init (struct proxy *px) {
 		act.sa_flags = 0;
 		err = sigaction (SIGPIPE, &act, NULL);
 		assert (!err);
-		printf ("Flag MSG_NOSIGNAL non presente, tutti i SIGPIPE ignorati.");
-	}
+		printf ("Manca MSG_NOSIGNAL, tutti i SIGPIPE ignorati.\n");
+		}
 #endif
 }
 
