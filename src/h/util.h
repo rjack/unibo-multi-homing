@@ -85,6 +85,10 @@ tcp_set_block (fd_t fd, bool must_block);
 
 
 int
+tcp_set_buffer_size (fd_t sockfd, int bufname, size_t buflen);
+
+
+int
 tcp_set_nagle (fd_t fd, bool active);
 
 

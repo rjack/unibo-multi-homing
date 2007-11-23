@@ -59,10 +59,12 @@ main (int argc, char **argv) {
 	/*
 	 * Inizializzazioni con valori di default.
 	 */
-
 	proxy_init (&ps);
 
-	/* Canali con il Ritardatore. */
+	/* Canali con il Ritardatore:
+	 * - indirizzi remoti
+	 * - dimensione buffer tcp di invio
+	 * - condizione di attivazione. */
 	for (i = 0; i < NETCHANNELS; i++) {
 		channel_init (&ps.p_net[i]);
 
@@ -70,21 +72,22 @@ main (int argc, char **argv) {
 		                defconnaddr[i], defconnport[i]);
 		assert (!err);
 
-		/* Ogni canale con il Ritardatore va attivato solo dopo che
-		 * l'host si e' connesso. */
+		/* Piu' piccolo possibile per notare prima congestioni e
+		 * blocchi. */
+		ps.p_net[i].c_sndbuf_len = 1024;
+
 		channel_set_condition (&ps.p_net[i], SET_ACTIVABLE,
 		                       &activable_if_connected, &ps.p_host);
 	}
 
-	/* Canale con il Sender. */
+	/* Canale con il Sender: porta di ascolto. */
 	channel_init (&ps.p_host);
 	err = set_addr (&ps.p_host.c_laddr, NULL, deflistport);
 	assert (!err);
 
 	/*
-	 * Personalizzazioni da riga di comando.
+	 * Impostazioni da riga di comando.
 	 */
-
 	err = getargs (argc, argv, "papapap",
 	              &ps.p_host.c_laddr.sin_port,
 		      &ps.p_net[0].c_raddr, &ps.p_net[0].c_raddr.sin_port,
@@ -119,7 +122,6 @@ activable_if_connected (void *arg) {
 	assert (arg != NULL);
 
 	ch = (struct chan *)arg;
-
 	if (channel_is_connected (ch)) {
 		return TRUE;
 	}

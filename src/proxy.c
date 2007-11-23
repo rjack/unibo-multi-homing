@@ -42,8 +42,9 @@ proxy_init (struct proxy *px) {
 		act.sa_flags = 0;
 		err = sigaction (SIGPIPE, &act, NULL);
 		assert (!err);
-		printf ("Manca MSG_NOSIGNAL, tutti i SIGPIPE ignorati.\n");
-		}
+		fprintf (stderr,
+		         "Manca MSG_NOSIGNAL, tutti i SIGPIPE ignorati.\n");
+	}
 #endif
 }
 
@@ -53,7 +54,7 @@ proxy_create_buffers (struct proxy *px, int chanid) {
 	/* Crea i buffer di I/O relativi al canale chanid. */
 
 	assert (px != NULL);
-	assert (chanid > 0);
+	assert (chanid >= 0);
 	assert (chanid < CHANNELS);
 
 	if (chanid == HOST) {

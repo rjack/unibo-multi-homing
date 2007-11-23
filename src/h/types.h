@@ -83,6 +83,10 @@ struct chan {
 	struct sockaddr_in c_laddr;
 	struct sockaddr_in c_raddr;
 
+	/* Dimensioni dei buffer tcp. */
+	size_t c_rcvbuf_len;
+	size_t c_sndbuf_len;
+
 	/* Funzione che decide quando il canale sia attivabile. */
 	bool (*c_is_activable)(void *);
 

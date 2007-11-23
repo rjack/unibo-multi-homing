@@ -214,17 +214,31 @@ connect_noblock (struct chan *ch) {
 	assert (ch->c_listfd < 0);
 	assert (ch->c_sockfd < 0);
 
-	/* Nuovo socket tcp. */
 	ch->c_sockfd = xtcp_socket ();
 
-	/* Non bloccante, se fallisce RITORNA subito. */
 	err = tcp_set_block (ch->c_sockfd, FALSE);
 	if (err) {
 		goto error;
 	}
 
-	/* FIXME dove disabilitare Nagle? */
-	/* TODO se necessario modificare i buffer TCP qui. */
+	/*
+	 * FIXME dove disabilitare Nagle?
+	 */
+
+	if (ch->c_rcvbuf_len > 0) {
+		err = tcp_set_buffer_size (ch->c_sockfd, SO_RCVBUF,
+		                           ch->c_rcvbuf_len);
+		assert (!err);
+		assert (ch->c_rcvbuf_len == tcp_get_buffer_size (ch->c_sockfd,
+		                                                 SO_RCVBUF));
+	}
+	if (ch->c_sndbuf_len > 0) {
+		err = tcp_set_buffer_size (ch->c_sockfd, SO_SNDBUF,
+		                           ch->c_sndbuf_len);
+		assert (!err);
+		assert (ch->c_sndbuf_len == tcp_get_buffer_size (ch->c_sockfd,
+		                                                 SO_SNDBUF));
+	}
 
 	/* Tentativo di connessione. */
 	do {
@@ -262,6 +276,12 @@ listen_noblock (struct chan *ch) {
 
 	ch->c_listfd = xtcp_socket ();
 
+	err = tcp_set_reusable (ch->c_listfd, TRUE);
+	if (err) {
+		errmsg = "tcp_set_reusable fallita";
+		goto error;
+	}
+
 	err = bind (ch->c_listfd,
 	            (struct sockaddr *)&ch->c_laddr,
 	            sizeof (ch->c_laddr));
@@ -270,10 +290,27 @@ listen_noblock (struct chan *ch) {
 		goto error;
 	}
 
-	err = tcp_set_reusable (ch->c_listfd, TRUE);
-	if (err) {
-		errmsg = "tcp_set_reusable fallita";
-		goto error;
+	if (ch->c_rcvbuf_len > 0) {
+		err = tcp_set_buffer_size (ch->c_listfd, SO_RCVBUF,
+		                           ch->c_rcvbuf_len);
+		if (err) {
+			errmsg = "tcp_set_buffer_size SO_RCVBUF fallita";
+			goto error;
+		}
+		assert (ch->c_rcvbuf_len == tcp_get_buffer_size (ch->c_listfd,
+		                                                 SO_RCVBUF));
+	}
+
+
+	if (ch->c_sndbuf_len > 0) {
+		err = tcp_set_buffer_size (ch->c_listfd, SO_SNDBUF,
+		                           ch->c_sndbuf_len);
+		if (err) {
+			errmsg = "tcp_set_buffer_size SO_SNDBUF fallita";
+			goto error;
+		}
+		assert (ch->c_sndbuf_len == tcp_get_buffer_size (ch->c_listfd,
+		                                                 SO_SNDBUF));
 	}
 
 	err = listen (ch->c_listfd, 0);

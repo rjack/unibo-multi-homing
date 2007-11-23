@@ -52,9 +52,12 @@ channel_init (struct chan *ch) {
 	memset (&ch->c_laddr, 0, sizeof (ch->c_laddr));
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
+	ch->c_rcvbuf_len = 0;
+	ch->c_sndbuf_len = 0;
+
 	channel_set_condition (ch, SET_ACTIVABLE, &always, NULL);
-	channel_set_condition (ch, SET_CAN_READ, &always, NULL);
-	channel_set_condition (ch, SET_CAN_WRITE, &always, NULL);
+	channel_set_condition (ch, SET_CAN_READ, &never, NULL);
+	channel_set_condition (ch, SET_CAN_WRITE, &never, NULL);
 }
 
 

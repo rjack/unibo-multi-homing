@@ -53,29 +53,33 @@ main (int argc, char **argv) {
 	/*
 	 * Inizializzazioni con valori di default.
 	 */
-
 	proxy_init (&pr);
 
-	/* Canali con il Ritardatore. */
+	/* Canali con il Ritardatore:
+	 * - porte di ascolto
+	 * - buffer tcp di invio. */
 	for (i = 0; i < NETCHANNELS; i++) {
 		channel_init (&pr.p_net[i]);
+
+		/* Piu' piccolo possibile per notare prima congestioni e
+		 * blocchi. */
+		pr.p_net[i].c_sndbuf_len = 1024;
 
 		err = set_addr (&pr.p_net[i].c_laddr, NULL, deflistport[i]);
 		assert (!err);
 	}
 
-	/* Canale con il Receiver. */
+	/* Canale con il Receiver: indirizzi remoti e condizione di
+	 * attivazione. */
 	channel_init (&pr.p_host);
 	err = set_addr (&pr.p_host.c_raddr, defconnaddr, defconnport);
 	assert (!err);
 
-	/* Il canale con il Receiver e' attivabile quando e' connesso almeno
-	 * un canale con il Ritardatore. */
 	channel_set_condition (&pr.p_host, SET_ACTIVABLE,
 			       &activable_if_almost_one_connected, pr.p_net);
 
 	/*
-	 * Personalizzazioni da riga di comando.
+	 * Impostazioni da riga di comando.
 	 */
 	err = getargs (argc, argv, "pppap",
 	              &pr.p_net[0].c_laddr.sin_port,

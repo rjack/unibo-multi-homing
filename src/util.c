@@ -172,6 +172,7 @@ tcp_get_buffer_size (fd_t sockfd, int bufname) {
 	assert (sockfd >= 0);
 	assert (bufname == SO_SNDBUF || bufname == SO_RCVBUF);
 
+	optlen = sizeof (optval);
 	err = getsockopt (sockfd, SOL_SOCKET, bufname, &optval, &optlen);
 	if (err < 0) {
 		return -1;
@@ -208,6 +209,18 @@ tcp_set_block (fd_t fd, bool must_block) {
 
 
 int
+tcp_set_buffer_size (fd_t sockfd, int bufname, size_t buflen) {
+
+	assert (sockfd > 0);
+	assert (bufname == SO_SNDBUF || bufname == SO_RCVBUF);
+	assert (buflen > 0);
+
+	return setsockopt (sockfd, SOL_SOCKET,
+	                   bufname, &buflen, sizeof (buflen));
+}
+
+
+int
 tcp_set_nagle (fd_t fd, bool active) {
 	/* Se active = TRUE imposta l'algoritmo di Nagle sul file descriptor
 	 * fd, altrimenti attiva l'opzione TCP_NODELAY.
@@ -220,7 +233,7 @@ tcp_set_nagle (fd_t fd, bool active) {
 	assert (fd >= 0);
 	assert (active == TRUE || active == FALSE);
 
-	optval = (active == TRUE )? 0 : 1;
+	optval = (active == TRUE ? 0 : 1);
 
 	err = setsockopt (fd, IPPROTO_TCP, TCP_NODELAY,
 	                  &optval, sizeof (optval));
@@ -236,10 +249,10 @@ tcp_set_reusable (fd_t fd, bool reusable) {
 	assert (fd >= 0);
 	assert (reusable == TRUE || reusable == FALSE);
 
-	optval = (reusable == TRUE) ? 1 : 0;
+	optval = (reusable == TRUE ? 1 : 0);
 
-	err = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval,
-	                  sizeof (optval));
+	err = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR,
+	                  &optval, sizeof (optval));
 
 	return err;
 }
