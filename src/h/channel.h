@@ -53,6 +53,14 @@ bool
 channel_is_listening (struct chan *ch);
 
 
+bool
+channel_must_connect (struct chan *ch);
+
+
+bool
+channel_must_listen (struct chan *ch);
+
+
 char *
 channel_name (struct chan *ch);
 /* Ritorna una stringa allocata staticamente e terminata da '\0' della forma

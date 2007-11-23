@@ -132,12 +132,7 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 		/*
 		 * Canale da connettere.
 		 */
-		if (!addr_is_set (&chnl[i]->c_laddr)
-		    && addr_is_set (&chnl[i]->c_raddr)
-		    && chnl[i]->c_sockfd < 0) {
-
-			assert (chnl[i]->c_listfd < 0);
-
+		if (channel_must_connect (chnl[i])) {
 			err = connect_noblock (chnl[i]);
 			assert (!err); /* FIXME controllo errore decente. */
 
@@ -154,12 +149,7 @@ manage_connections (struct chan* chnl[CHANNELS]) {
 		/*
 		 * Canale da mettere in ascolto.
 		 */
-		else if (addr_is_set (&chnl[i]->c_laddr)
-		    && !addr_is_set (&chnl[i]->c_raddr)
-		    && chnl[i]->c_listfd < 0) {
-
-			assert (chnl[i]->c_sockfd < 0);
-
+		else if (channel_must_listen (chnl[i])) {
 			err = listen_noblock (chnl[i]);
 			assert (!err); /* FIXME controllo errore decente. */
 

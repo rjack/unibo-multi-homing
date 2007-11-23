@@ -100,6 +100,8 @@ channel_is_connecting (struct chan *ch) {
 	 * remoto e non quello locale, allora c'e' una connect non bloccante
 	 * in corso. */
 
+	assert (ch != NULL);
+
 	if (ch->c_sockfd >= 0
 	    && !addr_is_set (&ch->c_laddr)
 	    && addr_is_set (&ch->c_raddr)) {
@@ -115,9 +117,45 @@ channel_is_listening (struct chan *ch) {
 	/* Se il socket listening del canale e' valido ed e' impostato l'addr
 	 * locale ma non quello remoto, allora il canale e' in ascolto. */
 
+	assert (ch != NULL);
+
 	if (ch->c_listfd >= 0
 	    && addr_is_set (&ch->c_laddr)
 	    && !addr_is_set (&ch->c_raddr)) {
+		assert (ch->c_sockfd < 0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+bool
+channel_must_connect (struct chan *ch) {
+	/* Usata da manage_connections per sapere se il canale deve essere
+	 * connesso. */
+
+	assert (ch != NULL);
+
+	if (!addr_is_set (&ch->c_laddr)
+	    && addr_is_set (&ch->c_raddr)
+	    && ch->c_sockfd < 0) {
+		assert (ch->c_listfd < 0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+bool
+channel_must_listen (struct chan *ch) {
+	/* Usata da manage_connections per sapere se il canale deve essere
+	 * messo in ascolto di connessioni. */
+
+	assert (ch != NULL);
+
+	if (addr_is_set (&ch->c_laddr)
+	    && !addr_is_set (&ch->c_raddr)
+	    && ch->c_listfd < 0) {
 		assert (ch->c_sockfd < 0);
 		return TRUE;
 	}
