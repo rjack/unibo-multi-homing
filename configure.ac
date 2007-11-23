@@ -10,6 +10,9 @@ AC_CONFIG_SRCDIR([src/psend.c])
 # Checks for programs.
 AC_PROG_CC
 
+AC_SUBST(CFLAGS, ["-g"])
+AC_SUBST(CPPFLAGS, ["-Wall -Werror -ansi -pedantic"])
+
 # Checks for libraries.
 
 # Checks for header files.
