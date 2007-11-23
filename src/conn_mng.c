@@ -60,6 +60,45 @@ accept_connection (struct chan *ch) {
 
 
 void
+activate_channels (struct chan* chnl[CHANNELS]) {
+	int i;
+	int err;
+
+	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (chnl[i])) {
+
+		if (channel_must_connect (chnl[i])) {
+			err = connect_noblock (chnl[i]);
+			assert (!err); /* FIXME controllo errore decente. */
+
+			/* Connect gia' conclusa, recupera nome del socket. */
+			if (errno != EINPROGRESS) {
+				tcp_sockname (chnl[i]->c_sockfd,
+				              &chnl[i]->c_laddr);
+		       	}
+			printf ("Canale %s %s.\n", channel_name (chnl[i]),
+			        addr_is_set (&chnl[i]->c_laddr) ?
+			        "connesso" : "in connessione");
+		}
+
+		else if (channel_must_listen (chnl[i])) {
+			err = listen_noblock (chnl[i]);
+			assert (!err); /* FIXME controllo errore decente. */
+
+			printf ("Canale %s in ascolto.\n",
+			        channel_name (chnl[i]));
+		}
+
+		else {
+			assert (FALSE);
+		}
+
+		/* Comunque vada il canale non va piu' attivato. */
+		channel_set_condition (chnl[i], SET_ACTIVABLE, NULL, NULL);
+	}
+}
+
+
+void
 close_idle_channels (struct chan ch[NETCHANNELS]) {
 	/* TODO
 	 * aggiorna tutti gli activity timeout
@@ -108,64 +147,6 @@ finalize_connection (struct chan *ch) {
 	tcp_sockname (ch->c_sockfd, &ch->c_laddr);
 
 	return 0;
-}
-
-
-void
-manage_connections (struct chan* chnl[CHANNELS]) {
-	/* Attiva tutti i canali che hanno una struct sockaddr_in impostata,
-	 * una ancora inizializzata e il socket non valido.
-	 *
-	 * I canali con entrambe le struct impostate sono considerati gia'
-	 * connessi; quelli con entrambe le struct inizializzate non piu'
-	 * utilizzabili; quelli con i socket validi sono gia' attivati.
-	 *
-	 * Se e' impostata la struct locale, viene creato un socket listening
-	 * e iniziata una accept non bloccante; altrimenti viene creato un
-	 * socket e iniziata una connect non bloccante. */
-
-	int i;
-	int err;
-
-	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (chnl[i])) {
-
-		/*
-		 * Canale da connettere.
-		 */
-		if (channel_must_connect (chnl[i])) {
-			err = connect_noblock (chnl[i]);
-			assert (!err); /* FIXME controllo errore decente. */
-
-			/* Connect gia' conclusa, recupera nome del socket. */
-			if (errno != EINPROGRESS) {
-				tcp_sockname (chnl[i]->c_sockfd,
-				              &chnl[i]->c_laddr);
-		       	}
-			printf ("Canale %s %s.\n", channel_name (chnl[i]),
-			        addr_is_set (&chnl[i]->c_laddr) ?
-			        "connesso" : "in connessione");
-		}
-
-		/*
-		 * Canale da mettere in ascolto.
-		 */
-		else if (channel_must_listen (chnl[i])) {
-			err = listen_noblock (chnl[i]);
-			assert (!err); /* FIXME controllo errore decente. */
-
-			printf ("Canale %s in ascolto.\n",
-			        channel_name (chnl[i]));
-		}
-
-		else {
-			/* Se arriva qui c'e' un problema: un canale
-			 * attivabile o deve essere connesso o messo in
-			 * ascolto, una delle due. */
-			assert (FALSE);
-		}
-
-		channel_set_condition (chnl[i], SET_ACTIVABLE, NULL, NULL);
-	}
 }
 
 

@@ -26,10 +26,7 @@ core (struct proxy *px) {
 	fd_set wrset;
 
 	for (;;) {
-		/*
-		 * Gestione connessioni.
-		 */
-		manage_connections (px->p_chptr);
+		activate_channels (px->p_chptr);
 
 		/*
 		 * Select
