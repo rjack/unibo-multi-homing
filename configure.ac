@@ -74,7 +74,7 @@ AC_OUTPUT
 printf "
 Configurazione:
 ---------------
-sistema  : ${SYS}
+sistema: ${SYS}
 
 Per compilare digitare 'make' e incrociare le dita.
 Buona fortuna!
