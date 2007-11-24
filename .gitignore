@@ -1,10 +1,12 @@
 .deps
 autom4te.cache
 build-aux
+config.*
 configure
 configure.scan
 config.status
 Makefile
+stamp-h1
 tags
 *.m4
 *.in

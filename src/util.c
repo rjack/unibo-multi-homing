@@ -1,6 +1,7 @@
 #include "h/util.h"
 #include "h/types.h"
 
+#include <config.h>
 #include <assert.h>
 #include <errno.h>
 #include <arpa/inet.h>
@@ -177,7 +178,10 @@ tcp_get_buffer_size (fd_t sockfd, int bufname) {
 	if (err < 0) {
 		return -1;
 	}
-	return (optval / 2);
+#ifdef SISTEMA_LINUX
+	optval = optval / 2;
+#endif
+	return optval;
 }
 
 

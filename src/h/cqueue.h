@@ -16,6 +16,10 @@ bool
 cqueue_can_read (void *arg);
 
 
+bool
+cqueue_can_write (void *arg);
+
+
 cqueue_t *
 cqueue_create (size_t len);
 

@@ -4,8 +4,10 @@
 AC_PREREQ(2.60)
 AC_INIT([multi-homing], [0607], [ritucci@cs.unibo.it])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE([-Wall -Werror])
 AC_CONFIG_SRCDIR([src/psend.c])
+AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CC
@@ -38,12 +40,42 @@ AC_TRY_COMPILE([#include <sys/socket.h>], [
 	AC_MSG_RESULT(no)
 ])
 
+case "${target_os}" in
+"")
+	SYS=unknown
+	;;
+linux*)
+	SYS=linux
+	;;
+*bsd*)
+	SYS=bsd
+	;;
+*)
+	SYS="${target_os}"
+	;;
+esac
+
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_CHECK_FUNCS([gettimeofday memset select socket strchr strerror strtol])
 
+if test "${SYS}" = "linux"; then
+	AC_DEFINE(SISTEMA_LINUX, 1, Define if we compile for a Linux system)
+elif test "${SYS}" = "bsd"; then
+	AC_DEFINE(SISTEMA_BSD, 1, Define if we compile for a BSD system)
+fi
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
 AC_OUTPUT
+
+printf "
+Configurazione:
+---------------
+sistema  : ${SYS}
+
+Per compilare digitare 'make' e incrociare le dita.
+Buona fortuna!
+"

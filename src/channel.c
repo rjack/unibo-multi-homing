@@ -2,6 +2,7 @@
 #include "h/types.h"
 #include "h/util.h"
 
+#include <config.h>
 #include <assert.h>
 #include <string.h>
 

@@ -2,6 +2,7 @@
 #include "h/types.h"
 #include "h/util.h"
 
+#include <config.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -75,6 +76,20 @@ cqueue_can_read (void *arg) {
        
 	cq = (cqueue_t *) arg;
 	if (cqueue_get_aval (cq) > 0) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+bool
+cqueue_can_write (void *arg) {
+	cqueue_t *cq;
+
+	assert (arg != NULL);
+
+	cq = (cqueue_t *) arg;
+	if (cqueue_get_used (cq) > 0) {
 		return TRUE;
 	}
 	return FALSE;

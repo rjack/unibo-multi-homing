@@ -2,6 +2,7 @@
 #include "h/util.h"
 #include "h/cqueue.h"
 
+#include <config.h>
 #include <assert.h>
 #include <signal.h>
 #include <stdio.h>
@@ -51,7 +52,8 @@ proxy_init (struct proxy *px) {
 
 void
 proxy_create_buffers (struct proxy *px, int chanid) {
-	/* Crea i buffer di I/O relativi al canale chanid. */
+	/* Crea i buffer di I/O relativi al canale chanid e imposta le
+	 * conseguenti condizioni di lettura e di scrittura. */
 
 	assert (px != NULL);
 	assert (chanid >= 0);
@@ -61,6 +63,7 @@ proxy_create_buffers (struct proxy *px, int chanid) {
 		size_t buflen;
 		assert (px->p_chptr[chanid] == &px->p_host);
 
+		/* Le cqueue hanno la stessa dimensione dei socket tcp. */
 		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
 		                              SO_RCVBUF);
 		px->p_host_rcvbuf = cqueue_create (buflen);
@@ -68,6 +71,11 @@ proxy_create_buffers (struct proxy *px, int chanid) {
 		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
 		                              SO_SNDBUF);
 		px->p_host_sndbuf = cqueue_create (buflen);
+
+		px->p_host.c_can_read = &cqueue_can_read;
+		px->p_host.c_can_write = &cqueue_can_write;
+		px->p_host.c_can_read_arg = (void *)px->p_host_rcvbuf;
+		px->p_host.c_can_write_arg = (void *)px->p_host_sndbuf;
 	}
 	/* NET */
 	else {

@@ -1,6 +1,7 @@
 #include "h/crono.h"
 #include "h/types.h"
 
+#include <config.h>
 #include <assert.h>
 #include <sys/time.h>
 
