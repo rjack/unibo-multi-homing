@@ -178,7 +178,7 @@ tcp_get_buffer_size (fd_t sockfd, int bufname) {
 	if (err < 0) {
 		return -1;
 	}
-#ifdef SISTEMA_LINUX
+#ifdef LINUX_OS
 	optval = optval / 2;
 #endif
 	return optval;

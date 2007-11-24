@@ -50,6 +50,9 @@ linux*)
 *bsd*)
 	SYS=bsd
 	;;
+darwin*)
+	SYS=darwin
+	;;
 *)
 	SYS="${target_os}"
 	;;
@@ -62,9 +65,11 @@ AC_FUNC_SELECT_ARGTYPES
 AC_CHECK_FUNCS([gettimeofday memset select socket strchr strerror strtol])
 
 if test "${SYS}" = "linux"; then
-	AC_DEFINE(SISTEMA_LINUX, 1, Define if we compile for a Linux system)
+	AC_DEFINE(LINUX_OS, 1, Define if we compile for a Linux system)
 elif test "${SYS}" = "bsd"; then
-	AC_DEFINE(SISTEMA_BSD, 1, Define if we compile for a BSD system)
+	AC_DEFINE(BSD_OS, 1, Define if we compile for a BSD system)
+elif test "${SYS}" = "darwin"; then
+	AC_DEFINE(DARWIN_OS, 1, Define if we compile for a Darwin system)
 fi
 
 AC_CONFIG_FILES([Makefile
