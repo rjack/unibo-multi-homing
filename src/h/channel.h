@@ -68,9 +68,16 @@ channel_name (struct chan *ch);
  * l'indirizzo locale, il secondo quello remoto. */
 
 
+int
+channel_read (struct chan *ch);
+
+
 void
 channel_set_condition
 (struct chan *ch, enum set_condition, bool (*funct)(void *), void *arg);
 
+
+int
+channel_write (struct chan *ch);
 
 #endif /* CHANNEL_H */

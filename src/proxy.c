@@ -10,6 +10,14 @@
 
 
 /*******************************************************************************
+		       Prototipi delle funzioni locali
+*******************************************************************************/
+
+static int host_read (fd_t fd, void *args);
+static int host_write (fd_t fd, void *args);
+
+
+/*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
 
@@ -53,7 +61,7 @@ proxy_init (struct proxy *px) {
 void
 proxy_create_buffers (struct proxy *px, int chanid) {
 	/* Crea i buffer di I/O relativi al canale chanid e imposta le
-	 * conseguenti condizioni di lettura e di scrittura. */
+	 * conseguenti condizioni e le funzioni di I/O. */
 
 	assert (px != NULL);
 	assert (chanid >= 0);
@@ -63,22 +71,46 @@ proxy_create_buffers (struct proxy *px, int chanid) {
 		size_t buflen;
 		assert (px->p_chptr[chanid] == &px->p_host);
 
-		/* Le cqueue hanno la stessa dimensione dei socket tcp. */
-		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
-		                              SO_RCVBUF);
+		buflen = tcp_get_buffer_size (px->p_host.c_sockfd, SO_RCVBUF);
 		px->p_host_rcvbuf = cqueue_create (buflen);
-
-		buflen = tcp_get_buffer_size (px->p_host.c_sockfd,
-		                              SO_SNDBUF);
+		buflen = tcp_get_buffer_size (px->p_host.c_sockfd, SO_SNDBUF);
 		px->p_host_sndbuf = cqueue_create (buflen);
+
+		px->p_host.c_rcvbufptr = px->p_host_rcvbuf;
+		px->p_host.c_sndbufptr = px->p_host_sndbuf;
 
 		px->p_host.c_can_read = &cqueue_can_read;
 		px->p_host.c_can_write = &cqueue_can_write;
-		px->p_host.c_can_read_arg = (void *)px->p_host_rcvbuf;
-		px->p_host.c_can_write_arg = (void *)px->p_host_sndbuf;
+		px->p_host.c_can_read_args = (void *)px->p_host_rcvbuf;
+		px->p_host.c_can_write_args = (void *)px->p_host_sndbuf;
+
+		px->p_host.c_read = &host_read;
+		px->p_host.c_write = &host_write;
 	}
 	/* NET */
 	else {
 		/* TODO */
 	}
+}
+
+
+/*******************************************************************************
+			       Funzioni locali
+*******************************************************************************/
+
+static int
+host_read (fd_t fd, void *args) {
+	assert (fd >= 0);
+	assert (args != NULL);
+
+	return cqueue_read (fd, (cqueue_t *)args);
+}
+
+
+static int
+host_write (fd_t fd, void *args) {
+	assert (fd >= 0);
+	assert (args != NULL);
+
+	return cqueue_write (fd, (cqueue_t *)args);
 }

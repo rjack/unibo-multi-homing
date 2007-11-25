@@ -90,15 +90,19 @@ core (struct proxy *px) {
 				/* Dati da leggere. */
 				if (channel_is_connected (ch)
 				    && FD_ISSET (ch->c_sockfd, &rdset)) {
-					/* TODO lettura */
-					assert (FALSE);
+					ssize_t nread;
+					nread = channel_read (ch);
+					/* FIXME controllo errore decente! */
+					assert (nread >= 0);
 				}
 
 				/* Dati da scrivere. */
 				if (channel_is_connected (ch)
 				    && FD_ISSET (ch->c_sockfd, &wrset)) {
-					/* TODO scrittura */
-					assert (FALSE);
+					ssize_t nwrite;
+					nwrite = channel_write (ch);
+					/* FIXME controllo errore decente! */
+					assert (nwrite >= 0);
 				}
 			}
 		}

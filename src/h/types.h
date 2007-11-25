@@ -87,6 +87,10 @@ struct chan {
 	size_t c_rcvbuf_len;
 	size_t c_sndbuf_len;
 
+	/* Puntatori ai buffer applicazione. */
+	void *c_sndbufptr;
+	void *c_rcvbufptr;
+
 	/* Funzione che decide quando il canale sia attivabile. */
 	bool (*c_is_activable)(void *);
 
@@ -95,10 +99,14 @@ struct chan {
 	bool (*c_can_read)(void *);
 	bool (*c_can_write)(void *);
 
+	/* Funzioni di I/O sul sockfd. */
+	int (*c_read)(fd_t, void *);
+	int (*c_write)(fd_t, void *);
+
 	/* Puntatori per gli argomenti delle funzioni. */
-	void *c_activable_arg;
-	void *c_can_read_arg;
-	void *c_can_write_arg;
+	void *c_activable_args;
+	void *c_can_read_args;
+	void *c_can_write_args;
 };
 
 

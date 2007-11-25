@@ -25,6 +25,7 @@ static int listen_noblock (struct chan *ch);
 
 int
 accept_connection (struct chan *ch) {
+	int err;
 	socklen_t raddr_len;
 
 	assert (ch != NULL);
@@ -56,6 +57,10 @@ accept_connection (struct chan *ch) {
 	if (ch->c_sockfd < 0) {
 		return -1;
 	}
+
+	err = tcp_set_block (ch->c_sockfd, FALSE);
+	assert (!err);
+
 	return 0;
 }
 
@@ -314,15 +319,15 @@ listen_noblock (struct chan *ch) {
 		                                                 SO_SNDBUF));
 	}
 
-	err = listen (ch->c_listfd, 0);
-	if (err) {
-		errmsg = "listen fallita";
-		goto error;
-	}
-
 	err = tcp_set_block (ch->c_listfd, FALSE);
 	if (err) {
 		errmsg = "tcp_set_block fallita";
+		goto error;
+	}
+
+	err = listen (ch->c_listfd, 0);
+	if (err) {
+		errmsg = "listen fallita";
 		goto error;
 	}
 

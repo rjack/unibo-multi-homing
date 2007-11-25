@@ -27,7 +27,7 @@ channel_can_read (struct chan *ch) {
 	assert (ch != NULL);
 	assert (ch->c_can_read != NULL);
 
-	return ch->c_can_read (ch->c_can_read_arg);
+	return ch->c_can_read (ch->c_can_read_args);
 }
 
 
@@ -39,7 +39,7 @@ channel_can_write (struct chan *ch) {
 	assert (ch != NULL);
 	assert (ch->c_can_write != NULL);
 
-	return ch->c_can_write (ch->c_can_write_arg);
+	return ch->c_can_write (ch->c_can_write_args);
 }
 
 
@@ -56,9 +56,15 @@ channel_init (struct chan *ch) {
 	ch->c_rcvbuf_len = 0;
 	ch->c_sndbuf_len = 0;
 
+	ch->c_rcvbufptr = NULL;
+	ch->c_sndbufptr = NULL;
+
 	channel_set_condition (ch, SET_ACTIVABLE, &always, NULL);
 	channel_set_condition (ch, SET_CAN_READ, &never, NULL);
 	channel_set_condition (ch, SET_CAN_WRITE, &never, NULL);
+
+	ch->c_read = NULL;
+	ch->c_write = NULL;
 }
 
 
@@ -77,7 +83,7 @@ channel_is_activable (struct chan *ch) {
 	assert (ch != NULL);
 	assert (ch->c_is_activable != NULL);
 
-	return ch->c_is_activable (ch->c_activable_arg);
+	return ch->c_is_activable (ch->c_activable_args);
 }
 
 
@@ -199,6 +205,16 @@ channel_name (struct chan *ch) {
 }
 
 
+int
+channel_read (struct chan *ch) {
+	assert (ch != NULL);
+	assert (channel_is_connected (ch));
+	assert (channel_can_read (ch));
+
+	return ch->c_read (ch->c_sockfd, ch->c_rcvbufptr);
+}
+
+
 void
 channel_set_condition
 (struct chan *ch, enum set_condition cond, bool (*funct)(void *), void *arg) {
@@ -212,19 +228,29 @@ channel_set_condition
 	switch (cond) {
 	case SET_ACTIVABLE:
 		ch->c_is_activable = (funct == NULL ? &never : funct);
-		ch->c_activable_arg = arg;
+		ch->c_activable_args = arg;
 		break;
 	case SET_CAN_READ:
 		ch->c_can_read = (funct == NULL ? &never : funct);
-		ch->c_can_read_arg = arg;
+		ch->c_can_read_args = arg;
 		break;
 	case SET_CAN_WRITE:
 		ch->c_can_write = (funct == NULL ? &never : funct);
-		ch->c_can_write_arg = arg;
+		ch->c_can_write_args = arg;
 		break;
 	default:
 		assert (FALSE);
 	}
+}
+
+
+int
+channel_write (struct chan *ch) {
+	assert (ch != NULL);
+	assert (channel_is_connected (ch));
+	assert (channel_can_write (ch));
+
+	return ch->c_write (ch->c_sockfd, ch->c_sndbufptr);
 }
 
 
