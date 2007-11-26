@@ -17,7 +17,8 @@
 *******************************************************************************/
 
 int
-getargs (int argc, char **argv, char *fmt, ...) {
+getargs (int argc, char **argv, char *fmt, ...)
+{
 
 	int err = 0;
 	int i;	/* su fmt */

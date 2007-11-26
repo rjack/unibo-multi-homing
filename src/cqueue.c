@@ -9,6 +9,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+/*
+ * TODO
+ * cqueue_read e cqueue_write rimprovano read e write sempre, mentre e'
+ * sufficiente riprovare quando l'indice (tail se cqueue_read, head se
+ * cqueue_write) cicla e torna a 0. */
+
 
 /*******************************************************************************
 				    Macro
@@ -35,7 +41,8 @@ static size_t cqueue_get_used_chunk (const cqueue_t *cq);
 *******************************************************************************/
 
 int
-cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
+cqueue_add (cqueue_t *cq, char *buf, size_t nbytes)
+{
 	size_t chunk_1;
 	size_t chunk_2;
 
@@ -69,7 +76,8 @@ cqueue_add (cqueue_t *cq, char *buf, size_t nbytes) {
 
 
 bool
-cqueue_can_read (void *arg) {
+cqueue_can_read (void *arg)
+{
 	cqueue_t *cq;
 
 	assert (arg != NULL);
@@ -83,7 +91,8 @@ cqueue_can_read (void *arg) {
 
 
 bool
-cqueue_can_write (void *arg) {
+cqueue_can_write (void *arg)
+{
 	cqueue_t *cq;
 
 	assert (arg != NULL);
@@ -97,7 +106,8 @@ cqueue_can_write (void *arg) {
 
 
 cqueue_t *
-cqueue_create (size_t len) {
+cqueue_create (size_t len)
+{
 	cqueue_t *cq;
 
 	assert (len > 0);
@@ -114,7 +124,8 @@ cqueue_create (size_t len) {
 
 
 void
-cqueue_destroy (cqueue_t *cq) {
+cqueue_destroy (cqueue_t *cq)
+{
 	assert (cq != NULL);
 
 	xfree (cq->cq_data);
@@ -123,7 +134,8 @@ cqueue_destroy (cqueue_t *cq) {
 
 
 size_t
-cqueue_get_aval (cqueue_t *cq) {
+cqueue_get_aval (cqueue_t *cq)
+{
 	size_t aval;
 
 	assert (cq != NULL);
@@ -140,14 +152,16 @@ cqueue_get_aval (cqueue_t *cq) {
 
 
 size_t
-cqueue_get_used (cqueue_t *cq) {
+cqueue_get_used (cqueue_t *cq)
+{
 	assert (cq != NULL);
 	return (cq->cq_len - cqueue_get_aval (cq));
 }
 
 
 int
-cqueue_read (fd_t fd, cqueue_t *cq) {
+cqueue_read (fd_t fd, cqueue_t *cq)
+{
 	ssize_t nread;
 	size_t chunk;
 
@@ -181,7 +195,8 @@ cqueue_read (fd_t fd, cqueue_t *cq) {
 
 
 int
-cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes) {
+cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes)
+{
 	size_t chunk_1;
 	size_t chunk_2;
 
@@ -215,7 +230,8 @@ cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes) {
 
 
 int
-cqueue_write (fd_t fd, cqueue_t *cq) {
+cqueue_write (fd_t fd, cqueue_t *cq)
+{
 	ssize_t nwrite;
 	ssize_t chunk;
 
@@ -254,7 +270,8 @@ cqueue_write (fd_t fd, cqueue_t *cq) {
 *******************************************************************************/
 
 static size_t
-cqueue_get_aval_chunk (const cqueue_t *cq) {
+cqueue_get_aval_chunk (const cqueue_t *cq)
+{
 	assert (cq != NULL);
 	return (cq->cq_wrap ?
 		cq->cq_head :
@@ -263,7 +280,8 @@ cqueue_get_aval_chunk (const cqueue_t *cq) {
 
 
 static size_t
-cqueue_get_used_chunk (const cqueue_t *cq) {
+cqueue_get_used_chunk (const cqueue_t *cq)
+{
 	assert (cq != NULL);
 	return (cq->cq_wrap ?
 		cq->cq_len :

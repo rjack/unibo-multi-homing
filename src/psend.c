@@ -51,7 +51,8 @@ static void print_help (const char *);
 *******************************************************************************/
 
 int
-main (int argc, char **argv) {
+main (int argc, char **argv)
+{
 
 	int i;
 	int err;
@@ -115,7 +116,8 @@ main (int argc, char **argv) {
 *******************************************************************************/
 
 static bool
-activable_if_connected (void *arg) {
+activable_if_connected (void *arg)
+{
 	/* Condizione di connessione per i canali con il Ritardatore. */
 
 	struct chan *ch;
@@ -131,7 +133,8 @@ activable_if_connected (void *arg) {
 
 
 static void
-print_help (const char *program_name) {
+print_help (const char *program_name)
+{
 	printf ("%s [[[ porta_locale ] ip ] porta ] ...\n",
 	        program_name);
 	printf ("\n"

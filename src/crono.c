@@ -30,7 +30,8 @@ static void tv_normalize (struct timeval *tv);
  */
 
 double
-crono_measure (crono_t *cr) {
+crono_measure (crono_t *cr)
+{
 	struct timeval now;
 
 	assert (cr != NULL);
@@ -46,14 +47,16 @@ crono_measure (crono_t *cr) {
 
 
 double
-crono_read (crono_t *cr) {
+crono_read (crono_t *cr)
+{
 	assert (cr != NULL);
 	return cr->cr_elapsed;
 }
 
 
 void
-crono_start (crono_t *cr) {
+crono_start (crono_t *cr)
+{
 	assert (cr != NULL);
 
 	cr->cr_elapsed = 0;
@@ -67,7 +70,8 @@ crono_start (crono_t *cr) {
  */
 
 void
-gettime (struct timeval *tv) {
+gettime (struct timeval *tv)
+{
 	assert (tv != NULL);
 
 	gettimeofday (tv, NULL);
@@ -80,14 +84,16 @@ gettime (struct timeval *tv) {
  */
 
 double
-timeout_left (timeout_t *to) {
+timeout_left (timeout_t *to)
+{
 	assert (to != NULL);
 	return (to->to_maxval - crono_measure (&to->to_crono));
 }
 
 
 void
-timeout_set (timeout_t *to, double value) {
+timeout_set (timeout_t *to, double value)
+{
 	assert (to != NULL);
 	assert (value > 0);
 
@@ -105,7 +111,8 @@ timeout_set (timeout_t *to, double value) {
  */
 
 static double
-tv_diff (const struct timeval *min, const struct timeval *sub) {
+tv_diff (const struct timeval *min, const struct timeval *sub)
+{
 	/* Sottrae sub da min, che si assumono essere normalizzate.
 	 * In caso di differenza negativa ritorna 0. */
 
@@ -136,7 +143,8 @@ tv_diff (const struct timeval *min, const struct timeval *sub) {
 
 
 static void
-tv_normalize (struct timeval *tv) {
+tv_normalize (struct timeval *tv)
+{
 
 	assert (tv != NULL);
 

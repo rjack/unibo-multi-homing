@@ -18,7 +18,8 @@
 *******************************************************************************/
 
 int
-core (struct proxy *px) {
+core (struct proxy *px)
+{
 	int i;
 	int err;
 	int rdy;

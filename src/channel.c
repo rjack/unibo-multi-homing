@@ -20,7 +20,8 @@ static bool never (void *discard);
 *******************************************************************************/
 
 bool
-channel_can_read (struct chan *ch) {
+channel_can_read (struct chan *ch)
+{
 	/* Chiama la funzione associata a ch->c_can_read, che ritorna TRUE se
 	 * ch e' pronto per leggere da ch->c_sockfd. */
 
@@ -32,7 +33,8 @@ channel_can_read (struct chan *ch) {
 
 
 bool
-channel_can_write (struct chan *ch) {
+channel_can_write (struct chan *ch)
+{
 	/* Chiama la funzione associata a ch->c_can_write, che ritorna TRUE se
 	 * ch e' pronto per scrivere su ch->c_sockfd. */
 
@@ -44,7 +46,8 @@ channel_can_write (struct chan *ch) {
 
 
 void
-channel_init (struct chan *ch) {
+channel_init (struct chan *ch)
+{
 	assert (ch != NULL);
 
 	ch->c_sockfd = -1;
@@ -69,14 +72,16 @@ channel_init (struct chan *ch) {
 
 
 void
-channel_invalidate (struct chan *ch) {
+channel_invalidate (struct chan *ch)
+{
 	channel_init (ch);
 	channel_set_condition (ch, SET_ACTIVABLE, NULL, NULL);
 }
 
 
 bool
-channel_is_activable (struct chan *ch) {
+channel_is_activable (struct chan *ch)
+{
 	/* Chiama la funzione associata a ch che decide se il canale sia
 	 * attivabile o meno. */
 
@@ -88,7 +93,8 @@ channel_is_activable (struct chan *ch) {
 
 
 bool
-channel_is_connected (struct chan *ch) {
+channel_is_connected (struct chan *ch)
+{
 	/* Il canale e' connesso quando entrambi gli addr sono impostati, il
 	 * socket listening e' chiuso e il socket e' connesso. */
 
@@ -105,7 +111,8 @@ channel_is_connected (struct chan *ch) {
 
 
 bool
-channel_is_connecting (struct chan *ch) {
+channel_is_connecting (struct chan *ch)
+{
 	/* Se il socket del canale e' valido ed e' impostato solo l'addr
 	 * remoto e non quello locale, allora c'e' una connect non bloccante
 	 * in corso. */
@@ -123,7 +130,8 @@ channel_is_connecting (struct chan *ch) {
 
 
 bool
-channel_is_listening (struct chan *ch) {
+channel_is_listening (struct chan *ch)
+{
 	/* Se il socket listening del canale e' valido ed e' impostato l'addr
 	 * locale ma non quello remoto, allora il canale e' in ascolto. */
 
@@ -140,7 +148,8 @@ channel_is_listening (struct chan *ch) {
 
 
 bool
-channel_must_connect (struct chan *ch) {
+channel_must_connect (struct chan *ch)
+{
 	/* Usata da manage_connections per sapere se il canale deve essere
 	 * connesso. */
 
@@ -157,7 +166,8 @@ channel_must_connect (struct chan *ch) {
 
 
 bool
-channel_must_listen (struct chan *ch) {
+channel_must_listen (struct chan *ch)
+{
 	/* Usata da manage_connections per sapere se il canale deve essere
 	 * messo in ascolto di connessioni. */
 
@@ -174,7 +184,8 @@ channel_must_listen (struct chan *ch) {
 
 
 char *
-channel_name (struct chan *ch) {
+channel_name (struct chan *ch)
+{
 	/* Ritorna una stringa allocata staticamente e terminata da '\0' della
 	 * forma "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il
 	 * primo è l'indirizzo locale, il secondo quello remoto. */
@@ -206,7 +217,8 @@ channel_name (struct chan *ch) {
 
 
 int
-channel_read (struct chan *ch) {
+channel_read (struct chan *ch)
+{
 	assert (ch != NULL);
 	assert (channel_is_connected (ch));
 	assert (channel_can_read (ch));
@@ -217,7 +229,8 @@ channel_read (struct chan *ch) {
 
 void
 channel_set_condition
-(struct chan *ch, enum set_condition cond, bool (*funct)(void *), void *arg) {
+(struct chan *ch, enum set_condition cond, bool (*funct)(void *), void *arg)
+{
 	/* Imposta la funzione e relativo argomento per verificare se ch e'
 	 * nella condizione richiesta. Se funct e' NULL la risposta sara'
 	 * sempre negativa. */
@@ -245,7 +258,8 @@ channel_set_condition
 
 
 int
-channel_write (struct chan *ch) {
+channel_write (struct chan *ch)
+{
 	assert (ch != NULL);
 	assert (channel_is_connected (ch));
 	assert (channel_can_write (ch));
@@ -259,12 +273,14 @@ channel_write (struct chan *ch) {
 *******************************************************************************/
 
 static bool
-always (void *discard) {
+always (void *discard)
+{
 	return TRUE;
 }
 
 
 static bool
-never (void *discard) {
+never (void *discard)
+{
 	return FALSE;
 }

@@ -45,8 +45,8 @@ static void print_help (const char *);
 *******************************************************************************/
 
 int
-main (int argc, char **argv) {
-
+main (int argc, char **argv)
+{
 	int i;
 	int err;
 	struct proxy pr;
@@ -108,7 +108,8 @@ main (int argc, char **argv) {
 *******************************************************************************/
 
 static bool
-activable_if_almost_one_connected (void *arg) {
+activable_if_almost_one_connected (void *arg)
+{
 	int i;
 	bool ok;
 	struct chan *ch;
@@ -128,7 +129,8 @@ activable_if_almost_one_connected (void *arg) {
 
 
 static void
-print_help (const char *program_name) {
+print_help (const char *program_name)
+{
 	printf (
 "%s [[[[[ porta_locale ] porta_locale ] porta_locale ] ip ] porta ]\n",
 	        program_name);

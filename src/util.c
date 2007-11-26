@@ -24,7 +24,8 @@
  */
 
 bool
-addr_is_set (struct sockaddr_in *addr) {
+addr_is_set (struct sockaddr_in *addr)
+{
 	/* Ritorna FALSE se addr e' ancora inizializzata a zero, TRUE
 	 * altrimenti.
 	 *
@@ -41,7 +42,8 @@ addr_is_set (struct sockaddr_in *addr) {
 
 
 char *
-addrstr (struct sockaddr_in *addr, char *buf) {
+addrstr (struct sockaddr_in *addr, char *buf)
+{
 	/* Copia la stringa in formato xxx.xxx.xxx.xxx:yyyyy nel buffer buf,
 	 * che deve essere grande a sufficienza. */
 
@@ -68,7 +70,8 @@ addrstr (struct sockaddr_in *addr, char *buf) {
 
 
 int
-set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
+set_addr (struct sockaddr_in *addr, const char *ip, port_t port)
+{
 	/* Imposta addr secondo l'indirizzo ip, in formato xxx.xxx.xxx.xxx, e
 	 * la porta port.
 	 *
@@ -96,7 +99,8 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port) {
  */
 
 bool
-streq (const char *str1, const char *str2) {
+streq (const char *str1, const char *str2)
+{
 	/* Ritorna TRUE se due stringhe sono uguali. */
 
 	int cmp;
@@ -116,7 +120,8 @@ streq (const char *str1, const char *str2) {
  */
 
 void
-xfree (void *ptr) {
+xfree (void *ptr)
+{
 	/* Free sicura. */
 
 	if (ptr != NULL) {
@@ -126,7 +131,8 @@ xfree (void *ptr) {
 
 
 void *
-xmalloc (size_t size) {
+xmalloc (size_t size)
+{
 	/* Malloc sicura. */
 	void *ptr;
 
@@ -146,7 +152,8 @@ xmalloc (size_t size) {
  */
 
 int
-tcp_close (fd_t *fd) {
+tcp_close (fd_t *fd)
+{
 	/* Chiude il file descriptor puntato da fd e lo inizializza a -1. */
 
 	int err;
@@ -164,7 +171,8 @@ tcp_close (fd_t *fd) {
 
 
 ssize_t
-tcp_get_buffer_size (fd_t sockfd, int bufname) {
+tcp_get_buffer_size (fd_t sockfd, int bufname)
+{
 
 	int err;
 	int optval;
@@ -186,7 +194,8 @@ tcp_get_buffer_size (fd_t sockfd, int bufname) {
 
 
 int
-tcp_set_block (fd_t fd, bool must_block) {
+tcp_set_block (fd_t fd, bool must_block)
+{
 	/* Se must_block = TRUE, imposta fd come bloccante, altrimenti come
 	 * non bloccante.
 	 *
@@ -213,7 +222,8 @@ tcp_set_block (fd_t fd, bool must_block) {
 
 
 int
-tcp_set_buffer_size (fd_t sockfd, int bufname, size_t buflen) {
+tcp_set_buffer_size (fd_t sockfd, int bufname, size_t buflen)
+{
 
 	assert (sockfd > 0);
 	assert (bufname == SO_SNDBUF || bufname == SO_RCVBUF);
@@ -225,7 +235,8 @@ tcp_set_buffer_size (fd_t sockfd, int bufname, size_t buflen) {
 
 
 int
-tcp_set_nagle (fd_t fd, bool active) {
+tcp_set_nagle (fd_t fd, bool active)
+{
 	/* Se active = TRUE imposta l'algoritmo di Nagle sul file descriptor
 	 * fd, altrimenti attiva l'opzione TCP_NODELAY.
 	 *
@@ -246,7 +257,8 @@ tcp_set_nagle (fd_t fd, bool active) {
 
 
 int
-tcp_set_reusable (fd_t fd, bool reusable) {
+tcp_set_reusable (fd_t fd, bool reusable)
+{
 	int err;
 	int optval;
 
@@ -263,7 +275,8 @@ tcp_set_reusable (fd_t fd, bool reusable) {
 
 
 void
-tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
+tcp_sockname (fd_t fd, struct sockaddr_in *laddr)
+{
 	/* Wrapper per nascondere le bruttezze di getsockname. */
 
 	int err;
@@ -281,7 +294,8 @@ tcp_sockname (fd_t fd, struct sockaddr_in *laddr) {
 
 
 fd_t
-xtcp_socket (void) {
+xtcp_socket (void)
+{
 	/* Socket sicura. */
 
 	fd_t newfd = socket (AF_INET, SOCK_STREAM, 0);

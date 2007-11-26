@@ -22,7 +22,8 @@ static int host_write (fd_t fd, void *args);
 *******************************************************************************/
 
 void
-proxy_init (struct proxy *px) {
+proxy_init (struct proxy *px)
+{
 	int i;
 
 	assert (px != NULL);
@@ -59,7 +60,8 @@ proxy_init (struct proxy *px) {
 
 
 void
-proxy_create_buffers (struct proxy *px, int chanid) {
+proxy_create_buffers (struct proxy *px, int chanid)
+{
 	/* Crea i buffer di I/O relativi al canale chanid e imposta le
 	 * conseguenti condizioni e le funzioni di I/O. */
 
@@ -99,7 +101,8 @@ proxy_create_buffers (struct proxy *px, int chanid) {
 *******************************************************************************/
 
 static int
-host_read (fd_t fd, void *args) {
+host_read (fd_t fd, void *args)
+{
 	assert (fd >= 0);
 	assert (args != NULL);
 
@@ -108,7 +111,8 @@ host_read (fd_t fd, void *args) {
 
 
 static int
-host_write (fd_t fd, void *args) {
+host_write (fd_t fd, void *args)
+{
 	assert (fd >= 0);
 	assert (args != NULL);
 

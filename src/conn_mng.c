@@ -24,7 +24,8 @@ static int listen_noblock (struct chan *ch);
 *******************************************************************************/
 
 int
-accept_connection (struct chan *ch) {
+accept_connection (struct chan *ch)
+{
 	int err;
 	socklen_t raddr_len;
 
@@ -66,7 +67,8 @@ accept_connection (struct chan *ch) {
 
 
 void
-activate_channels (struct chan* chnl[CHANNELS]) {
+activate_channels (struct chan* chnl[CHANNELS])
+{
 	int i;
 	int err;
 
@@ -105,7 +107,8 @@ activate_channels (struct chan* chnl[CHANNELS]) {
 
 
 void
-close_idle_channels (struct chan ch[NETCHANNELS]) {
+close_idle_channels (struct chan ch[NETCHANNELS])
+{
 	/* TODO
 	 * aggiorna tutti gli activity timeout
 	 * se il timeout è scaduto invalida il canale
@@ -114,7 +117,8 @@ close_idle_channels (struct chan ch[NETCHANNELS]) {
 
 
 int
-finalize_connection (struct chan *ch) {
+finalize_connection (struct chan *ch)
+{
 	int err;
 	int optval;
 	socklen_t optsize;
@@ -158,7 +162,8 @@ finalize_connection (struct chan *ch) {
 
 fd_t
 set_file_descriptors (struct chan *chnl[CHANNELS],
-                      fd_set *rdset, fd_set *wrset) {
+                      fd_set *rdset, fd_set *wrset)
+{
 	int i;
 	fd_t max;
 
@@ -200,7 +205,8 @@ set_file_descriptors (struct chan *chnl[CHANNELS],
 *******************************************************************************/
 
 static int
-connect_noblock (struct chan *ch) {
+connect_noblock (struct chan *ch)
+{
 	/* Connessione non bloccante. Crea un socket, lo imposta non bloccante
 	 * ed esegue una connect (senza bind) usando la struct sockaddr_in del
 	 * canale.
@@ -270,7 +276,8 @@ error:
 
 
 static int
-listen_noblock (struct chan *ch) {
+listen_noblock (struct chan *ch)
+{
 	int err;
 	char *errmsg;
 
