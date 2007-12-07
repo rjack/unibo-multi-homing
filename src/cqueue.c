@@ -9,13 +9,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-/*
- * TODO
- * cqueue_read e cqueue_write rimprovano read e write sempre, mentre e'
- * sufficiente riprovare quando l'indice (tail se cqueue_read, head se
- * cqueue_write) cicla e torna a 0. */
-
-
 /*******************************************************************************
 				    Macro
 *******************************************************************************/
@@ -173,6 +166,7 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	chunk = cqueue_get_aval_chunk (cq);
 	assert (chunk > 0);
 
+	/* Questo ciclo viene eseguito al massimo due volte. */
 	do {
 		nread = read (fd, &cq->cq_data[cq->cq_tail], chunk);
 		if (nread > 0) {
@@ -180,14 +174,14 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 			if (cq->cq_tail == 0) {
 				assert (!cq->cq_wrap);
 				cq->cq_wrap = TRUE;
+				/* Se chunk > 0 vinciamo un altro giro. */
+				chunk = cqueue_get_aval_chunk (cq);
 			}
-			chunk = cqueue_get_aval_chunk (cq);
 		}
-	} while ((nread > 0 && chunk > 0)
+	} while ((nread > 0 && cq->cq_tail == 0 && chunk > 0)
 	          || (nread == -1 && errno == EINTR));
 
-	if ((nread == -1 && errno == EAGAIN)
-	     || nread > 0) {
+	if (nread > 0 || (nread == -1 && errno == EAGAIN)) {
 		nread = 1;
 	}
 	return nread;
@@ -202,7 +196,6 @@ cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes)
 
 	assert (cq != NULL);
 	assert (buf != NULL);
-	assert (nbytes > 0);
 
 	if (cqueue_get_used (cq) >= nbytes) {
 		assert (cq->cq_wrap || cq->cq_tail > cq->cq_head);
@@ -233,7 +226,7 @@ int
 cqueue_write (fd_t fd, cqueue_t *cq)
 {
 	ssize_t nwrite;
-	ssize_t chunk;
+	size_t chunk;
 
 	assert (fd > 0);
 	assert (cq != NULL);
@@ -243,6 +236,7 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	chunk = cqueue_get_used_chunk (cq);
 	assert (chunk > 0);
 
+	/* Questo ciclo viene eseguito al massimo due volte. */
 	do {
 		nwrite = send (fd, &cq->cq_data[cq->cq_head], chunk,
 			       MSG_NOSIGNAL);
@@ -251,14 +245,14 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 			if (cq->cq_head == 0) {
 				assert (cq->cq_wrap);
 				cq->cq_wrap = FALSE;
+				/* Se chunk > 0 vinciamo un altro giro. */
+				chunk = cqueue_get_used_chunk (cq);
 			}
-			chunk = cqueue_get_used_chunk (cq);
 		}
-	} while ((nwrite > 0 && chunk > 0)
+	} while ((nwrite > 0 && cq->cq_head == 0 && chunk > 0)
 	          || (nwrite == -1 && errno == EINTR));
 
-	if ((nwrite == -1 && errno == EAGAIN)
-	     || nwrite > 0) {
+	if (nwrite > 0 || (nwrite == -1 && errno == EAGAIN)) {
 		nwrite = 1;
 	}
 	return nwrite;
