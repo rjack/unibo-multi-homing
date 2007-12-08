@@ -19,12 +19,19 @@
 
 
 Flags:
-- critico: è stato spedito su tutti i canali
-- dati: ha il payload
+- critico: un segmento dati che è stato spedito su tutti i canali
+- payload: il segmento ha il payload
 - lunghezza non standard: se acceso e' presente il capo pldlen, ignorato se
   non c'e' il payload.
-
-NB: se è critico e non ha il payload è un NACK.
+- NACK: il segmento e' un NACK, quindi
+  - e' stato spedito su tutti i canali
+  - non ha il payload
+  - il seqnum rappresenta l'id del segmento di cui chiediamo la rispedizione.
+- ACK:
+  - se il segmento ha il payload, ACK in piggybacking e campo aggiuntivo con
+    il seqnum del segmento che il peer puo' scartare.
+  - se non ha il payload, il campo seqnum viene usato al posto del campo
+    aggiuntivo.
 
 
   Lettura dal Sender
