@@ -1,5 +1,6 @@
 #include "h/crono.h"
 #include "h/types.h"
+#include "h/util.h"
 
 #include <config.h>
 #include <assert.h>
@@ -17,7 +18,8 @@
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static double tv_diff (const struct timeval *min, const struct timeval *sub);
+static double tv_diff (struct timeval *min, struct timeval *sub);
+static bool tv_is_normalized (struct timeval *tv);
 static void tv_normalize (struct timeval *tv);
 
 
@@ -79,6 +81,41 @@ gettime (struct timeval *tv)
 }
 
 
+void
+d2tv (double value, struct timeval *tv)
+{
+	assert (value >= 0);
+	assert (tv != NULL);
+
+	tv->tv_sec = 0;
+	while (value > 1) {
+		value--;
+		tv->tv_sec++;
+	}
+	tv->tv_usec = value * ONE_MILLION;
+
+	assert (tv_is_normalized (tv));
+}
+
+
+double
+tv2d (struct timeval *tv, bool must_free)
+{
+	double result;
+
+	assert (tv != NULL);
+	assert (must_free == TRUE || must_free == FALSE);
+
+	result = tv->tv_sec + (double)tv->tv_usec / (double)ONE_MILLION;
+
+	if (must_free) {
+		xfree (tv);
+	}
+
+	return result;
+}
+
+
 /*
  * Timeout.
  */
@@ -111,41 +148,30 @@ timeout_set (timeout_t *to, double value)
  */
 
 static double
-tv_diff (const struct timeval *min, const struct timeval *sub)
+tv_diff (struct timeval *min, struct timeval *sub)
 {
-	/* Sottrae sub da min, che si assumono essere normalizzate.
-	 * In caso di differenza negativa ritorna 0. */
+	double dmin;
+	double dsub;
 
-	/* Variabili d'appoggio per non modificare il minuendo. */
-	time_t adjsec = 0;
-	suseconds_t adjusec = 0;
-	double result = 0;
+	dmin = tv2d (min, FALSE);
+	dsub = tv2d (sub, FALSE);
 
-	assert (min != NULL);
-	assert (sub != NULL);
+	return (dmin > dsub ? dmin - dsub : 0);
+}
 
-	/* De-normalizzazione. */
-	if (min->tv_usec < sub->tv_usec) {
-		adjsec = -1;
-		adjusec = ONE_MILLION;
-	}
 
-	/* Calcolo in due passi: prima parte frazionaria, poi aggiunta di
-	 * quella intera. */
-	if (min->tv_sec >= sub->tv_sec) {
-		result = (double)(min->tv_usec + adjusec - sub->tv_usec)
-		         / (double)ONE_MILLION;
-		result += (min->tv_sec + adjsec - sub->tv_sec);
-	}
+static bool
+tv_is_normalized (struct timeval *tv)
+{
+	assert (tv != NULL);
 
-	return result;
+	return (tv->tv_usec < ONE_MILLION ? TRUE : FALSE);
 }
 
 
 static void
 tv_normalize (struct timeval *tv)
 {
-
 	assert (tv != NULL);
 
 	if (tv->tv_usec >= ONE_MILLION) {

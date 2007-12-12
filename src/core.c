@@ -29,6 +29,12 @@ core (struct proxy *px)
 
 	for (;;) {
 		activate_channels (px->p_chptr);
+		
+		/*
+		select_timeout = check_timeouts (px);
+
+		refill_buffers (px);
+		*/
 
 		/*
 		 * Select
@@ -38,15 +44,13 @@ core (struct proxy *px)
 			FD_ZERO (&rdset);
 			FD_ZERO (&wrset);
 
-			/* Chiusura canali bloccati dal Ritardatore. */
-			close_idle_channels (px->p_net);
-
 			/* Selezione dei fd in base allo stato dei canali. */
 			maxfd = set_file_descriptors (px->p_chptr,
 			                              &rdset, &wrset);
 
 			rdy = select (maxfd + 1, &rdset, &wrset, NULL, NULL);
 		} while (rdy == -1 && errno == EINTR);
+
 		if (rdy < 0) {
 			fprintf (stderr, "Errore irrimediabile select: %s\n",
 			         strerror (errno));
