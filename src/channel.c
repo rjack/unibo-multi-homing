@@ -95,9 +95,6 @@ channel_is_activable (struct chan *ch)
 bool
 channel_is_connected (struct chan *ch)
 {
-	/* Il canale e' connesso quando entrambi gli addr sono impostati, il
-	 * socket listening e' chiuso e il socket e' connesso. */
-
 	assert (ch != NULL);
 
 	if (ch->c_listfd < 0
@@ -150,8 +147,8 @@ channel_is_listening (struct chan *ch)
 bool
 channel_must_connect (struct chan *ch)
 {
-	/* Usata da manage_connections per sapere se il canale deve essere
-	 * connesso. */
+	/* Il canale deve essere connesso se l'indirizzo remoto e' impostato,
+	 * ma il socket non e' un fd valido. */
 
 	assert (ch != NULL);
 
@@ -168,8 +165,8 @@ channel_must_connect (struct chan *ch)
 bool
 channel_must_listen (struct chan *ch)
 {
-	/* Usata da manage_connections per sapere se il canale deve essere
-	 * messo in ascolto di connessioni. */
+	/* Il canale deve essere messo in ascolto se l'indirizzo locale e'
+	 * impostato, ma il socket listening non e' un fd valido. */
 
 	assert (ch != NULL);
 

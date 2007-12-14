@@ -61,11 +61,18 @@ canale e peggioro le cose, obbligando l'altro proxy a rispedire il segmento (e
 magari bastava aspettare un attimo)
 
 Ma se aspetto troppo sforo il tetto dei 500ms!
-Attesa invio NACK: 130-150ms
+Attesa invio NACK: 130-150ms?
 
 NACK delay da tarare bene! Ogni loop decremento un timer associato ai segmenti
 nella jq, quando scade mando il NACK, se arriva il segmento in tempo rimuovo
 il timer.
+
+Quando tutti i segmenti sono in fila posso mandare un ACK in modo che il peer
+liberi memoria. Mando un ACK ogni tot secondi e SOLO se non ci sono NACK
+timeout in corso (un NACK e' implicitamente un ACK).
+
+Tutti i segmenti consecutivi vengono accodati al buffer di spedizione per
+l'host e rimossi dalla joining queue.
 
 
   Routing segmenti

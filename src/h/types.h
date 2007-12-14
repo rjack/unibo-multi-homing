@@ -88,8 +88,8 @@ struct chan {
 	size_t c_sndbuf_len;
 
 	/* Puntatori ai buffer applicazione. */
-	void *c_sndbufptr;
 	void *c_rcvbufptr;
+	void *c_sndbufptr;
 
 	/* Funzione che decide quando il canale sia attivabile. */
 	bool (*c_is_activable)(void *);
