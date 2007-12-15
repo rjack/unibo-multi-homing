@@ -106,16 +106,6 @@ activate_channels (struct chan* chnl[CHANNELS])
 }
 
 
-void
-close_idle_channels (struct chan ch[NETCHANNELS])
-{
-	/* TODO
-	 * aggiorna tutti gli activity timeout
-	 * se il timeout è scaduto invalida il canale
-	 * !!! dirottare i segmenti in uscita sulle altre connessioni! */
-}
-
-
 int
 finalize_connection (struct chan *ch)
 {

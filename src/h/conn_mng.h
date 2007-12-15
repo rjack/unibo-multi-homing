@@ -17,10 +17,6 @@ void
 activate_channels (struct chan* chnl[CHANNELS]);
 
 
-void
-close_idle_channels (struct chan ch[NETCHANNELS]);
-
-
 int
 finalize_connection (struct chan *ch);
 
