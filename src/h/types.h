@@ -87,6 +87,7 @@ typedef struct timeout_t {
 
 	/* Per la coda mantenuta dal timeout_manager. */
 	struct timeout_t *to_next;
+	struct timeout_t *to_prev;
 } timeout_t;
 
 /*
@@ -117,6 +118,9 @@ struct chan {
 	/* Puntatori ai buffer applicazione. */
 	void *c_rcvbufptr;
 	void *c_sndbufptr;
+
+	/* Timeout di attivita'. */
+	timeout_t *c_activity_timeout;
 
 	/* Funzione che decide quando il canale sia attivabile. */
 	condition_checker_t c_is_activable;

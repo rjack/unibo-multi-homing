@@ -13,7 +13,7 @@ AC_CONFIG_HEADER([config.h])
 AC_PROG_CC
 
 AC_SUBST(CFLAGS, ["-g"])
-AC_SUBST(CPPFLAGS, ["-Wall -Werror -ansi -pedantic"])
+AC_SUBST(CPPFLAGS, ["-Wall -Werror -Wno-unused-function -ansi -pedantic"])
 
 # Checks for libraries.
 

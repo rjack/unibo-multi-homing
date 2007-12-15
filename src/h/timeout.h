@@ -18,4 +18,19 @@ check_timeouts (void);
 void
 init_timeout_module (void);
 
+
+timeout_t *
+timeout_create
+(double maxval, timeout_handler_t trigger, void *trigger_args, bool oneshot);
+
+
+void
+timeout_destroy (timeout_t *to);
+
+
+void
+timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
+              void *trigger_args, bool oneshot);
+
+
 #endif /* TIMEOUT_MANAGER_H */

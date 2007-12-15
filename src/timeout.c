@@ -1,9 +1,17 @@
 #include "h/types.h"
 #include "h/util.h"
 #include "h/crono.h"
+#include "h/timeout.h"
 
 #include <assert.h>
 #include <unistd.h>
+
+#define     TYPE     timeout_t
+#define     NEXT     to_next
+#define     PREV     to_prev
+#define     EMPTYQ   NULL
+#include "src/queue_template"
+
 
 /*******************************************************************************
 			      Definizioni locali
@@ -19,8 +27,7 @@
 
 /* Teste e code delle linked list di timeout.
  * Per ogni classe l'ordine dei timeout e' indifferente. */
-static timeout_t *head[CLASSNO];
-static timeout_t **tail[CLASSNO];
+static timeout_t *tqueue[CLASSNO];
 
 
 /*******************************************************************************
@@ -43,8 +50,7 @@ init_timeout_module (void)
 
 	static int i = 0;
 	while (i < CLASSNO) {
-		head[i] = NULL;
-		tail[i] = &head[i];
+		tqueue[i] = newQueue ();
 		i++;
 	}
 }
@@ -53,11 +59,30 @@ init_timeout_module (void)
 void
 add_timeout (timeout_t *to, timeout_class class)
 {
-	assert (to != NULL);
+	/* Aggiunge to alla lista dei timeout di classe class, in modo che
+	 * venga gestito da check_timeouts.
+	 * XXX se to e' oneshot il chiamante non deve piu' usare il puntatore
+	 * a to, perche' non ha modo di sapere con sicurezza quando verra'
+	 * deallocato senza rischiare un segfault. */
 
-	to->to_next = NULL;
-	*(tail[class]) = to;
-	tail[class] = &(to->to_next);
+	assert (to != NULL);
+	assert (class >= 0);
+	assert (class < CLASSNO);
+
+	enqueue (&tqueue[class], to);
+}
+
+
+void
+del_timeout (timeout_t *to, timeout_class class)
+{
+	/* Rimuove to dalla lista di classe class. */
+
+	assert (to != NULL);
+	assert (class >= 0);
+	assert (class < CLASSNO);
+
+	remove (&tqueue[class], to);
 }
 
 
@@ -70,22 +95,68 @@ check_timeouts (void)
 	int i;
 	double left;
 	double min = HUGE_TIMEOUT;
-	timeout_t *to;
+	timeout_t *cur;
+	timeout_t *tmp;
 
 	for (i = 0; i < CLASSNO; i++) {
-		for (to = head[i]; to != NULL; to = to->to_next) {
-			left = timeout_check (to);
+		cur = getHead (tqueue[i]);
+		while (!isEmpty (tqueue[i]) && cur != NULL) {
+			tmp = (cur->to_next == getHead (tqueue[i]) ?
+			       NULL : cur->to_next);
+			left = timeout_check (cur);
 			if (left > 0) {
 				min = MIN (min, left);
-			} else if (to->to_oneshot == TRUE) {
-				/* TODO
-				 * timeout remove (to);
-				 * xfree (to) */
+			} else if (cur->to_oneshot == TRUE) {
+				del_timeout (cur, i);
+				timeout_destroy (cur);
 			}
+			cur = tmp;
 		}
 	}
+
 	return (min == HUGE_TIMEOUT ? 0 : min);
 }
+
+
+timeout_t *
+timeout_create
+(double maxval, timeout_handler_t trigger, void *trigger_args, bool oneshot)
+{
+	timeout_t *newto;
+
+	assert (maxval > 0);
+	assert (trigger != NULL);
+	assert (oneshot == TRUE || oneshot == FALSE);
+
+	newto = xmalloc (sizeof (timeout_t));
+	timeout_init (newto, maxval, trigger, trigger_args, oneshot);
+
+	return newto;
+}
+
+
+void
+timeout_destroy (timeout_t *to) {
+	assert (to != NULL);
+	xfree (to);
+}
+
+
+void
+timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
+              void *trigger_args, bool oneshot)
+{
+	assert (to != NULL);
+	assert (maxval > 0);
+	assert (trigger != NULL);
+	assert (oneshot == TRUE || oneshot == FALSE);
+
+	to->to_maxval = maxval;
+	to->to_trigger = trigger;
+	to->to_trigger_args = trigger_args;
+	to->to_oneshot = oneshot;
+}
+
 
 
 /*******************************************************************************

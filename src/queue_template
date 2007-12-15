@@ -1,0 +1,170 @@
+/* queue_template : code template for circular, tail pointed, doubly linked
+ *                  queues.
+ *
+ * Code is parametrized with macros to provide a simple way to include it in
+ * different modules. This allow to avoid (void *) casts and keeps the type
+ * related work at compile time.
+ *
+ * All functions in queue_template are HIDDEN so they will be local to the
+ * including module.
+ *
+ * Macros to be defined:
+ *
+ * TYPE : the type of the elements in the queue (e.g. tcb_t).
+ * NEXT : the field that points the next entry (e.g. t_next in tcb_t queues
+ *        and t_sibling in tcb_t child queues).
+ * PREV : same as above, except that points the previous entry.
+ * EMPTYQ : value that represents a empty queue of the desired type. */
+
+
+/*******************************************************************************
+				 Private defs
+*******************************************************************************/
+
+/* Redefine defs needed in this file since it's impossible to know in advance
+ * where queue_template will be included. */
+
+#ifndef HIDDEN
+#define HIDDEN static
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif 
+
+
+/*******************************************************************************
+			      Private functions
+*******************************************************************************/
+
+HIDDEN TYPE *
+newQueue (void) {
+	/* EMPTYQ will be defined as module specific empty queue value. */
+
+	return EMPTYQ;
+}
+
+
+HIDDEN int
+isEmpty (TYPE *tp) {
+	/* Return TRUE if tp points a empty queue, FALSE otherwise. */
+
+	return (tp == EMPTYQ);
+}
+
+
+HIDDEN TYPE *
+getNext (TYPE *element) {
+	/* Return the element next to element. */
+
+	return element->NEXT;
+}
+
+
+HIDDEN TYPE *
+getHead (TYPE *tp) {
+	/* Return NULL if tp points a empty queue, a pointer to the first
+	 * element otherwise. */
+
+	TYPE *head = NULL;
+	if (!isEmpty (tp)) {
+		head = getNext (tp);
+	}
+	return head;
+}
+
+
+HIDDEN int
+isLast (TYPE *tp, TYPE *ptr) {
+	/* Return TRUE if ptr is the last element of tp's queue. */
+
+	return (tp == ptr
+	        && ptr->NEXT == ptr
+	        && ptr->PREV == ptr);
+}
+
+
+HIDDEN int
+contains (TYPE *tp, TYPE *ptr) {
+	/* Return TRUE if tp's queue contains ptr. */
+
+	TYPE *i = getHead (tp);
+	/* i is null if queue is empty. */
+	if (i != NULL) {
+		while (i != ptr && i != tp) {
+			i = getNext (i);
+		}
+	}
+	/* TRUE if tp's queue not empty and i matches ptr. */
+	return (i != NULL && i == ptr);
+}
+
+
+HIDDEN void
+insert (TYPE **tp, TYPE *new) {
+	/* Used by push and enqueue: insert new between head and tail of tp's
+	 * queue. Update tp only on first insert. */
+
+	TYPE *head = getHead (*tp);
+	if (head == NULL) {
+		new->NEXT = new;
+		new->PREV = new;
+		*tp = new;
+	} else {
+		/* new <-> head */
+		head->PREV = new;
+		new->NEXT = head;
+
+		/* tail <-> new */
+		(*tp)->NEXT = new;
+		new->PREV = *tp;
+	}
+}
+
+
+HIDDEN TYPE *
+remove (TYPE **tp, TYPE *ptr) {
+	/* Remove ptr from tp's queue and return it. */
+
+	if (isLast (*tp, ptr)) {
+		/* Removing last, queue is now empty. */
+		*tp = newQueue ();
+	} else {
+		/* Update tp when removing tail. */
+		if (*tp == ptr) {
+			*tp = ptr->PREV;
+		}
+		ptr->PREV->NEXT = ptr->NEXT;
+		ptr->NEXT->PREV = ptr->PREV;
+	}
+	ptr->NEXT = NULL;
+	ptr->PREV = NULL;
+	return ptr;
+}
+
+
+HIDDEN void
+push (TYPE **tp, TYPE *new_head) {
+	insert (tp, new_head);
+}
+
+
+HIDDEN void
+enqueue (TYPE **tp, TYPE *new_tail) {
+	insert (tp, new_tail);
+	*tp = new_tail;
+}
+
+
+HIDDEN TYPE *
+dequeue (TYPE **tp) {
+	TYPE *head = getHead (*tp);
+	if (head != NULL) {
+		head = remove (tp, head);
+	}
+	return head;
+}
