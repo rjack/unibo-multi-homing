@@ -39,17 +39,4 @@ d2tv (double value, struct timeval *tv);
 double
 tv2d (struct timeval *tv, bool must_free);
 
-
-/*
- * Timeout.
- */
-
-double
-timeout_left (timeout_t *to);
-
-
-void
-timeout_set (timeout_t *to, double value);
-
-
 #endif /* CRONO_H */

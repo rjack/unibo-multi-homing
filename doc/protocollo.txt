@@ -98,10 +98,34 @@ su tutti i canali, per essere sicuro che arrivi in tempo.
 
 Un canale con il ritardatore deve avere associato un timeout che viene
 ripristinato ogni volta che c'è attività. Se scade il canale viene invalidato.
-AliveTimeout: tra i 600ms e 1s.
+ActivityTimeout: tra i 600ms e 1s.
 
 Che si fa con i segmenti in coda per quel canale?
 - se sono critici si buttano, i duplicati sono già stati spediti sugli altri
   canali e non ha senso ritrasmetterli,
 - se sono normali vanno messi in testa alle code degli altri canali,
   distribuendoli uniformemente.
+
+
+  Gestione timeout
+
+Ogni timeout ha un'azione da compiere allo scadere: ptr a funzione.
+Argomento?
+
+ActivityTimeout: uno per ogni canale con il Ritardatore.
+- non periodico
+- invalida il canale
+- dirotta i segmenti in coda su quel canale sugli altri canali
+> serve struct proxy
+
+NAKTimeout: uno per ogni segmento nella joining queue.
+- non periodico
+- mette un NAK in testa alla coda di invio di ogni canale con il ritardatore
+> serve struct proxy
+
+ACKTimeout: uno solo, globale.
+- periodico
+- aggiunge un ACK a un canale, scelto a rotazione.
+> serve struct proxy
+
+Quindi funzioni trigger prendono come parametro una struct proxy.

@@ -48,6 +48,13 @@ typedef uint16_t port_t;
  */
 typedef int fd_t;
 
+/*
+ * Puntatori a funzione.
+ */
+typedef void (*timeout_handler_t)(void *args);
+typedef bool (*condition_checker_t)(void *args);
+typedef int (*io_performer_t)(fd_t fd, void *args);
+
 
 /*******************************************************************************
 				  Strutture
@@ -63,12 +70,32 @@ typedef struct {
 
 
 /*
- * Timeout, per controllare scadenze.
+ * Timeout, eseguono un trigger allo scadere di un intervallo di tempo.
  */
-typedef struct {
+typedef struct timeout_t {
+	/* Se TRUE la struct deve essere deallocata dopo l'esecuzione del
+	 * trigger. */
+	bool to_oneshot;
+
+	/* Durata del timeout e cronometro. */
 	double to_maxval;
 	crono_t to_crono;
+
+	/* Funzione da eseguire allo scadere. */
+	timeout_handler_t to_trigger;
+	void *to_trigger_args;
+
+	/* Per la coda mantenuta dal timeout_manager. */
+	struct timeout_t *to_next;
 } timeout_t;
+
+/*
+ * Classi di timeout.
+ */
+
+typedef enum {
+	ACTIVITY, NACK, ACK
+} timeout_class;
 
 
 /*
@@ -92,16 +119,16 @@ struct chan {
 	void *c_sndbufptr;
 
 	/* Funzione che decide quando il canale sia attivabile. */
-	bool (*c_is_activable)(void *);
+	condition_checker_t c_is_activable;
 
 	/* Funzioni che controllano le condizioni in cui il canale puo' fare
 	 * I/O sul suo c_sockfd. */
-	bool (*c_can_read)(void *);
-	bool (*c_can_write)(void *);
+	condition_checker_t c_can_read;
+	condition_checker_t c_can_write;
 
 	/* Funzioni di I/O sul sockfd. */
-	int (*c_read)(fd_t, void *);
-	int (*c_write)(fd_t, void *);
+	io_performer_t c_read;
+	io_performer_t c_write;
 
 	/* Puntatori per gli argomenti delle funzioni. */
 	void *c_activable_args;

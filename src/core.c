@@ -1,6 +1,8 @@
 #include "h/channel.h"
+#include "h/crono.h"
 #include "h/conn_mng.h"
 #include "h/proxy.h"
+#include "h/timeout.h"
 #include "h/types.h"
 
 #include <config.h>
@@ -26,13 +28,17 @@ core (struct proxy *px)
 	fd_t maxfd;
 	fd_set rdset;
 	fd_set wrset;
+	double min_timeout;
+	struct timeval tv_timeout;
+
+	init_timeout_module ();
 
 	for (;;) {
 		activate_channels (px->p_chptr);
 		
-		/*
-		select_timeout = check_timeouts (px);
+		min_timeout = check_timeouts ();
 
+		/*
 		refill_buffers (px);
 		*/
 
@@ -40,6 +46,15 @@ core (struct proxy *px)
 		 * Select
 		 */
 		do {
+			struct timeval *sto;
+
+			if (min_timeout > 0) {
+				sto = &tv_timeout;
+				d2tv (min_timeout, sto);
+			} else {
+				sto = NULL;
+			}
+
 			/* Inizializzazione dei set. */
 			FD_ZERO (&rdset);
 			FD_ZERO (&wrset);
@@ -48,7 +63,7 @@ core (struct proxy *px)
 			maxfd = set_file_descriptors (px->p_chptr,
 			                              &rdset, &wrset);
 
-			rdy = select (maxfd + 1, &rdset, &wrset, NULL, NULL);
+			rdy = select (maxfd + 1, &rdset, &wrset, NULL, sto);
 		} while (rdy == -1 && errno == EINTR);
 
 		if (rdy < 0) {

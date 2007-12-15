@@ -34,12 +34,11 @@ static void tv_normalize (struct timeval *tv);
 double
 crono_measure (crono_t *cr)
 {
-	struct timeval now;
+	static struct timeval now;
 
 	assert (cr != NULL);
 
-	gettimeofday (&now, NULL);
-	tv_normalize (&now);
+	gettime (&now);
 	cr->cr_elapsed = tv_diff (&now, &cr->cr_start);
 
 	assert (cr->cr_elapsed > 0);
@@ -63,7 +62,6 @@ crono_start (crono_t *cr)
 
 	cr->cr_elapsed = 0;
 	gettime (&cr->cr_start);
-	tv_normalize (&cr->cr_start);
 }
 
 
@@ -113,29 +111,6 @@ tv2d (struct timeval *tv, bool must_free)
 	}
 
 	return result;
-}
-
-
-/*
- * Timeout.
- */
-
-double
-timeout_left (timeout_t *to)
-{
-	assert (to != NULL);
-	return (to->to_maxval - crono_measure (&to->to_crono));
-}
-
-
-void
-timeout_set (timeout_t *to, double value)
-{
-	assert (to != NULL);
-	assert (value > 0);
-
-	to->to_maxval = value;
-	crono_start (&to->to_crono);
 }
 
 
