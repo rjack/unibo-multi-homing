@@ -16,6 +16,10 @@ check_timeouts (void);
 
 
 void
+del_timeout (timeout_t *to, timeout_class class);
+
+
+void
 init_timeout_module (void);
 
 

@@ -43,20 +43,6 @@ static void timeout_reset (timeout_t *to);
 *******************************************************************************/
 
 void
-init_timeout_module (void)
-{
-	/* Da chiamare prima di ogni altra funzione del modulo;
-	 * "static" assicura che abbia effetto una volta sola. */
-
-	static int i = 0;
-	while (i < CLASSNO) {
-		tqueue[i] = newQueue ();
-		i++;
-	}
-}
-
-
-void
 add_timeout (timeout_t *to, timeout_class class)
 {
 	/* Aggiunge to alla lista dei timeout di classe class, in modo che
@@ -70,19 +56,6 @@ add_timeout (timeout_t *to, timeout_class class)
 	assert (class < CLASSNO);
 
 	enqueue (&tqueue[class], to);
-}
-
-
-void
-del_timeout (timeout_t *to, timeout_class class)
-{
-	/* Rimuove to dalla lista di classe class. */
-
-	assert (to != NULL);
-	assert (class >= 0);
-	assert (class < CLASSNO);
-
-	remove (&tqueue[class], to);
 }
 
 
@@ -115,6 +88,33 @@ check_timeouts (void)
 	}
 
 	return (min == HUGE_TIMEOUT ? 0 : min);
+}
+
+
+void
+del_timeout (timeout_t *to, timeout_class class)
+{
+	/* Rimuove to dalla lista di classe class. */
+
+	assert (to != NULL);
+	assert (class >= 0);
+	assert (class < CLASSNO);
+
+	remove (&tqueue[class], to);
+}
+
+
+void
+init_timeout_module (void)
+{
+	/* Da chiamare prima di ogni altra funzione del modulo;
+	 * "static" assicura che abbia effetto una volta sola. */
+
+	static int i = 0;
+	while (i < CLASSNO) {
+		tqueue[i] = newQueue ();
+		i++;
+	}
 }
 
 
