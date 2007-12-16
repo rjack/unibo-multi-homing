@@ -62,6 +62,8 @@ channel_init (struct chan *ch)
 	ch->c_rcvbufptr = NULL;
 	ch->c_sndbufptr = NULL;
 
+	ch->c_activity = NULL;
+
 	channel_set_condition (ch, SET_ACTIVABLE, &always, NULL);
 	channel_set_condition (ch, SET_CAN_READ, &never, NULL);
 	channel_set_condition (ch, SET_CAN_WRITE, &never, NULL);
@@ -226,26 +228,26 @@ channel_read (struct chan *ch)
 
 void
 channel_set_condition
-(struct chan *ch, enum set_condition cond, bool (*funct)(void *), void *arg)
+(struct chan *ch, enum set_condition cond, condition_checker_t fun, void *arg)
 {
 	/* Imposta la funzione e relativo argomento per verificare se ch e'
-	 * nella condizione richiesta. Se funct e' NULL la risposta sara'
+	 * nella condizione richiesta. Se fun e' NULL la risposta sara'
 	 * sempre negativa. */
 
 	assert (ch != NULL);
-	assert (funct != NULL || arg == NULL);
+	assert (fun != NULL || arg == NULL);
 
 	switch (cond) {
 	case SET_ACTIVABLE:
-		ch->c_is_activable = (funct == NULL ? &never : funct);
+		ch->c_is_activable = (fun == NULL ? &never : fun);
 		ch->c_activable_args = arg;
 		break;
 	case SET_CAN_READ:
-		ch->c_can_read = (funct == NULL ? &never : funct);
+		ch->c_can_read = (fun == NULL ? &never : fun);
 		ch->c_can_read_args = arg;
 		break;
 	case SET_CAN_WRITE:
-		ch->c_can_write = (funct == NULL ? &never : funct);
+		ch->c_can_write = (fun == NULL ? &never : fun);
 		ch->c_can_write_args = arg;
 		break;
 	default:
