@@ -7,7 +7,7 @@ configure.scan
 config.status
 Makefile
 stamp-h1
-TAGS
+tags
 *.m4
 *.in
 *.log
