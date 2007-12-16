@@ -74,7 +74,7 @@ channel_read (struct chan *ch);
 
 void
 channel_set_condition
-(struct chan *ch, enum set_condition, bool (*funct)(void *), void *arg);
+(struct chan *ch, enum set_condition, condition_checker_t fun, void *arg);
 
 
 int

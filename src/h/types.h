@@ -18,6 +18,13 @@
 /* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
 #define     HOST           (NETCHANNELS)
 
+/*
+ * Durate dei timeout.
+ */
+#define     ACTIVITY_TIMEOUT     0.250
+#define     NAK_TIMEOUT          0.130
+#define     ACK_TIMEOUT          2
+
 
 /*******************************************************************************
 			     Definizioni di tipo
@@ -120,7 +127,7 @@ struct chan {
 	void *c_sndbufptr;
 
 	/* Timeout di attivita'. */
-	timeout_t *c_activity_timeout;
+	timeout_t *c_activity;
 
 	/* Funzione che decide quando il canale sia attivabile. */
 	condition_checker_t c_is_activable;
@@ -184,6 +191,21 @@ struct proxy {
 	 * - coda segmenti da ritrasmettere
 	 * - OPPURE coda segmenti da ricostruire. */
 };
+
+
+/*
+ * Argomenti per i timeout_handler_t.
+ */
+
+/* Per idle_handler. */
+struct idle_args {
+	struct proxy *ia_px;
+	struct chan *ia_ch;
+};
+
+/* TODO struct ack_args */
+/* TODO struct nak_args */
+
 
 
 #endif /* MH_TYPES_H */

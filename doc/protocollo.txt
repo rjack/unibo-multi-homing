@@ -98,7 +98,7 @@ su tutti i canali, per essere sicuro che arrivi in tempo.
 
 Un canale con il ritardatore deve avere associato un timeout che viene
 ripristinato ogni volta che c'è attività. Se scade il canale viene invalidato.
-ActivityTimeout: tra i 600ms e 1s.
+ActivityTimeout: meta' del tempo massimo concesso (= 250ms)?
 
 Che si fa con i segmenti in coda per quel canale?
 - se sono critici si buttano, i duplicati sono già stati spediti sugli altri

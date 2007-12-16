@@ -37,4 +37,7 @@ timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
               void *trigger_args, bool oneshot);
 
 
+void
+timeout_reset (timeout_t *to);
+
 #endif /* TIMEOUT_MANAGER_H */

@@ -1,13 +1,13 @@
-#include "h/util.h"
 #include "h/types.h"
+#include "h/util.h"
 
 #include <config.h>
 #include <assert.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -70,7 +70,7 @@ addrstr (struct sockaddr_in *addr, char *buf)
 
 
 int
-set_addr (struct sockaddr_in *addr, const char *ip, port_t port)
+set_addr (struct sockaddr_in *addr, char *ip, port_t port)
 {
 	/* Imposta addr secondo l'indirizzo ip, in formato xxx.xxx.xxx.xxx, e
 	 * la porta port.
@@ -99,7 +99,7 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port)
  */
 
 bool
-streq (const char *str1, const char *str2)
+streq (char *str1, char *str2)
 {
 	/* Ritorna TRUE se due stringhe sono uguali. */
 

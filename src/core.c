@@ -4,6 +4,7 @@
 #include "h/proxy.h"
 #include "h/timeout.h"
 #include "h/types.h"
+#include "h/util.h"
 
 #include <config.h>
 #include <assert.h>
@@ -31,7 +32,17 @@ core (struct proxy *px)
 	double min_timeout;
 	struct timeval tv_timeout;
 
+	/* Preparazione timeout.
+	 * Creazione timeout attività per i canali con il Ritardatore. */
 	init_timeout_module ();
+	for (i = 0; i < NETCHANNELS; i++) {
+		struct idle_args *args = xmalloc (sizeof (struct idle_args));
+		args->ia_px = px;
+		args->ia_ch = &(px->p_net[i]);
+		px->p_net[i].c_activity = timeout_create (ACTIVITY_TIMEOUT,
+							  idle_handler,
+							  args, TRUE);
+	}
 
 	for (;;) {
 		activate_channels (px->p_chptr);
@@ -86,7 +97,7 @@ core (struct proxy *px)
 				if (err) {
 					channel_invalidate (ch);
 				} else {
-					proxy_create_buffers (px, i);
+					proxy_prepare_io (px, i);
 					printf ("Canale %s connesso.\n",
 					        channel_name (ch));
 				}
@@ -99,7 +110,7 @@ core (struct proxy *px)
 				if (err) {
 					channel_invalidate (ch);
 				} else {
-					proxy_create_buffers (px, i);
+					proxy_prepare_io (px, i);
 					printf ("Canale %s, connessione "
 					        "accettata.\n",
 						channel_name (ch));

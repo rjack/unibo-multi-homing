@@ -9,11 +9,15 @@
 *******************************************************************************/
 
 void
+idle_handler (void *args);
+
+
+void
 proxy_init (struct proxy *px);
 
 
 void
-proxy_create_buffers (struct proxy *px, int chanid);
+proxy_prepare_io (struct proxy *px, int chanid);
 
 
 #endif /* PROXY_H */

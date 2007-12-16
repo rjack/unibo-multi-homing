@@ -1,6 +1,8 @@
+#include "h/channel.h"
+#include "h/cqueue.h"
+#include "h/timeout.h"
 #include "h/types.h"
 #include "h/util.h"
-#include "h/cqueue.h"
 
 #include <config.h>
 #include <assert.h>
@@ -20,6 +22,32 @@ static int host_write (fd_t fd, void *args);
 /*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
+
+
+void
+idle_handler (void *args)
+{
+	struct proxy *px;
+	struct chan *ch;
+
+	assert (args != NULL);
+
+	px = ((struct idle_args *)args)->ia_px;
+	ch = ((struct idle_args *)args)->ia_ch;
+	assert (px != NULL);
+	assert (ch != NULL);
+
+	xfree (args);
+	args = NULL;
+
+	/* TODO travaso buffer */
+
+	fprintf (stderr, "WARNING Canale %s chiuso per inattività\n",
+	         channel_name (ch));
+
+	channel_invalidate (ch);
+}
+
 
 void
 proxy_init (struct proxy *px)
@@ -60,18 +88,20 @@ proxy_init (struct proxy *px)
 
 
 void
-proxy_create_buffers (struct proxy *px, int chanid)
+proxy_prepare_io (struct proxy *px, int id)
 {
-	/* Crea i buffer di I/O relativi al canale chanid e imposta le
-	 * conseguenti condizioni e le funzioni di I/O. */
+	/* Crea i buffer di I/O relativi al canale id e imposta le
+	 * conseguenti condizioni e le funzioni di I/O.
+	 *
+	 * Per i canali di rete fa partire i timeout di attività. */
 
 	assert (px != NULL);
-	assert (chanid >= 0);
-	assert (chanid < CHANNELS);
+	assert (id >= 0);
+	assert (id < CHANNELS);
 
-	if (chanid == HOST) {
+	if (id == HOST) {
 		size_t buflen;
-		assert (px->p_chptr[chanid] == &px->p_host);
+		assert (px->p_chptr[id] == &px->p_host);
 
 		buflen = tcp_get_buffer_size (px->p_host.c_sockfd, SO_RCVBUF);
 		px->p_host_rcvbuf = cqueue_create (buflen);
@@ -91,7 +121,9 @@ proxy_create_buffers (struct proxy *px, int chanid)
 	}
 	/* NET */
 	else {
-		/* TODO */
+		timeout_reset (px->p_net[id].c_activity);
+		add_timeout (px->p_net[id].c_activity, ACTIVITY);
+		/* TODO buffer canali ritardatore */
 	}
 }
 

@@ -35,7 +35,6 @@ static timeout_t *tqueue[CLASSNO];
 *******************************************************************************/
 
 static double timeout_check (timeout_t *to);
-static void timeout_reset (timeout_t *to);
 
 
 /*******************************************************************************
@@ -126,7 +125,7 @@ timeout_create
 
 	assert (maxval > 0);
 	assert (trigger != NULL);
-	assert (oneshot == TRUE || oneshot == FALSE);
+	assert (BOOL_VALUE (oneshot));
 
 	newto = xmalloc (sizeof (timeout_t));
 	timeout_init (newto, maxval, trigger, trigger_args, oneshot);
@@ -158,6 +157,13 @@ timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
 }
 
 
+void
+timeout_reset (timeout_t *to)
+{
+	assert (to != NULL);
+	crono_start (&to->to_crono);
+}
+
 
 /*******************************************************************************
 			       Funzioni locali
@@ -180,12 +186,4 @@ timeout_check (timeout_t *to)
 		timeout_reset (to);
 	}
 	return left;
-}
-
-
-static void
-timeout_reset (timeout_t *to)
-{
-	assert (to != NULL);
-	crono_start (&to->to_crono);
 }

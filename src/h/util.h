@@ -25,7 +25,7 @@
 
 
 /* Test sui valori dei bool: usata nelle assert. */
-#define     BOOL_VALUE(b)     ((b) == 0 || (b) == 1)
+#define     BOOL_VALUE(b)     ((b) == FALSE || (b) == TRUE)
 
 
 /*******************************************************************************
@@ -45,7 +45,7 @@ addrstr (struct sockaddr_in *addr, char *buf);
 
 
 int
-set_addr (struct sockaddr_in *addr, const char *ip, port_t port);
+set_addr (struct sockaddr_in *addr, char *ip, port_t port);
 
 
 /*
@@ -53,7 +53,7 @@ set_addr (struct sockaddr_in *addr, const char *ip, port_t port);
  */
 
 bool
-streq (const char *str1, const char *str2);
+streq (char *str1, char *str2);
 
 
 /*
