@@ -51,7 +51,6 @@ add_timeout (timeout_t *to, timeout_class class)
 	 * deallocato senza rischiare un segfault. */
 
 	assert (to != NULL);
-	assert (class >= 0);
 	assert (class < CLASSNO);
 
 	enqueue (&tqueue[class], to);
@@ -96,7 +95,6 @@ del_timeout (timeout_t *to, timeout_class class)
 	/* Rimuove to dalla lista di classe class. */
 
 	assert (to != NULL);
-	assert (class >= 0);
 	assert (class < CLASSNO);
 
 	remove (&tqueue[class], to);
