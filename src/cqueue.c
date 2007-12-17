@@ -74,7 +74,7 @@ cqueue_can_read (void *arg)
 	cqueue_t *cq;
 
 	assert (arg != NULL);
-       
+
 	cq = (cqueue_t *) arg;
 	if (cqueue_get_aval (cq) > 0) {
 		return TRUE;

@@ -173,9 +173,9 @@ set_file_descriptors (struct chan *chnl[CHANNELS],
 				FD_SET (chnl[i]->c_sockfd, wrset);
 				max = MAX (chnl[i]->c_sockfd, max);
 			}
-		} 
+		}
 		/* Connessioni da completare o accettare. */
-		else { 
+		else {
 			if (channel_is_connecting (chnl[i])) {
 				FD_SET (chnl[i]->c_sockfd, wrset);
 				max = MAX (chnl[i]->c_sockfd, max);

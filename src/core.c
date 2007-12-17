@@ -46,7 +46,7 @@ core (struct proxy *px)
 
 	for (;;) {
 		activate_channels (px->p_chptr);
-		
+
 		min_timeout = check_timeouts ();
 
 		/*
@@ -86,7 +86,7 @@ core (struct proxy *px)
 		/*
 		 * Gestione eventi.
 		 */
-		for (i = 0; i < CHANNELS; i++) {
+		if (rdy > 0 ) for (i = 0; i < CHANNELS; i++) {
 			struct chan *ch;
 			ch = px->p_chptr[i];
 
