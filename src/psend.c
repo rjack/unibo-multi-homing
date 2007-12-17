@@ -21,21 +21,21 @@
  */
 
 /* Indirizzi per connessioni al Ritardatore. */
-static const char* defconnaddr[NETCHANNELS] = {
+static char* defconnaddr[NETCHANNELS] = {
 	"127.0.0.1",
 	"127.0.0.1",
 	"127.0.0.1"
 };
 
 /* Porte per connessioni al Ritardatore. */
-static const port_t defconnport[NETCHANNELS] = {
+static port_t defconnport[NETCHANNELS] = {
 	7001,
 	7002,
 	7003
 };
 
 /* Porta di ascolto per accettare la connessione del Sender. */
-static const port_t deflistport = 6001;
+static port_t deflistport = 6001;
 
 
 /*******************************************************************************

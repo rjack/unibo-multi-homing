@@ -4,6 +4,7 @@
 #include "h/timeout.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #define     TYPE     timeout_t
@@ -29,17 +30,25 @@
  * Per ogni classe l'ordine dei timeout e' indifferente. */
 static timeout_t *tqueue[CLASSNO];
 
+/* Intervallo spedizione ACK.
+ * XXX per ora viene solo inizializzato da init_timeout_module, quindi non
+ * XXX viene controllato da check_timeouts.
+ * XXX Sara' passato ad add_timeout alla ricezione del primo segmento. */
+static timeout_t ack_timeout;
+
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
 static double timeout_check (timeout_t *to);
+static void ack_handler (void *args);
 
 
 /*******************************************************************************
 				   Funzioni
 *******************************************************************************/
+
 
 void
 add_timeout (timeout_t *to, timeout_class class)
@@ -53,7 +62,7 @@ add_timeout (timeout_t *to, timeout_class class)
 	assert (to != NULL);
 	assert (class < CLASSNO);
 
-	enqueue (&tqueue[class], to);
+	qenqueue (&tqueue[class], to);
 }
 
 
@@ -97,12 +106,12 @@ del_timeout (timeout_t *to, timeout_class class)
 	assert (to != NULL);
 	assert (class < CLASSNO);
 
-	remove (&tqueue[class], to);
+	qremove (&tqueue[class], to);
 }
 
 
 void
-init_timeout_module (void)
+init_timeout_module (struct ack_args *args)
 {
 	/* Da chiamare prima di ogni altra funzione del modulo;
 	 * "static" assicura che abbia effetto una volta sola. */
@@ -112,6 +121,8 @@ init_timeout_module (void)
 		tqueue[i] = newQueue ();
 		i++;
 	}
+
+	timeout_init (&ack_timeout, ACK, ack_handler, args, FALSE);
 }
 
 
@@ -133,7 +144,8 @@ timeout_create
 
 
 void
-timeout_destroy (timeout_t *to) {
+timeout_destroy (timeout_t *to)
+{
 	assert (to != NULL);
 	xfree (to);
 }
@@ -166,6 +178,19 @@ timeout_reset (timeout_t *to)
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
+
+static void
+ack_handler (void *args) {
+	struct proxy *px;
+
+	assert (args != NULL);
+
+	px = ((struct ack_args *)args)->aa_px;
+
+	/* TODO manda ack */
+	fprintf (stderr, "ACK!\n");
+}
+
 
 static double
 timeout_check (timeout_t *to)

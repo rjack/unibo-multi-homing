@@ -31,10 +31,16 @@ core (struct proxy *px)
 	fd_set wrset;
 	double min_timeout;
 	struct timeval tv_timeout;
+	struct ack_args *args;
 
-	/* Preparazione timeout.
-	 * Creazione timeout attività per i canali con il Ritardatore. */
-	init_timeout_module ();
+	/* 
+	 * Preparazione timeout.
+	 */
+
+	/* Creazione timeout attività per i canali con il Ritardatore. */
+	args = xmalloc (sizeof (struct ack_args));
+	args->aa_px = px;
+	init_timeout_module (args);
 	for (i = 0; i < NETCHANNELS; i++) {
 		struct idle_args *args = xmalloc (sizeof (struct idle_args));
 		args->ia_px = px;

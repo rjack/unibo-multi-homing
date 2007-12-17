@@ -89,7 +89,7 @@ isLast (TYPE *tp, TYPE *ptr) {
 
 
 HIDDEN int
-contains (TYPE *tp, TYPE *ptr) {
+qcontains (TYPE *tp, TYPE *ptr) {
 	/* Return TRUE if tp's queue contains ptr. */
 
 	TYPE *i = getHead (tp);
@@ -105,7 +105,7 @@ contains (TYPE *tp, TYPE *ptr) {
 
 
 HIDDEN void
-insert (TYPE **tp, TYPE *new) {
+qinsert (TYPE **tp, TYPE *new) {
 	/* Used by push and enqueue: insert new between head and tail of tp's
 	 * queue. Update tp only on first insert. */
 
@@ -127,7 +127,7 @@ insert (TYPE **tp, TYPE *new) {
 
 
 HIDDEN TYPE *
-remove (TYPE **tp, TYPE *ptr) {
+qremove (TYPE **tp, TYPE *ptr) {
 	/* Remove ptr from tp's queue and return it. */
 
 	if (isLast (*tp, ptr)) {
@@ -148,23 +148,23 @@ remove (TYPE **tp, TYPE *ptr) {
 
 
 HIDDEN void
-push (TYPE **tp, TYPE *new_head) {
-	insert (tp, new_head);
+qpush (TYPE **tp, TYPE *new_head) {
+	qinsert (tp, new_head);
 }
 
 
 HIDDEN void
-enqueue (TYPE **tp, TYPE *new_tail) {
-	insert (tp, new_tail);
+qenqueue (TYPE **tp, TYPE *new_tail) {
+	qinsert (tp, new_tail);
 	*tp = new_tail;
 }
 
 
 HIDDEN TYPE *
-dequeue (TYPE **tp) {
+qdequeue (TYPE **tp) {
 	TYPE *head = getHead (*tp);
 	if (head != NULL) {
-		head = remove (tp, head);
+		head = qremove (tp, head);
 	}
 	return head;
 }

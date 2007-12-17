@@ -21,15 +21,15 @@
  */
 
 /* Porte di ascolto per accettare connessioni da Ritardatore. */
-static const port_t deflistport[NETCHANNELS] = {
+static port_t deflistport[NETCHANNELS] = {
 	8001,
 	8002,
 	8003
 };
 
 /* Indirizzo e porta di connessione al Receiver. */
-static const char* defconnaddr = "127.0.0.1";
-static const port_t defconnport = 9001;
+static char* defconnaddr = "127.0.0.1";
+static port_t defconnport = 9001;
 
 
 /*******************************************************************************

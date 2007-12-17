@@ -203,7 +203,11 @@ struct idle_args {
 	struct chan *ia_ch;
 };
 
-/* TODO struct ack_args */
+/* Per ack_handler. */
+struct ack_args {
+	struct proxy *aa_px;
+};
+
 /* TODO struct nak_args */
 
 
