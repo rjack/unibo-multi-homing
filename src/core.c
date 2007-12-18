@@ -33,7 +33,7 @@ core (struct proxy *px)
 	struct timeval tv_timeout;
 	struct ack_args *args;
 
-	/* 
+	/*
 	 * Preparazione timeout.
 	 */
 

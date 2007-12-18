@@ -42,7 +42,8 @@
 *******************************************************************************/
 
 HIDDEN TYPE *
-newQueue (void) {
+newQueue (void)
+{
 	/* EMPTYQ will be defined as module specific empty queue value. */
 
 	return EMPTYQ;
@@ -50,7 +51,8 @@ newQueue (void) {
 
 
 HIDDEN int
-isEmpty (TYPE *tp) {
+isEmpty (TYPE *tp)
+{
 	/* Return TRUE if tp points a empty queue, FALSE otherwise. */
 
 	return (tp == EMPTYQ);
@@ -58,7 +60,8 @@ isEmpty (TYPE *tp) {
 
 
 HIDDEN TYPE *
-getNext (TYPE *element) {
+getNext (TYPE *element)
+{
 	/* Return the element next to element. */
 
 	return element->NEXT;
@@ -66,7 +69,8 @@ getNext (TYPE *element) {
 
 
 HIDDEN TYPE *
-getHead (TYPE *tp) {
+getHead (TYPE *tp)
+{
 	/* Return NULL if tp points a empty queue, a pointer to the first
 	 * element otherwise. */
 
@@ -79,7 +83,8 @@ getHead (TYPE *tp) {
 
 
 HIDDEN int
-isLast (TYPE *tp, TYPE *ptr) {
+isLast (TYPE *tp, TYPE *ptr)
+{
 	/* Return TRUE if ptr is the last element of tp's queue. */
 
 	return (tp == ptr
@@ -89,7 +94,8 @@ isLast (TYPE *tp, TYPE *ptr) {
 
 
 HIDDEN int
-qcontains (TYPE *tp, TYPE *ptr) {
+qcontains (TYPE *tp, TYPE *ptr)
+{
 	/* Return TRUE if tp's queue contains ptr. */
 
 	TYPE *i = getHead (tp);
@@ -105,7 +111,8 @@ qcontains (TYPE *tp, TYPE *ptr) {
 
 
 HIDDEN void
-qinsert (TYPE **tp, TYPE *new) {
+qinsert (TYPE **tp, TYPE *new)
+{
 	/* Used by push and enqueue: insert new between head and tail of tp's
 	 * queue. Update tp only on first insert. */
 
@@ -127,7 +134,8 @@ qinsert (TYPE **tp, TYPE *new) {
 
 
 HIDDEN TYPE *
-qremove (TYPE **tp, TYPE *ptr) {
+qremove (TYPE **tp, TYPE *ptr)
+{
 	/* Remove ptr from tp's queue and return it. */
 
 	if (isLast (*tp, ptr)) {
@@ -148,20 +156,23 @@ qremove (TYPE **tp, TYPE *ptr) {
 
 
 HIDDEN void
-qpush (TYPE **tp, TYPE *new_head) {
+qpush (TYPE **tp, TYPE *new_head)
+{
 	qinsert (tp, new_head);
 }
 
 
 HIDDEN void
-qenqueue (TYPE **tp, TYPE *new_tail) {
+qenqueue (TYPE **tp, TYPE *new_tail)
+{
 	qinsert (tp, new_tail);
 	*tp = new_tail;
 }
 
 
 HIDDEN TYPE *
-qdequeue (TYPE **tp) {
+qdequeue (TYPE **tp)
+{
 	TYPE *head = getHead (*tp);
 	if (head != NULL) {
 		head = qremove (tp, head);

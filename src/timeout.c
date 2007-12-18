@@ -180,7 +180,8 @@ timeout_reset (timeout_t *to)
 *******************************************************************************/
 
 static void
-ack_handler (void *args) {
+ack_handler (void *args)
+{
 	struct proxy *px;
 
 	assert (args != NULL);
