@@ -63,13 +63,13 @@ core (struct proxy *px)
 		 * Select
 		 */
 		do {
-			struct timeval *sto;
+			struct timeval *toptr;
 
 			if (min_timeout > 0) {
-				sto = &tv_timeout;
-				d2tv (min_timeout, sto);
+				toptr = &tv_timeout;
+				d2tv (min_timeout, toptr);
 			} else {
-				sto = NULL;
+				toptr = NULL;
 			}
 
 			/* Inizializzazione dei set. */
@@ -80,7 +80,7 @@ core (struct proxy *px)
 			maxfd = set_file_descriptors (px->p_chptr,
 			                              &rdset, &wrset);
 
-			rdy = select (maxfd + 1, &rdset, &wrset, NULL, sto);
+			rdy = select (maxfd + 1, &rdset, &wrset, NULL, toptr);
 		} while (rdy == -1 && errno == EINTR);
 
 		if (rdy < 0) {
