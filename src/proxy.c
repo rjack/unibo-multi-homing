@@ -23,6 +23,42 @@ static int host_write (fd_t fd, void *args);
 			      Funzioni pubbliche
 *******************************************************************************/
 
+void
+do_joining (struct proxy *px)
+{
+	/* TODO do_joining */
+}
+
+
+void
+do_routing (struct proxy *px)
+{
+	/* Il routing e' banale: un segmento a ogni canale, finche' ci stanno
+	 * nei net o si svuota l'host.
+	 * XXX round robin = variabile statica che tiene traccia dell'ultimo
+	 * canale servito.
+	 * XXX solo i canali connessi.
+	 * XXX le code dei net devono essere sempre piu' o meno uguali. */
+
+	/* In binario e' 111, ogni canale inattivo o pieno spegne il proprio
+	 * bit. */
+	int needmask = 0x7;
+	/* Contatore, statico per politica round robin. */
+	static int id = 0;
+
+	while (needmask != 0x0
+	       && cqueue_get_used (px->p_host_rcvbuf) > 0) {
+		if (channel_is_connected (&px->p_net[id])
+		    /* TODO && c'e' spazio nel buffer */ ) {
+			/* TODO dequeue (host) => enqueue (net[id]) */
+		} else {
+			/* spegnimento bit */
+			needmask &= ~(0x1 << id);
+		}
+		id = (id + 1) % NETCHANNELS;
+	}
+}
+
 
 void
 idle_handler (void *args)

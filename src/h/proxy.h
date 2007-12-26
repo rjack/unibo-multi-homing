@@ -9,6 +9,14 @@
 *******************************************************************************/
 
 void
+do_joining (struct proxy *px);
+
+
+void
+do_routing (struct proxy *px);
+
+
+void
 idle_handler (void *args);
 
 

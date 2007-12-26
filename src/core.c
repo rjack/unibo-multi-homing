@@ -55,9 +55,9 @@ core (struct proxy *px)
 
 		min_timeout = check_timeouts ();
 
-		/*
-		refill_buffers (px);
-		*/
+		do_routing (px);
+
+		do_joining (px);
 
 		/*
 		 * Select
