@@ -9,11 +9,11 @@
 *******************************************************************************/
 
 void
-do_joining (struct proxy *px);
+move_data_net2host (struct proxy *px);
 
 
 void
-do_routing (struct proxy *px);
+move_data_host2net (struct proxy *px);
 
 
 void
