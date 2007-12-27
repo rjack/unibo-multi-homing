@@ -24,14 +24,14 @@ static int host_write (fd_t fd, void *args);
 *******************************************************************************/
 
 void
-move_data_net2host (struct proxy *px)
+feed_download (struct proxy *px)
 {
-	/* TODO do_joining */
+	/* TODO download */
 }
 
 
 void
-move_data_host2net (struct proxy *px)
+feed_upload (struct proxy *px)
 {
 	/* Il routing e' banale: un segmento a ogni canale, finche' ci stanno
 	 * nei net o si svuota l'host.

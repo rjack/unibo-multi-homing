@@ -9,11 +9,11 @@
 *******************************************************************************/
 
 void
-move_data_net2host (struct proxy *px);
+feed_download (struct proxy *px);
 
 
 void
-move_data_host2net (struct proxy *px);
+feed_upload (struct proxy *px);
 
 
 void

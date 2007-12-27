@@ -55,8 +55,8 @@ core (struct proxy *px)
 
 		min_timeout = check_timeouts ();
 
-		move_data_host2net (px);
-		move_data_net2host (px);
+		feed_upload (px);
+		feed_download (px);
 
 		/*
 		 * Select
