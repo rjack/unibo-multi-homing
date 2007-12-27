@@ -62,6 +62,16 @@ typedef void (*timeout_handler_t)(void *args);
 typedef bool (*condition_checker_t)(void *args);
 typedef int (*io_performer_t)(fd_t fd, void *args);
 
+/*
+ * Campi dei segmenti.
+ */
+/* Numeri di sequenza. */
+typedef uint8_t seq_t;
+/* Lunghezza del segmento. */
+typedef uint8_t len_t;
+/* Flag conformazione segmento. */
+typedef uint8_t flag_t;
+
 
 /*******************************************************************************
 				  Strutture
@@ -181,11 +191,16 @@ struct proxy {
 
 	cqueue_t *p_host_rcvbuf;
 	cqueue_t *p_host_sndbuf;
+
+	cqueue_t *p_net_rcvbuf[NETCHANNELS];
+	cqueue_t *p_net_sndbuf[NETCHANNELS];
+	/* TODO coda segmenti uscenti. */
+
+	/* Ultimo seqnum inviato. */
+	seq_t p_outseq;
+
 	/* TODO
-	 * - coda accodamento dati in attesa di smistamento ai canali
-	 * - buffer di trasferimento con il ritardatore
 	 * - contatori:
-	 *   - ultimo seqnum inviato
 	 *   - ack/nack
 	 *   - etc
 	 * - coda segmenti da ritrasmettere

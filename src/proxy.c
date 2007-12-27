@@ -36,7 +36,7 @@ feed_upload (struct proxy *px)
 	/* Il routing e' banale: un segmento a ogni canale, finche' ci stanno
 	 * nei net o si svuota l'host.
 	 * XXX round robin = variabile statica che tiene traccia dell'ultimo
-	 * canale servito.
+	 * XXX canale servito.
 	 * XXX solo i canali connessi.
 	 * XXX le code dei net devono essere sempre piu' o meno uguali. */
 
@@ -50,9 +50,9 @@ feed_upload (struct proxy *px)
 	       && cqueue_get_used (px->p_host_rcvbuf) > 0) {
 		if (channel_is_connected (&px->p_net[id])
 		    /* TODO && c'e' spazio nel buffer */ ) {
-			/* TODO dequeue (host) => enqueue (net[id]) */
+			/* TODO mov_host2net */
 		} else {
-			/* spegnimento bit */
+			/* Spegnimento bit. */
 			needmask &= ~(0x1 << id);
 		}
 		id = (id + 1) % NETCHANNELS;
@@ -102,6 +102,14 @@ proxy_init (struct proxy *px)
 
 	px->p_host_rcvbuf = NULL;
 	px->p_host_sndbuf = NULL;
+
+	for (i = 0; i < NETCHANNELS; i++) {
+		px->p_net_rcvbuf[i] = NULL;
+		px->p_net_sndbuf[i] = NULL;
+		/* TODO coda segmenti uscenti. */
+	}
+
+	px->p_outseq = 0;
 
 #if !HAVE_MSG_NOSIGNAL
 	/* Gestione SIGPIPE.
