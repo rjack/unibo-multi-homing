@@ -19,7 +19,7 @@
 #define     HOST           (NETCHANNELS)
 
 /*
- * Durate dei timeout.
+ * Durate dei timeout in secondi.
  */
 #define     ACTIVITY_TIMEOUT     0.250
 #define     NAK_TIMEOUT          0.130

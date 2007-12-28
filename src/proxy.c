@@ -17,6 +17,7 @@
 
 static int host_read (fd_t fd, void *args);
 static int host_write (fd_t fd, void *args);
+static void mov_host2net (struct proxy *px);
 
 
 /*******************************************************************************
@@ -40,22 +41,21 @@ feed_upload (struct proxy *px)
 	 * XXX solo i canali connessi.
 	 * XXX le code dei net devono essere sempre piu' o meno uguali. */
 
-	/* In binario e' 111, ogni canale inattivo o pieno spegne il proprio
-	 * bit. */
-	int needmask = 0x7;
+	/* Ogni canale inattivo o pieno spegne il proprio bit. */
+	int needmask;
 	/* Contatore, statico per politica round robin. */
 	static int id = 0;
 
-	while (needmask != 0x0
-	       && cqueue_get_used (px->p_host_rcvbuf) > 0) {
+	for (needmask = 0x7;
+	     needmask != 0x0 && cqueue_get_used (px->p_host_rcvbuf > 0);
+	     id = (id + 1) % NETCHANNELS) {
 		if (channel_is_connected (&px->p_net[id])
-		    /* TODO && c'e' spazio nel buffer */ ) {
+		    /* TODO && spazio nel buffer > SEGMINLEN */ ) {
 			/* TODO mov_host2net */
 		} else {
 			/* Spegnimento bit. */
 			needmask &= ~(0x1 << id);
 		}
-		id = (id + 1) % NETCHANNELS;
 	}
 }
 
@@ -193,4 +193,27 @@ host_write (fd_t fd, void *args)
 	assert (args != NULL);
 
 	return cqueue_write (fd, (cqueue_t *)args);
+}
+
+
+static void
+mov_host2net (struct proxy *px)
+{
+	size_t pldlen;
+	size_t used;
+	/* TODO static char buf[PLDDEFLEN + PLDMINLEN + HDRLEN]; */
+
+	assert (px != NULL);
+	assert (cqueue_get_used (px->p_host_rcvbuf) >= PLDMINLEN);
+
+	/* Fa in modo che in p_host_rcvbuf non rimangano mai troppi pochi
+	 * dati per fare un payload valido. */
+	used = cqueue_get_used (px->p_host_rcvbuf);
+	if (used >= PLDDEFLEN && (used - PLDDEFLEN) >= PLDMINLEN) {
+		pldlen = PLDDEFLEN;
+	} else {
+		pldlen = used;
+	}
+
+	/* TODO costruire header */
 }
