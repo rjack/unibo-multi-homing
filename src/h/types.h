@@ -6,27 +6,6 @@
 
 
 /*******************************************************************************
-				   Costanti
-*******************************************************************************/
-
-/* Numero di canali di rete. */
-#define     NETCHANNELS    3
-/* Numero di canali totali. */
-#define     CHANNELS       (NETCHANNELS + 1)
-/* Id del primo canale di rete. */
-#define     NET            0
-/* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
-#define     HOST           (NETCHANNELS)
-
-/*
- * Durate dei timeout in secondi.
- */
-#define     ACTIVITY_TIMEOUT     0.250
-#define     NAK_TIMEOUT          0.130
-#define     ACK_TIMEOUT          2
-
-
-/*******************************************************************************
 			     Definizioni di tipo
 *******************************************************************************/
 
@@ -69,8 +48,54 @@ typedef int (*io_performer_t)(fd_t fd, void *args);
 typedef uint8_t seq_t;
 /* Lunghezza del segmento. */
 typedef uint8_t len_t;
+/* Dati */
+typedef uint8_t pld_t;
 /* Flag conformazione segmento. */
 typedef uint8_t flag_t;
+
+
+/*******************************************************************************
+				   Costanti
+*******************************************************************************/
+
+/* Numero di canali di rete. */
+#define     NETCHANNELS    3
+/* Numero di canali totali. */
+#define     CHANNELS       (NETCHANNELS + 1)
+/* Id del primo canale di rete. */
+#define     NET            0
+/* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
+#define     HOST           (NETCHANNELS)
+
+/*
+ * Durate dei timeout in secondi.
+ */
+#define     ACTIVITY_TIMEOUT     1000000000.0 /* 0.250 */
+#define     NAK_TIMEOUT          0.130
+#define     ACK_TIMEOUT          2
+
+/*
+ * Segmenti.
+ */
+
+/* Campi, in byte. */
+#define     SEQLEN     sizeof(seq_t)
+#define     LENLEN     sizeof(len_t)
+#define     FLGLEN     sizeof(flag_t)
+
+/* Limiti dei payload, in byte. */
+/* Il payload minimo eguaglia l'overhead causato dall'header. */
+#define     PLDMINLEN     (FLGLEN + SEQLEN + LENLEN)
+#define     PLDMAXLEN     UINT8_MAX
+/* XXX Da tarare bene. */
+#define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))
+
+/* Bit del campo flag */
+#define     FLCRT     0x1
+#define     FLPLD     0x2
+#define     FLLEN     0x4
+#define     FLNAK     0x8
+#define     FLACK     0x10
 
 
 /*******************************************************************************
@@ -151,7 +176,7 @@ struct chan {
 	io_performer_t c_read;
 	io_performer_t c_write;
 
-	/* Puntatori per gli argomenti delle funzioni. */
+	/* Puntatori agli argomenti delle funzioni. */
 	void *c_activable_args;
 	void *c_can_read_args;
 	void *c_can_write_args;

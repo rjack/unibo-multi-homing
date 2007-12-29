@@ -47,11 +47,11 @@ feed_upload (struct proxy *px)
 	static int id = 0;
 
 	for (needmask = 0x7;
-	     needmask != 0x0 && cqueue_get_used (px->p_host_rcvbuf > 0);
+	     needmask != 0x0 && cqueue_get_used (px->p_host_rcvbuf) > 0;
 	     id = (id + 1) % NETCHANNELS) {
 		if (channel_is_connected (&px->p_net[id])
 		    /* TODO && spazio nel buffer > SEGMINLEN */ ) {
-			/* TODO mov_host2net */
+			mov_host2net (px);
 		} else {
 			/* Spegnimento bit. */
 			needmask &= ~(0x1 << id);
@@ -199,21 +199,37 @@ host_write (fd_t fd, void *args)
 static void
 mov_host2net (struct proxy *px)
 {
-	size_t pldlen;
+	int err;
 	size_t used;
-	/* TODO static char buf[PLDDEFLEN + PLDMINLEN + HDRLEN]; */
+	/* Segmento piu' grande possibile. */
+	uint8_t buf[FLGLEN + SEQLEN + LENLEN + PLDMAXLEN];
+	/* Puntatori ai campi nel buffer. */
+	flag_t *flags = &buf[0];
+	seq_t *seq = &buf[1];
+	len_t *pldlen = &buf[2];
+	pld_t *pld = NULL;
 
 	assert (px != NULL);
 	assert (cqueue_get_used (px->p_host_rcvbuf) >= PLDMINLEN);
+
+	*flags = 0 | FLPLD;
+	*seq = px->p_outseq;
+	px->p_outseq++;
 
 	/* Fa in modo che in p_host_rcvbuf non rimangano mai troppi pochi
 	 * dati per fare un payload valido. */
 	used = cqueue_get_used (px->p_host_rcvbuf);
 	if (used >= PLDDEFLEN && (used - PLDDEFLEN) >= PLDMINLEN) {
-		pldlen = PLDDEFLEN;
+		/* Payload standard, il segmento non ha il campo pldlen. */
+		pld = &buf[2];
+		pldlen = NULL;
 	} else {
-		pldlen = used;
+		*pldlen = used;
+		*flags |= FLLEN;
+		pld = &buf[3];
 	}
-
-	/* TODO costruire header */
+	err = cqueue_remove (px->p_host_rcvbuf,
+	                     (char *)pld,
+	                     pldlen == NULL ? PLDDEFLEN : *pldlen);
+	assert (!err);
 }

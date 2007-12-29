@@ -33,6 +33,13 @@ core (struct proxy *px)
 	struct timeval tv_timeout;
 	struct ack_args *args;
 
+	/* DEBUG */
+	if (ACTIVITY_TIMEOUT > 1) {
+		fprintf (stderr,
+		        "\nOCCHIO!!!\nACTIVITY_TIMEOUT = %f\n\n",
+		        ACTIVITY_TIMEOUT);
+	}
+
 	/*
 	 * Preparazione timeout.
 	 */
@@ -55,8 +62,12 @@ core (struct proxy *px)
 
 		min_timeout = check_timeouts ();
 
-		feed_upload (px);
-		feed_download (px);
+		if (px->p_host_rcvbuf != NULL) {
+			feed_upload (px);
+		}
+		if (px->p_host_sndbuf != NULL) {
+			feed_download (px);
+		}
 
 		/*
 		 * Select
