@@ -204,16 +204,13 @@ mov_host2net (struct proxy *px)
 	/* Segmento piu' grande possibile. */
 	uint8_t buf[FLGLEN + SEQLEN + LENLEN + PLDMAXLEN];
 	/* Puntatori ai campi nel buffer. */
-	flag_t *flags = &buf[0];
-	seq_t *seq = &buf[1];
-	len_t *pldlen = &buf[2];
 	pld_t *pld = NULL;
 
 	assert (px != NULL);
 	assert (cqueue_get_used (px->p_host_rcvbuf) >= PLDMINLEN);
 
-	*flags = 0 | FLPLD;
-	*seq = px->p_outseq;
+	buf[FLG] = 0 | PLDFLAG;
+	buf[SEQ] = px->p_outseq;
 	px->p_outseq++;
 
 	/* Fa in modo che in p_host_rcvbuf non rimangano mai troppi pochi
@@ -221,15 +218,14 @@ mov_host2net (struct proxy *px)
 	used = cqueue_get_used (px->p_host_rcvbuf);
 	if (used >= PLDDEFLEN && (used - PLDDEFLEN) >= PLDMINLEN) {
 		/* Payload standard, il segmento non ha il campo pldlen. */
-		pld = &buf[2];
-		pldlen = NULL;
+		pld = &buf[LEN];
 	} else {
-		*pldlen = used;
-		*flags |= FLLEN;
-		pld = &buf[3];
+		buf[FLG] |= LENFLAG;
+		buf[LEN] = used;
+		pld = &buf[LEN + 1];
 	}
 	err = cqueue_remove (px->p_host_rcvbuf,
-	                     (char *)pld,
-	                     pldlen == NULL ? PLDDEFLEN : *pldlen);
+	                     pld,
+	                     (buf[FLG] & LENFLAG ? buf[LEN] : PLDDEFLEN));
 	assert (!err);
 }

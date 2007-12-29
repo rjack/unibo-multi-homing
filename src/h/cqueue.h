@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 int
-cqueue_add (cqueue_t *cq, char *buf, size_t nbytes);
+cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes);
 
 
 bool
@@ -41,7 +41,7 @@ cqueue_read (fd_t fd, cqueue_t *cq);
 
 
 int
-cqueue_remove (cqueue_t *cq, char *buf, size_t buflen);
+cqueue_remove (cqueue_t *cq, seg_t *buf, size_t buflen);
 
 
 int

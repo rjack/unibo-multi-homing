@@ -52,6 +52,8 @@ typedef uint8_t len_t;
 typedef uint8_t pld_t;
 /* Flag conformazione segmento. */
 typedef uint8_t flag_t;
+/* Buffer contentente un segmento. */
+typedef uint8_t seg_t;
 
 
 /*******************************************************************************
@@ -77,8 +79,12 @@ typedef uint8_t flag_t;
 /*
  * Segmenti.
  */
+/* Indici dei campi. */
+#define     FLG     0
+#define     SEQ     1
+#define     LEN     2
 
-/* Campi, in byte. */
+/* Dimensione campi, in byte. */
 #define     SEQLEN     sizeof(seq_t)
 #define     LENLEN     sizeof(len_t)
 #define     FLGLEN     sizeof(flag_t)
@@ -91,11 +97,11 @@ typedef uint8_t flag_t;
 #define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))
 
 /* Bit del campo flag */
-#define     FLCRT     0x1
-#define     FLPLD     0x2
-#define     FLLEN     0x4
-#define     FLNAK     0x8
-#define     FLACK     0x10
+#define     CRTFLAG     0x1
+#define     PLDFLAG     0x2
+#define     LENFLAG     0x4
+#define     NAKFLAG     0x8
+#define     ACKFLAG     0x10
 
 
 /*******************************************************************************
@@ -192,7 +198,7 @@ typedef struct {
 	bool cq_wrap;
 
 	/* Puntatore al buffer. */
-	char *cq_data;
+	seg_t *cq_data;
 
 	/* Dimensione del buffer. */
 	size_t cq_len;

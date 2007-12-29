@@ -34,7 +34,7 @@ static size_t cqueue_get_used_chunk (const cqueue_t *cq);
 *******************************************************************************/
 
 int
-cqueue_add (cqueue_t *cq, char *buf, size_t nbytes)
+cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
 	size_t chunk_1;
 	size_t chunk_2;
@@ -106,7 +106,7 @@ cqueue_create (size_t len)
 	assert (len > 0);
 
 	cq = xmalloc (sizeof (cqueue_t));
-	cq->cq_data = xmalloc (len * sizeof (char));
+	cq->cq_data = xmalloc (len * sizeof (seg_t));
 	cq->cq_len = len;
 	cq->cq_head = 0;
 	cq->cq_tail = 0;
@@ -189,7 +189,7 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 
 
 int
-cqueue_remove (cqueue_t *cq, char *buf, size_t nbytes)
+cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
 	size_t chunk_1;
 	size_t chunk_2;
