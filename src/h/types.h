@@ -138,10 +138,10 @@ typedef struct timeout_t {
 	struct timeout_t *to_prev;
 } timeout_t;
 
+
 /*
  * Classi di timeout.
  */
-
 typedef enum {
 	ACTIVITY, NACK, ACK
 } timeout_class;
@@ -210,6 +210,32 @@ typedef struct {
 
 
 /*
+ * Wrapper per creare code di segmenti.
+ */
+struct segwrap {
+	seg_t *sw_seg;
+	size_t sw_seglen;
+	struct segwrap *sw_next;
+	struct segwrap *sw_prev;
+};
+
+
+/*
+ * Coda di routing.
+ */
+typedef struct {
+	/* Buffer circolare per inviare al / ricevere dal sockfd. */
+	cqueue_t *rq_data;
+	/* Coda di segmenti da mantenere per rispedizione / ricostruzione. */
+	struct segwrap *rq_seg;
+	/* In invio e' il numero di byte da spedire per completare il segmento
+	 * corrente, in ricezione il numero di byte che mancano alla fine del
+	 * segmento in arrivo. */
+	size_t rq_nbytes;
+} rqueue_t;
+
+
+/*
  * Proxy: i vari canali, i buffer e i contatori.
  */
 struct proxy {
@@ -223,8 +249,8 @@ struct proxy {
 	cqueue_t *p_host_rcvbuf;
 	cqueue_t *p_host_sndbuf;
 
-	cqueue_t *p_net_rcvbuf[NETCHANNELS];
-	cqueue_t *p_net_sndbuf[NETCHANNELS];
+	rqueue_t *p_net_rcvbuf[NETCHANNELS];
+	rqueue_t *p_net_sndbuf[NETCHANNELS];
 	/* TODO coda segmenti uscenti. */
 
 	/* Ultimo seqnum inviato. */
