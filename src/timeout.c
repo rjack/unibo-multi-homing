@@ -4,6 +4,7 @@
 #include "h/timeout.h"
 
 #include <assert.h>
+#include <config.h>
 #include <stdio.h>
 #include <unistd.h>
 
