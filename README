@@ -1,0 +1,12 @@
+  Compilazione
+
+autoreconf -fi
+./configure
+make clean all
+
+
+  Esecuzione
+
+Gli eseguibili sono:
+  src/psend
+  src/precv
