@@ -13,8 +13,9 @@
 				    Macro
 *******************************************************************************/
 
-/* Incremento circolare. */
+/* Incremento e decremento circolare. */
 #define     CINC(x,inc,len)     ((x) = ((x) + (inc)) % (len))
+#define     CDEC(x,dec,len)     ((x) = ((x) - (dec)) % (len))
 
 #if ! HAVE_MSG_NOSIGNAL
 #define     MSG_NOSIGNAL     0
@@ -126,6 +127,20 @@ cqueue_destroy (cqueue_t *cq)
 }
 
 
+void
+cqueue_drop (cqueue_t *cq, size_t nbytes)
+{
+	assert (cq != NULL);
+	assert (nbytes > 0);
+	assert (nbytes <= cqueue_get_aval (cq));
+
+	CINC (cq->cq_head, nbytes, cq->cq_len);
+	if (cq->cq_head <= cq->cq_tail) {
+		cq->cq_wrap = FALSE;
+	}
+}
+
+
 size_t
 cqueue_get_aval (cqueue_t *cq)
 {
@@ -149,6 +164,40 @@ cqueue_get_used (cqueue_t *cq)
 {
 	assert (cq != NULL);
 	return (cq->cq_len - cqueue_get_aval (cq));
+}
+
+
+int
+cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
+{
+	size_t chunk_1;
+	size_t chunk_2;
+
+	if (cqueue_get_aval (cq) >= nbytes) {
+		assert (cq->cq_wrap || cq->cq_tail >= cq->cq_head);
+		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
+
+		chunk_1 = cq->cq_head - (cq->cq_wrap ? cq->cq_tail : 0);
+		chunk_2 = nbytes - chunk_1;
+
+		if (chunk_1 > 0) {
+			CDEC (cq->cq_head, chunk_1, cq->cq_len);
+			memcpy (&cq->cq_data[cq->cq_head], buf, chunk_1);
+			buf += chunk_1;
+		}
+		if (cq->cq_head + chunk_1 > cq->cq_len) {
+			assert (!cq->cq_wrap);
+			cq->cq_wrap = TRUE;
+		}
+		if (chunk_2 > 0) {
+			memcpy (&cq->cq_data[cq->cq_head], buf, chunk_2);
+			cq->cq_head -= chunk_2;
+			assert (cq->cq_head >= 0);
+			assert (cq->cq_head >= cq->cq_tail);
+		}
+		return 0;
+	}
+	return -1;
 }
 
 

@@ -28,12 +28,20 @@ void
 cqueue_destroy (cqueue_t *cq);
 
 
+void
+cqueue_drop (cqueue_t *cq, size_t nbytes);
+
+
 size_t
 cqueue_get_aval (cqueue_t *cq);
 
 
 size_t
 cqueue_get_used (cqueue_t *cq);
+
+
+int
+cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes);
 
 
 int
