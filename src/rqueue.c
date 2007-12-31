@@ -29,7 +29,7 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (!seg_is_nak (sw->sw_seg));
 
 	qenqueue (&rq->rq_seg, sw);
-	err = cqueue_add (rc->rq_data, sw->sw_seg, sw->sw_seglen);
+	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
 	assert (!err);
 	return err;
 }
@@ -66,7 +66,7 @@ rqueue_create (size_t len)
 	assert (len > 0);
 
 	newrq = xmalloc (sizeof (rqueue_t));
-	newrq->rq_data = rqueue_create (len);
+	newrq->rq_data = cqueue_create (len);
 	newrq->rq_seg = newQueue ();
 	newrq->rq_nbytes = 0;
 
