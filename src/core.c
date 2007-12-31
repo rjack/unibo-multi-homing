@@ -62,10 +62,9 @@ core (struct proxy *px)
 
 		min_timeout = check_timeouts ();
 
-		if (px->p_host_rcvbuf != NULL) {
+		/* Lo stato dei canali p_net e' controllato dalle funzioni. */
+		if (channel_is_connected (&px->p_host)) {
 			feed_upload (px);
-		}
-		if (px->p_host_sndbuf != NULL) {
 			feed_download (px);
 		}
 

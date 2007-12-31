@@ -95,64 +95,6 @@ set_addr (struct sockaddr_in *addr, char *ip, port_t port)
 
 
 /*
- * Funzioni su segmenti.
- */
-
-bool
-seg_is_ack (seg_t *seg)
-{
-	assert (seg != NULL);
-	return (seg[FLG] & ACKFLAG ? TRUE : FALSE);
-}
-
-
-bool
-seg_is_critical (seg_t *seg)
-{
-	assert (seg != NULL);
-	return (seg[FLG] & CRTFLAG ? TRUE : FALSE);
-}
-
-
-bool
-seg_is_nak (seg_t *seg)
-{
-	assert (seg != NULL);
-	return (seg[FLG] & NAKFLAG ? TRUE : FALSE);
-}
-
-
-pld_t *
-seg_pld (seg_t *seg)
-{
-	assert (seg != NULL);
-	if (seg[FLG] & PLDFLAG) {
-		return (seg[FLG] & LENFLAG ? &seg[LEN + 1] : &seg[LEN]);
-	}
-	return NULL;
-}
-
-
-len_t
-seg_pld_len (seg_t *seg)
-{
-	assert (seg != NULL);
-	if (seg[FLG] & PLDFLAG) {
-		return (seg[FLG] & LENFLAG ? seg[LEN] : PLDDEFLEN);
-	}
-	return 0;
-}
-
-
-seq_t
-seg_seq (seg_t *seg)
-{
-	assert (seg != NULL);
-	return seg[SEQ];
-}
-
-
-/*
  * Funzioni su stringhe.
  */
 

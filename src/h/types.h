@@ -89,12 +89,16 @@ typedef uint8_t seg_t;
 #define     LENLEN     sizeof(len_t)
 #define     FLGLEN     sizeof(flag_t)
 
-/* Limiti dei payload, in byte. */
-/* Il payload minimo eguaglia l'overhead causato dall'header. */
-#define     PLDMINLEN     (FLGLEN + SEQLEN + LENLEN)
+/* Limiti dei segmenti, in byte. */
+#define     HDRMINLEN     (FLGLEN + SEQLEN)
+#define     HDRMAXLEN     (FLGLEN + SEQLEN + LENLEN)
+
+#define     PLDMINLEN     (HDRMAXLEN * 2)
 #define     PLDMAXLEN     UINT8_MAX
-/* XXX Da tarare bene. */
-#define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))
+#define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))  /* TODO da tarare */
+
+#define     SEGMINLEN     (PLDMINLEN + HDRMAXLEN)
+#define     SEGMAXLEN     (PLDMAXLEN + HDRMAXLEN)
 
 /* Bit del campo flag */
 #define     CRTFLAG     0x1

@@ -1,4 +1,5 @@
 #include "h/cqueue.h"
+#include "h/segment.h"
 #include "h/types.h"
 #include "h/util.h"
 

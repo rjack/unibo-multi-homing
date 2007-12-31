@@ -1,5 +1,7 @@
 #include "h/channel.h"
 #include "h/cqueue.h"
+#include "h/rqueue.h"
+#include "h/segment.h"
 #include "h/timeout.h"
 #include "h/types.h"
 #include "h/util.h"
@@ -17,7 +19,7 @@
 
 static int host_read (fd_t fd, void *args);
 static int host_write (fd_t fd, void *args);
-static void mov_host2net (struct proxy *px);
+static void mov_host2net (struct proxy *px, int id);
 
 
 /*******************************************************************************
@@ -36,7 +38,7 @@ feed_upload (struct proxy *px)
 {
 	/* Il routing e' banale: un segmento a ogni canale, finche' ci stanno
 	 * nei net o si svuota l'host.
-	 * XXX round robin = variabile statica che tiene traccia dell'ultimo
+	 * XXX round robin: id variabile statica che tiene traccia dell'ultimo
 	 * XXX canale servito.
 	 * XXX solo i canali connessi.
 	 * XXX le code dei net devono essere sempre piu' o meno uguali. */
@@ -50,8 +52,8 @@ feed_upload (struct proxy *px)
 	     needmask != 0x0 && cqueue_get_used (px->p_host_rcvbuf) > 0;
 	     id = (id + 1) % NETCHANNELS) {
 		if (channel_is_connected (&px->p_net[id])
-		    /* TODO && spazio nel buffer > SEGMINLEN */ ) {
-			mov_host2net (px);
+		    && rqueue_get_aval (px->p_net_sndbuf[id]) >= SEGMINLEN) {
+			mov_host2net (px, id);
 		} else {
 			/* Spegnimento bit. */
 			needmask &= ~(0x1 << id);
@@ -197,35 +199,31 @@ host_write (fd_t fd, void *args)
 
 
 static void
-mov_host2net (struct proxy *px)
+mov_host2net (struct proxy *px, int id)
 {
 	int err;
 	size_t used;
-	/* Segmento piu' grande possibile. */
-	uint8_t buf[FLGLEN + SEQLEN + LENLEN + PLDMAXLEN];
-	/* Puntatori ai campi nel buffer. */
+	size_t pldlen;
+	struct segwrap *newsw;
 	pld_t *pld = NULL;
 
 	assert (px != NULL);
 	assert (cqueue_get_used (px->p_host_rcvbuf) >= PLDMINLEN);
 
-	buf[FLG] = 0 | PLDFLAG;
-	buf[SEQ] = px->p_outseq;
-	px->p_outseq++;
-
-	/* Fa in modo che in p_host_rcvbuf non rimangano mai troppi pochi
-	 * dati per fare un payload valido. */
+	/* Calcolo lunghezza payload. */
 	used = cqueue_get_used (px->p_host_rcvbuf);
 	if (used >= PLDDEFLEN && (used - PLDDEFLEN) >= PLDMINLEN) {
-		/* Payload standard, il segmento non ha il campo pldlen. */
-		pld = &buf[LEN];
+		pldlen = PLDDEFLEN;
 	} else {
-		buf[FLG] |= LENFLAG;
-		buf[LEN] = used;
-		pld = &buf[LEN + 1];
+		pldlen = used;
 	}
-	err = cqueue_remove (px->p_host_rcvbuf,
-	                     pld,
-	                     (buf[FLG] & LENFLAG ? buf[LEN] : PLDDEFLEN));
+
+	newsw = segwrap_create (px->p_outseq, pldlen);
+	px->p_outseq++;
+
+	pld = seg_pld (newsw->sw_seg);
+	err = cqueue_remove (px->p_host_rcvbuf, pld, pldlen);
 	assert (!err);
+
+	rqueue_add (px->p_net_sndbuf[id], newsw);
 }
