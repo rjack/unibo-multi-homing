@@ -46,16 +46,20 @@ rqueue_add_nak (rqueue_t *rq, seq_t seq)
 bool
 rqueue_can_read (void *arg)
 {
-	/* TODO rqueue_can_read */
-	return FALSE;
+	rqueue_t *rq = (rqueue_t *)arg;
+
+	assert (rq != NULL);
+	return cqueue_can_read ((void *)rq->rq_data);
 }
 
 
 bool
 rqueue_can_write (void *arg)
 {
-	/* TODO rqueue_can_write */
-	return FALSE;
+	rqueue_t *rq = (rqueue_t *)arg;
+
+	assert (rq != NULL);
+	return cqueue_can_write ((void *)rq->rq_data);
 }
 
 
