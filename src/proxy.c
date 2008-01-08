@@ -108,16 +108,12 @@ proxy_init (struct proxy *px)
 	for (i = 0; i < NETCHANNELS; i++) {
 		px->p_net_rcvbuf[i] = NULL;
 		px->p_net_sndbuf[i] = NULL;
-		/* TODO coda segmenti uscenti. */
 	}
 
 	px->p_outseq = 0;
 
-#if !HAVE_MSG_NOSIGNAL
-	/* Gestione SIGPIPE.
-	 * NetBSD non ha un equivalente di MSG_NOSIGNAL, quindi l'unico modo
-	 * e' ignorare il segnale. */
-	{
+	/* Ignora SIGPIPE sui sistemi senza MSG_NOSIGNAL. */
+	if (!HAVE_MSG_NOSIGNAL) {
 		int err;
 		struct sigaction act;
 
@@ -129,7 +125,6 @@ proxy_init (struct proxy *px)
 		fprintf (stderr,
 		         "Manca MSG_NOSIGNAL, tutti i SIGPIPE ignorati.\n");
 	}
-#endif
 }
 
 

@@ -136,3 +136,10 @@ ACKTimeout: uno solo, globale.
 > serve struct proxy
 
 Quindi funzioni trigger prendono come parametro una struct proxy.
+
+
+  Buffer canali di rete
+
+Ricezione: massimo possibile -> cqueue = al buffer TCP.
+
+Spedizione: minimo possibile -> cqueue = 2 * buffer TCP.

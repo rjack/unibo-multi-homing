@@ -255,7 +255,6 @@ struct proxy {
 
 	rqueue_t *p_net_rcvbuf[NETCHANNELS];
 	rqueue_t *p_net_sndbuf[NETCHANNELS];
-	/* TODO coda segmenti uscenti. */
 
 	/* Ultimo seqnum inviato. */
 	seq_t p_outseq;
