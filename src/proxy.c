@@ -113,7 +113,8 @@ proxy_init (struct proxy *px)
 	px->p_outseq = 0;
 
 	/* Ignora SIGPIPE sui sistemi senza MSG_NOSIGNAL. */
-	if (!HAVE_MSG_NOSIGNAL) {
+#if !HAVE_MSG_NOSIGNAL
+	{
 		int err;
 		struct sigaction act;
 
@@ -125,6 +126,7 @@ proxy_init (struct proxy *px)
 		fprintf (stderr,
 		         "Manca MSG_NOSIGNAL, tutti i SIGPIPE ignorati.\n");
 	}
+#endif
 }
 
 
