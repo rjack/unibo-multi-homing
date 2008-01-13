@@ -64,7 +64,7 @@ main (int argc, char **argv)
 
 		/* Piu' piccolo possibile per notare prima congestioni e
 		 * blocchi. */
-		pr.p_net[i].c_sndbuf_len = 1024;
+		pr.p_net[i].c_tcp_sndbuf_len = 1024;
 
 		err = set_addr (&pr.p_net[i].c_laddr, NULL, deflistport[i]);
 		assert (!err);

@@ -227,19 +227,19 @@ connect_noblock (struct chan *ch)
 	 * FIXME dove disabilitare Nagle?
 	 */
 
-	if (ch->c_rcvbuf_len > 0) {
+	if (ch->c_tcp_rcvbuf_len > 0) {
 		err = tcp_set_buffer_size (ch->c_sockfd, SO_RCVBUF,
-		                           ch->c_rcvbuf_len);
+		                           ch->c_tcp_rcvbuf_len);
 		assert (!err);
-		assert (ch->c_rcvbuf_len == tcp_get_buffer_size (ch->c_sockfd,
-		                                                 SO_RCVBUF));
+		assert (ch->c_tcp_rcvbuf_len == tcp_get_buffer_size
+				                (ch->c_sockfd, SO_RCVBUF));
 	}
-	if (ch->c_sndbuf_len > 0) {
+	if (ch->c_tcp_sndbuf_len > 0) {
 		err = tcp_set_buffer_size (ch->c_sockfd, SO_SNDBUF,
-		                           ch->c_sndbuf_len);
+		                           ch->c_tcp_sndbuf_len);
 		assert (!err);
-		assert (ch->c_sndbuf_len == tcp_get_buffer_size (ch->c_sockfd,
-		                                                 SO_SNDBUF));
+		assert (ch->c_tcp_sndbuf_len == tcp_get_buffer_size
+		                                (ch->c_sockfd, SO_SNDBUF));
 	}
 
 	/* Tentativo di connessione. */
@@ -293,27 +293,27 @@ listen_noblock (struct chan *ch)
 		goto error;
 	}
 
-	if (ch->c_rcvbuf_len > 0) {
+	if (ch->c_tcp_rcvbuf_len > 0) {
 		err = tcp_set_buffer_size (ch->c_listfd, SO_RCVBUF,
-		                           ch->c_rcvbuf_len);
+		                           ch->c_tcp_rcvbuf_len);
 		if (err) {
 			errmsg = "tcp_set_buffer_size SO_RCVBUF fallita";
 			goto error;
 		}
-		assert (ch->c_rcvbuf_len == tcp_get_buffer_size (ch->c_listfd,
-		                                                 SO_RCVBUF));
+		assert (ch->c_tcp_rcvbuf_len == tcp_get_buffer_size
+		                                (ch->c_listfd, SO_RCVBUF));
 	}
 
 
-	if (ch->c_sndbuf_len > 0) {
+	if (ch->c_tcp_sndbuf_len > 0) {
 		err = tcp_set_buffer_size (ch->c_listfd, SO_SNDBUF,
-		                           ch->c_sndbuf_len);
+		                           ch->c_tcp_sndbuf_len);
 		if (err) {
 			errmsg = "tcp_set_buffer_size SO_SNDBUF fallita";
 			goto error;
 		}
-		assert (ch->c_sndbuf_len == tcp_get_buffer_size (ch->c_listfd,
-		                                                 SO_SNDBUF));
+		assert (ch->c_tcp_sndbuf_len == tcp_get_buffer_size
+		                                (ch->c_listfd, SO_SNDBUF));
 	}
 
 	err = tcp_set_block (ch->c_listfd, FALSE);

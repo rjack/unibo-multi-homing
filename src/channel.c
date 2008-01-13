@@ -56,8 +56,8 @@ channel_init (struct chan *ch)
 	memset (&ch->c_laddr, 0, sizeof (ch->c_laddr));
 	memset (&ch->c_raddr, 0, sizeof (ch->c_raddr));
 
-	ch->c_rcvbuf_len = 0;
-	ch->c_sndbuf_len = 0;
+	ch->c_tcp_rcvbuf_len = 0;
+	ch->c_tcp_sndbuf_len = 0;
 
 	ch->c_rcvbufptr = NULL;
 	ch->c_sndbufptr = NULL;

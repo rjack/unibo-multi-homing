@@ -93,6 +93,8 @@ typedef uint8_t seg_t;
 #define     HDRMINLEN     (FLGLEN + SEQLEN)
 #define     HDRMAXLEN     (FLGLEN + SEQLEN + LENLEN)
 
+/* XXX sono possibili payload minori di PLDMINLEN, e' solo indicativo.
+ * XXX PLDMAXLEN invece e' un limite reale. */
 #define     PLDMINLEN     (HDRMAXLEN * 2)
 #define     PLDMAXLEN     UINT8_MAX
 #define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))  /* TODO da tarare */
@@ -164,8 +166,8 @@ struct chan {
 	struct sockaddr_in c_raddr;
 
 	/* Dimensioni dei buffer tcp. */
-	size_t c_rcvbuf_len;
-	size_t c_sndbuf_len;
+	size_t c_tcp_rcvbuf_len;
+	size_t c_tcp_sndbuf_len;
 
 	/* Puntatori ai buffer applicazione. */
 	void *c_rcvbufptr;

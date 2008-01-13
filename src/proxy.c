@@ -19,7 +19,7 @@
 
 static int host_read (fd_t fd, void *args);
 static int host_write (fd_t fd, void *args);
-static void mov_host2net (struct proxy *px, int id);
+static void mov_host2net (struct proxy *px, int id, len_t pldlen);
 
 
 /*******************************************************************************
@@ -47,17 +47,23 @@ feed_upload (struct proxy *px)
 	int needmask;
 	/* Contatore, statico per politica round robin. */
 	static int id = 0;
+	size_t used;
+	len_t pldlen;
 
-	for (needmask = 0x7;
-	     needmask != 0x0 && cqueue_get_used (px->p_host_rcvbuf) > 0;
-	     id = (id + 1) % NETCHANNELS) {
+	needmask = 0x7;
+	used = cqueue_get_used (px->p_host_rcvbuf),
+	pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
+	while (needmask != 0x0 && used > 0) {
 		if (channel_is_connected (&px->p_net[id])
-		    && rqueue_get_aval (px->p_net_sndbuf[id]) >= SEGMINLEN) {
-			mov_host2net (px, id);
+		    && rqueue_get_aval (px->p_net_sndbuf[id]) >= pldlen) {
+			mov_host2net (px, id, pldlen);
+			used = cqueue_get_used (px->p_host_rcvbuf),
+			pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
 		} else {
 			/* Spegnimento bit. */
 			needmask &= ~(0x1 << id);
 		}
+		id = (id + 1) % NETCHANNELS;
 	}
 }
 
@@ -164,9 +170,26 @@ proxy_prepare_io (struct proxy *px, int id)
 	}
 	/* NET */
 	else {
+		size_t buflen;
+
+		buflen = MAX (SEGMAXLEN,
+		              tcp_get_buffer_size (px->p_net[id].c_sockfd,
+		                                   SO_RCVBUF));
+		px->p_net_rcvbuf[id] = rqueue_create (buflen);
+		buflen = 2 * tcp_get_buffer_size (px->p_net[id].c_sockfd,
+		                                  SO_SNDBUF);
+		px->p_net_sndbuf[id] = rqueue_create (buflen);
+
+		px->p_net[id].c_rcvbufptr = px->p_net_rcvbuf[id];
+		px->p_net[id].c_sndbufptr = px->p_net_sndbuf[id];
+
+		px->p_net[id].c_can_read = &rqueue_can_read;
+		px->p_net[id].c_can_write = &rqueue_can_write;
+		px->p_net[id].c_can_read_args = px->p_net_rcvbuf[id];
+		px->p_net[id].c_can_write_args = px->p_net_sndbuf[id];
+
 		timeout_reset (px->p_net[id].c_activity);
 		add_timeout (px->p_net[id].c_activity, ACTIVITY);
-		/* TODO buffer canali ritardatore */
 	}
 }
 
@@ -196,24 +219,13 @@ host_write (fd_t fd, void *args)
 
 
 static void
-mov_host2net (struct proxy *px, int id)
+mov_host2net (struct proxy *px, int id, len_t pldlen)
 {
 	int err;
-	size_t used;
-	size_t pldlen;
 	struct segwrap *newsw;
 	pld_t *pld = NULL;
 
 	assert (px != NULL);
-	assert (cqueue_get_used (px->p_host_rcvbuf) >= PLDMINLEN);
-
-	/* Calcolo lunghezza payload. */
-	used = cqueue_get_used (px->p_host_rcvbuf);
-	if (used >= PLDDEFLEN && (used - PLDDEFLEN) >= PLDMINLEN) {
-		pldlen = PLDDEFLEN;
-	} else {
-		pldlen = used;
-	}
 
 	newsw = segwrap_create (px->p_outseq, pldlen);
 	px->p_outseq++;

@@ -76,7 +76,7 @@ main (int argc, char **argv)
 
 		/* Piu' piccolo possibile per notare prima congestioni e
 		 * blocchi. */
-		ps.p_net[i].c_sndbuf_len = 1024;
+		ps.p_net[i].c_tcp_sndbuf_len = 1024;
 
 		channel_set_condition (&ps.p_net[i], SET_ACTIVABLE,
 		                       &activable_if_connected, &ps.p_host);

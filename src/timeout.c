@@ -207,8 +207,8 @@ timeout_check (timeout_t *to)
 
 	left = to->to_maxval - crono_measure (&to->to_crono);
 	if (left <= 0) {
-		to->to_trigger (to->to_trigger_args);
 		timeout_reset (to);
+		to->to_trigger (to->to_trigger_args);
 	}
 	return left;
 }

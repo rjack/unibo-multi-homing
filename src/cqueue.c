@@ -49,7 +49,7 @@ cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
 
 		chunk_1 = cqueue_get_aval_chunk (cq);
-		chunk_2 = nbytes - chunk_1;
+		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
 
 		memcpy (&cq->cq_data[cq->cq_tail], buf, chunk_1);
 		CINC (cq->cq_tail, chunk_1, cq->cq_len);
@@ -178,7 +178,7 @@ cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
 
 		chunk_1 = cq->cq_head - (cq->cq_wrap ? cq->cq_tail : 0);
-		chunk_2 = nbytes - chunk_1;
+		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
 
 		if (chunk_1 > 0) {
 			CDEC (cq->cq_head, chunk_1, cq->cq_len);
@@ -251,7 +251,7 @@ cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		assert (!cq->cq_wrap || cq->cq_tail <= cq->cq_head);
 
 		chunk_1 = cqueue_get_used_chunk (cq);
-		chunk_2 = nbytes - chunk_1;
+		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
 
 		memcpy (buf, &cq->cq_data[cq->cq_head], chunk_1);
 		CINC (cq->cq_head, chunk_1, cq->cq_len);
