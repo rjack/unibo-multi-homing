@@ -14,15 +14,15 @@
  */
 typedef unsigned char bool;
 
-#ifdef TRUE
-#undef TRUE
-#endif
-#define     TRUE     ((bool)1)
-
 #ifdef FALSE
 #undef FALSE
 #endif
 #define     FALSE     ((bool)0)
+
+#ifdef TRUE
+#undef TRUE
+#endif
+#define     TRUE     (!FALSE)
 
 /*
  * Identificativi delle porte.
