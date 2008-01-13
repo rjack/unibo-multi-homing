@@ -55,7 +55,8 @@ feed_upload (struct proxy *px)
 	pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
 	while (needmask != 0x0 && used > 0) {
 		if (channel_is_connected (&px->p_net[id])
-		    && rqueue_get_aval (px->p_net_sndbuf[id]) >= pldlen) {
+		    && rqueue_get_aval (px->p_net_sndbuf[id]) <= (HDRMAXLEN
+		                                                  + pldlen)) {
 			mov_host2net (px, id, pldlen);
 			used = cqueue_get_used (px->p_host_rcvbuf),
 			pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
