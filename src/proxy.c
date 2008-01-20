@@ -87,7 +87,7 @@ idle_handler (void *args)
 
 	/* TODO travaso buffer */
 
-	fprintf (stderr, "WARNING Canale %s chiuso per inattività\n",
+	fprintf (stderr, "WARNING Canale %s chiuso per inattivita'\n",
 	         channel_name (ch));
 
 	channel_invalidate (ch);
@@ -143,7 +143,7 @@ proxy_prepare_io (struct proxy *px, int id)
 	/* Crea i buffer di I/O relativi al canale id e imposta le
 	 * conseguenti condizioni e le funzioni di I/O.
 	 *
-	 * Per i canali di rete fa partire i timeout di attività. */
+	 * Per i canali di rete fa partire i timeout di attivita'. */
 
 	assert (px != NULL);
 	assert (id >= 0);

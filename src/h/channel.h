@@ -64,7 +64,7 @@ channel_must_listen (struct chan *ch);
 char *
 channel_name (struct chan *ch);
 /* Ritorna una stringa allocata staticamente e terminata da '\0' della forma
- * "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il primo è
+ * "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il primo e'
  * l'indirizzo locale, il secondo quello remoto. */
 
 

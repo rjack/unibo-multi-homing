@@ -137,7 +137,7 @@ print_help (const char *program_name)
 	printf ("\n"
 "Attende una connessione dal Ritardatore su una delle porte locali e si\n"
 "connette al Receiver, che deve essere in ascolto sull'indirizzo ip:porta. Se\n"
-"un argomento non viene specificato oppure è -, viene usato il valore\n"
+"un argomento non viene specificato oppure e' -, viene usato il valore\n"
 "predefinito.\n"
 		);
 }

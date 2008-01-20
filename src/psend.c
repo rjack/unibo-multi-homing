@@ -140,7 +140,7 @@ print_help (const char *program_name)
 	printf ("\n"
 "Attende la connessione dal Sender su porta_locale e si connette al\n"
 "Ritardatore, che deve essere in ascolto sugli indirizzi ip:porta. Se un\n"
-"un argomento non viene specificato oppure è -, viene usato il valore\n"
+"un argomento non viene specificato oppure e' -, viene usato il valore\n"
 "predefinito.\n"
 		);
 }

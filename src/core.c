@@ -44,7 +44,7 @@ core (struct proxy *px)
 	 * Preparazione timeout.
 	 */
 
-	/* Creazione timeout attività per i canali con il Ritardatore. */
+	/* Creazione timeout attivita' per i canali con il Ritardatore. */
 	args = xmalloc (sizeof (struct ack_args));
 	args->aa_px = px;
 	init_timeout_module (args);

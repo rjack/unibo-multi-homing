@@ -1,5 +1,5 @@
 	  Progetto di Laboratorio di Programmazione di Rete 2006/07
-     "Fornire interattività a comunicazione TCP sfruttando multi-homing"
+     "Fornire interattivita' a comunicazione TCP sfruttando multi-homing"
 
 
 			   PROTOCOLLO APPLICAZIONE
@@ -19,7 +19,7 @@
 
 
 Flags:
-- critico: un segmento con payload che è stato spedito su tutti i canali
+- critico: un segmento con payload che e' stato spedito su tutti i canali
 - payload: il segmento ha il payload
 - lunghezza non standard: se acceso e' presente il capo pldlen, ignorato se
   non c'e' il payload.
@@ -57,7 +57,7 @@ Solita joining queue di segmenti ordinati:
 
    jq: | 5 | -> | 7 | -> | 12 |
 
-Un segmento è nella jq <==> non ha il seqnum successivo a quello dell'ultimo
+Un segmento e' nella jq <==> non ha il seqnum successivo a quello dell'ultimo
 segmento inviato all'host: mancano uno o piu' segmenti!
 
 Quindi... insert in jq -> manda NAK all'altro proxy per chiedere segmento
@@ -78,8 +78,8 @@ Quando mando il NAK, rimuovo il timer.
 In ogni caso, i NAK vengono mandati una volta sola: il peer risponde al primo
 NAK che riceve e scarta quelli relativi allo stesso seqnum che arrivano dagli
 altri canali. La risposta e' l'invio del segmento richiesto su tutti i
-canali: di meglio puo' fare, quindi puo' rimuovere il pacchetto in questione
-dalla coda dei segmenti da rispedire, come se fosse stato ACKato.
+canali: di meglio non si puo' fare, quindi puo' rimuovere il pacchetto in
+questione dalla coda dei segmenti da rispedire, come se fosse stato ACKato.
 
 Quando tutti i segmenti sono in fila posso mandare un ACK in modo che il peer
 liberi memoria. Mando un ACK ogni tot secondi a partire dall'ultimo NAK e SOLO
@@ -95,8 +95,8 @@ Condizione migliore (nessun ritardo) -> meglio un segmento per ogni canale,
 politica round robin.
 
 Condizione peggiore (congestioni frequenti) -> ridondanza per diminuire
-probabilità che segmento incontri un ritardo. Non rischio di intasare tutto?!
-Sicuramente sì: bisogna che solo i segmenti in ritardo vengano mandati in più
+probabilita' che segmento incontri un ritardo. Non rischio di intasare tutto?!
+Sicuramente si' bisogna che solo i segmenti in ritardo vengano mandati in piu'
 copie, in modo da minimizzare gli sprechi.
 
 Traffico normale: ogni segmento inviato sul suo canale.
@@ -104,11 +104,11 @@ Traffico critico: quando ricevo un NAK, il segmento richiesto lo rispedisco
 su tutti i canali, per essere sicuro che arrivi in tempo.
 
 Un canale con il ritardatore deve avere associato un timeout che viene
-ripristinato ogni volta che c'è attività. Se scade il canale viene invalidato.
-ActivityTimeout: meta' del tempo massimo concesso (= 250ms)?
+ripristinato ogni volta che c'e' attivita'. Se scade il canale viene
+invalidato. ActivityTimeout: meta' del tempo massimo concesso (= 250ms)?
 
 Che si fa con i segmenti in coda per quel canale?
-- se sono critici si buttano, i duplicati sono già stati spediti sugli altri
+- se sono critici si buttano, i duplicati sono gia' stati spediti sugli altri
   canali e non ha senso ritrasmetterli,
 - se sono normali vanno messi in testa alle code degli altri canali,
   distribuendoli uniformemente.
@@ -143,3 +143,5 @@ Quindi funzioni trigger prendono come parametro una struct proxy.
 Ricezione: massimo possibile -> cqueue = al buffer TCP.
 
 Spedizione: minimo possibile -> cqueue = 2 * buffer TCP.
+
+XXX: sicuri che sia necessario 2 * buffer TCP? Forse basta = al buffer TCP!

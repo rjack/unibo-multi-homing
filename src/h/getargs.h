@@ -14,7 +14,7 @@ getargs (int argc, char **argv, char *fmt, ...);
  * Ogni carattere della stringa fmt specifica o un indirizzo ip ('a') o una
  * porta ('p').
  *
- * Se il valore da linea di comando è '-', lascia il valore di default.
+ * Se il valore da linea di comando e' '-', lascia il valore di default.
  *
  * Ritorna TRUE se riesce, FALSE se fallisce. */
 

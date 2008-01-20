@@ -187,7 +187,7 @@ channel_name (struct chan *ch)
 {
 	/* Ritorna una stringa allocata staticamente e terminata da '\0' della
 	 * forma "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il
-	 * primo è l'indirizzo locale, il secondo quello remoto. */
+	 * primo e' l'indirizzo locale, il secondo quello remoto. */
 
 	char *bufptr;
 	static char bufname[46];
@@ -196,7 +196,7 @@ channel_name (struct chan *ch)
 
 	memset (bufname, 0, sizeof (bufname));
 
-	/* Indrizzo locale. */
+	/* Indirizzo locale. */
 	bufptr = addrstr (&ch->c_laddr, bufname);
 
 	/* Separatore. */
