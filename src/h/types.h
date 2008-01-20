@@ -2,6 +2,7 @@
 #define MH_TYPES_H
 
 #include <arpa/inet.h>
+#include <inttypes.h>
 #include <sys/time.h>
 
 
