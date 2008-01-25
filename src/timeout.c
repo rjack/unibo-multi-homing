@@ -159,7 +159,7 @@ timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
 	assert (to != NULL);
 	assert (maxval > 0);
 	assert (trigger != NULL);
-	assert (oneshot == TRUE || oneshot == FALSE);
+	assert (BOOL_VALUE (oneshot));
 
 	to->to_maxval = maxval;
 	to->to_trigger = trigger;
