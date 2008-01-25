@@ -148,7 +148,7 @@ core (struct proxy *px)
 					ssize_t nwrite;
 					nwrite = channel_write (ch);
 					/* FIXME controllo errore decente! */
-					assert (nwrite >= 0);
+					assert (nwrite != -1);
 				}
 			}
 		}

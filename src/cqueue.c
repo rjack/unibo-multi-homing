@@ -274,6 +274,13 @@ cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 int
 cqueue_write (fd_t fd, cqueue_t *cq)
 {
+	/* Scrive piu' dati possibile sul file descriptor fd dalla coda cq.
+	 * Ritorna -1 se fallisce senza aver scritto nulla.
+	 * Se riesce a scrivere qualcosa, ritorna il numero di byte scritti,
+	 * oppure il numero di byte scritti moltiplicati per -1 se e' avvenuto
+	 * un errore. */
+
+	ssize_t nsent;
 	ssize_t nwrite;
 	size_t chunk;
 
@@ -282,14 +289,19 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	assert (cqueue_get_used (cq) > 0);
 	/* TODO assert (NONBLOCK); */
 
+	nsent = 0;
 	chunk = cqueue_get_used_chunk (cq);
 	assert (chunk > 0);
 
-	/* Questo ciclo viene eseguito al massimo due volte. */
+	/* Questo ciclo viene eseguito al massimo due volte: se la coda ha
+	 * ciclato e la prima iterazione scrive tutti i dati dalla testa alla
+	 * fine del buffer, prova a scrivere anche i dati dall'inizio del
+	 * buffer alla coda. */
 	do {
 		nwrite = send (fd, &cq->cq_data[cq->cq_head], chunk,
 			       MSG_NOSIGNAL);
 		if (nwrite > 0) {
+			nsent += nwrite;
 			CINC (cq->cq_head, nwrite, cq->cq_len);
 			if (cq->cq_head == 0) {
 				assert (cq->cq_wrap);
@@ -301,10 +313,25 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	} while ((nwrite > 0 && cq->cq_head == 0 && chunk > 0)
 	          || (nwrite == -1 && errno == EINTR));
 
-	if (nwrite > 0 || (nwrite == -1 && errno == EAGAIN)) {
-		nwrite = 1;
+	/* Valore di ritorno? Vari casi:
+	 * - prima write fallita: nwrite = -1, nsent = 0
+	 *   => ritorna -1
+	 *   - sottocaso: errno = EAGAIN
+	 *     => ritorna 0
+	 * - prima write riuscita, seconda fallita: nwrite = -1, nsent > 0
+	 *   => ritorna -1 * nsent
+	 *   - sottocaso: errno = EAGAIN
+	 *     => ritorna nsent
+	 * - altrimenti
+	 *   => ritorna nsent */
+	assert (nwrite != 0);
+	if (nwrite < 0
+	    && errno != EAGAIN && errno != EWOULDBLOCK) {
+		if (nsent > 0)
+			return -1 * nsent;
+		return -1;
 	}
-	return nwrite;
+	return nsent;
 }
 
 
