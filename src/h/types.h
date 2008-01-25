@@ -231,10 +231,12 @@ struct segwrap {
  * Coda di routing.
  */
 typedef struct {
-	/* Buffer circolare per inviare al / ricevere dal sockfd. */
+	/* Buffer circolare per I/O sul sockfd. */
 	cqueue_t *rq_data;
-	/* Coda di segmenti da mantenere per rispedizione / ricostruzione. */
+	/* Coda dei segmenti in uscita. */
 	struct segwrap *rq_seg;
+	/* Coda dei segmenti spediti. */
+	struct segwrap *rq_sent;
 	/* In invio e' il numero di byte da spedire per completare il segmento
 	 * corrente, in ricezione il numero di byte che mancano alla fine del
 	 * segmento in arrivo. */

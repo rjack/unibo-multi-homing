@@ -81,6 +81,7 @@ rqueue_create (size_t len)
 	newrq = xmalloc (sizeof (rqueue_t));
 	newrq->rq_data = cqueue_create (len);
 	newrq->rq_seg = newQueue ();
+	newrq->rq_sent = newQueue ();
 	newrq->rq_nbytes = 0;
 
 	return newrq;
@@ -145,16 +146,20 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	assert (rqueue_can_write (rq));
 
 	nsent = cqueue_write (fd, rq->rq_data);
+
 	while (nsent > 0) {
 		size_t min = MIN (nsent, rq->rq_nbytes);
 		nsent -= min;
 		rq->rq_nbytes -= min;
+
+		/* Se primo segmento spedito completamente, lo rimuove e lo
+		 * accoda a rq_sent. */
 		if (rq->rq_nbytes == 0) {
 			struct segwrap *head;
 			head = qdequeue (&rq->rq_seg);
 			assert (head != NULL);
-			/* TODO inserimento nella struttura dati dei segmenti
-			 * TODO da rispedire. */
+			qenqueue (&rq->rq_sent, head);
+			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_seg);
 			rq->rq_nbytes = head->sw_seglen;
 		}
