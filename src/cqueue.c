@@ -275,10 +275,9 @@ int
 cqueue_write (fd_t fd, cqueue_t *cq)
 {
 	/* Scrive piu' dati possibile sul file descriptor fd dalla coda cq.
-	 * Ritorna -1 se fallisce senza aver scritto nulla.
-	 * Se riesce a scrivere qualcosa, ritorna il numero di byte scritti,
-	 * oppure il numero di byte scritti moltiplicati per -1 se e' avvenuto
-	 * un errore. */
+	 * Ritorna il numero di byte scritti, 0 se e' completamente fallita.
+	 * Se e' avvenuto un errore imposta l'errno corrispondente, se riesce
+	 * imposta errno = 0. */
 
 	ssize_t nsent;
 	ssize_t nwrite;
@@ -313,23 +312,11 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	} while ((nwrite > 0 && cq->cq_head == 0 && chunk > 0)
 	          || (nwrite == -1 && errno == EINTR));
 
-	/* Valore di ritorno? Vari casi:
-	 * - prima write fallita: nwrite = -1, nsent = 0
-	 *   => ritorna -1
-	 *   - sottocaso: errno = EAGAIN
-	 *     => ritorna 0
-	 * - prima write riuscita, seconda fallita: nwrite = -1, nsent > 0
-	 *   => ritorna -1 * nsent
-	 *   - sottocaso: errno = EAGAIN
-	 *     => ritorna nsent
-	 * - altrimenti
-	 *   => ritorna nsent */
 	assert (nwrite != 0);
-	if (nwrite < 0
-	    && errno != EAGAIN && errno != EWOULDBLOCK) {
-		if (nsent > 0)
-			return -1 * nsent;
-		return -1;
+	/* Pulisce il valore di errno se tutto e' andato liscio. */
+	if (nwrite > 0
+	    || errno == EAGAIN || errno == EWOULDBLOCK) {
+		errno = 0;
 	}
 	return nsent;
 }

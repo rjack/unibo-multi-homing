@@ -4,6 +4,7 @@
 #include "h/util.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <config.h>
 
 #define     TYPE     struct segwrap
@@ -12,6 +13,10 @@
 #define     EMPTYQ   NULL
 #include "src/queue_template"
 
+/* Invarianti di una rqueue:
+ * - rq_data contiene la prima parte (al massimo tutta) della coda rq_seg
+ * - rq_nbytes indica sempre quanti byte mancano per completare la spedizione
+ *   del segmento alla testa della rq_seg. */
 
 /*******************************************************************************
 			      Funzioni pubbliche
@@ -29,6 +34,9 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen > 0);
 	assert (!seg_is_nak (sw->sw_seg));
 
+	if (isEmpty (rq->rq_seg)) {
+		rq->rq_nbytes = sw->sw_seglen;
+	}
 	qenqueue (&rq->rq_seg, sw);
 	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
 	assert (!err);
@@ -130,6 +138,27 @@ rqueue_remove (rqueue_t *rq)
 int
 rqueue_write (fd_t fd, rqueue_t *rq)
 {
-	/* TODO rqueue_write */
-	return 0;
+	ssize_t nsent;
+
+	assert (fd >= 0);
+	assert (rq != NULL);
+	assert (rqueue_can_write (rq));
+
+	nsent = cqueue_write (fd, rq->rq_data);
+	while (nsent > 0) {
+		size_t min = MIN (nsent, rq->rq_nbytes);
+		nsent -= min;
+		rq->rq_nbytes -= min;
+		if (rq->rq_nbytes == 0) {
+			struct segwrap *head;
+			head = qdequeue (&rq->rq_seg);
+			assert (head != NULL);
+			/* TODO inserimento nella struttura dati dei segmenti
+			 * TODO da rispedire. */
+			head = getHead (rq->rq_seg);
+			rq->rq_nbytes = head->sw_seglen;
+		}
+	}
+
+	return (errno != 0 ? -1 : 0);
 }

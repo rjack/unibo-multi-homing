@@ -10,9 +10,7 @@
 				    Macro
 *******************************************************************************/
 
-/*
- * Massimo e minimo.
- */
+/* Massimo e minimo. */
 #ifdef MAX
 #undef MAX
 #endif
@@ -27,6 +25,9 @@
 /* Test sui valori dei bool: usata nelle assert. */
 #define     BOOL_VALUE(b)     ((b) == FALSE || (b) == TRUE)
 
+
+/* Valore assoluto. */
+#define     ABS(n)     ((n) >= 0 ? (n) : -1 * (n))
 
 /*******************************************************************************
 				  Prototipi
