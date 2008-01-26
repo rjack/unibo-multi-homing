@@ -14,7 +14,7 @@ accept_connection (struct chan *ch);
 
 
 void
-activate_channels (struct chan* chnl[CHANNELS]);
+activate_channels (struct proxy *px);
 
 
 int

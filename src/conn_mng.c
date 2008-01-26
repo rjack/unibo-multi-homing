@@ -1,5 +1,6 @@
 #include "h/types.h"
 #include "h/channel.h"
+#include "h/proxy.h"
 #include "h/util.h"
 
 #include <config.h>
@@ -67,11 +68,15 @@ accept_connection (struct chan *ch)
 
 
 void
-activate_channels (struct chan* chnl[CHANNELS])
+activate_channels (struct proxy *px)
 {
 	int i;
 	int err;
+	struct chan **chnl;
 
+	assert (px != NULL);
+
+	chnl = px->p_chptr;
 	for (i = 0; i < CHANNELS; i++) if (channel_is_activable (chnl[i])) {
 
 		if (channel_must_connect (chnl[i])) {
@@ -82,6 +87,7 @@ activate_channels (struct chan* chnl[CHANNELS])
 			if (errno != EINPROGRESS) {
 				tcp_sockname (chnl[i]->c_sockfd,
 				              &chnl[i]->c_laddr);
+				proxy_prepare_io (px, i);
 		       	}
 			printf ("Canale %s %s.\n", channel_name (chnl[i]),
 			        addr_is_set (&chnl[i]->c_laddr) ?

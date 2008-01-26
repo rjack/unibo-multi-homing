@@ -58,7 +58,7 @@ core (struct proxy *px)
 	}
 
 	for (;;) {
-		activate_channels (px->p_chptr);
+		activate_channels (px);
 
 		min_timeout = check_timeouts ();
 
