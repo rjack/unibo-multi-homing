@@ -161,7 +161,9 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 			qenqueue (&rq->rq_sent, head);
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_seg);
-			rq->rq_nbytes = head->sw_seglen;
+			if (head != NULL) {
+				rq->rq_nbytes = head->sw_seglen;
+			}
 		}
 	}
 

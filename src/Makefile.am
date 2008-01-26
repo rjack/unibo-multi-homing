@@ -1,3 +1,4 @@
+LDADD=-lm
 bin_PROGRAMS=precv psend
 precv_SOURCES=precv.c h/types.h \
 	      util.c h/util.h \

@@ -48,7 +48,7 @@ cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		assert (cq->cq_wrap || cq->cq_tail >= cq->cq_head);
 		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
 
-		chunk_1 = cqueue_get_aval_chunk (cq);
+		chunk_1 = MIN (cqueue_get_aval_chunk (cq), nbytes);
 		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
 
 		memcpy (&cq->cq_data[cq->cq_tail], buf, chunk_1);

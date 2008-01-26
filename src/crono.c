@@ -4,6 +4,7 @@
 
 #include <config.h>
 #include <assert.h>
+#include <math.h>
 #include <sys/time.h>
 
 
@@ -85,12 +86,8 @@ d2tv (double value, struct timeval *tv)
 	assert (value >= 0);
 	assert (tv != NULL);
 
-	tv->tv_sec = 0;
-	while (value > 1) {
-		value--;
-		tv->tv_sec++;
-	}
-	tv->tv_usec = value * ONE_MILLION;
+	tv->tv_sec = floor (value);
+	tv->tv_usec = (value - tv->tv_sec) * ONE_MILLION;
 
 	assert (tv_is_normalized (tv));
 }

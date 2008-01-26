@@ -19,6 +19,8 @@
 
 static int host_read (fd_t fd, void *args);
 static int host_write (fd_t fd, void *args);
+static int net_read (fd_t fd, void *args);
+static int net_write (fd_t fd, void *args);
 static void mov_host2net (struct proxy *px, int id, len_t pldlen);
 
 
@@ -55,7 +57,7 @@ feed_upload (struct proxy *px)
 	pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
 	while (needmask != 0x0 && used > 0) {
 		if (channel_is_connected (&px->p_net[id])
-		    && rqueue_get_aval (px->p_net_sndbuf[id]) <= (HDRMAXLEN
+		    && rqueue_get_aval (px->p_net_sndbuf[id]) >= (HDRMAXLEN
 		                                                  + pldlen)) {
 			mov_host2net (px, id, pldlen);
 			used = cqueue_get_used (px->p_host_rcvbuf),
@@ -189,6 +191,9 @@ proxy_prepare_io (struct proxy *px, int id)
 		px->p_net[id].c_can_read_args = px->p_net_rcvbuf[id];
 		px->p_net[id].c_can_write_args = px->p_net_sndbuf[id];
 
+		px->p_net[id].c_read = &net_read;
+		px->p_net[id].c_write = &net_write;
+
 		timeout_reset (px->p_net[id].c_activity);
 		add_timeout (px->p_net[id].c_activity, ACTIVITY);
 	}
@@ -216,6 +221,26 @@ host_write (fd_t fd, void *args)
 	assert (args != NULL);
 
 	return cqueue_write (fd, (cqueue_t *)args);
+}
+
+
+static int
+net_read (fd_t fd, void *args)
+{
+	assert (fd >= 0);
+	assert (args != NULL);
+
+	return rqueue_read (fd, (rqueue_t *)args);
+}
+
+
+static int
+net_write (fd_t fd, void *args)
+{
+	assert (fd >= 0);
+	assert (args != NULL);
+
+	return rqueue_write (fd, (rqueue_t *)args);
 }
 
 
