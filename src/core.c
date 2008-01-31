@@ -1,7 +1,5 @@
 #include "h/channel.h"
 #include "h/crono.h"
-#include "h/conn_mng.h"
-#include "h/proxy.h"
 #include "h/timeout.h"
 #include "h/types.h"
 #include "h/util.h"
@@ -21,17 +19,16 @@
 *******************************************************************************/
 
 int
-core (struct proxy *px)
+core (void)
 {
-	int i;
 	int err;
 	int rdy;
+	cd_t cd;
 	fd_t maxfd;
 	fd_set rdset;
 	fd_set wrset;
 	double min_timeout;
 	struct timeval tv_timeout;
-	struct ack_args *args;
 
 	/* DEBUG */
 	if (ACTIVITY_TIMEOUT > 1) {
@@ -43,29 +40,17 @@ core (struct proxy *px)
 	/*
 	 * Preparazione timeout.
 	 */
-
-	/* Creazione timeout attivita' per i canali con il Ritardatore. */
-	args = xmalloc (sizeof (struct ack_args));
-	args->aa_px = px;
-	init_timeout_module (args);
-	for (i = 0; i < NETCHANNELS; i++) {
-		struct idle_args *args = xmalloc (sizeof (struct idle_args));
-		args->ia_px = px;
-		args->ia_ch = &(px->p_net[i]);
-		px->p_net[i].c_activity = timeout_create (ACTIVITY_TIMEOUT,
-							  idle_handler,
-							  args, TRUE);
-	}
+	init_timeout_module ();
 
 	for (;;) {
-		activate_channels (px);
+		activate_channels ();
 
 		min_timeout = check_timeouts ();
 
 		/* Lo stato dei canali p_net e' controllato dalle funzioni. */
-		if (channel_is_connected (&px->p_host)) {
-			feed_upload (px);
-			feed_download (px);
+		if (channel_is_connected (HOSTCD)) {
+			feed_upload ();
+			/* TODO feed_download (); */
 		}
 
 		/*
@@ -86,8 +71,7 @@ core (struct proxy *px)
 			FD_ZERO (&wrset);
 
 			/* Selezione dei fd in base allo stato dei canali. */
-			maxfd = set_file_descriptors (px->p_chptr,
-			                              &rdset, &wrset);
+			maxfd = set_file_descriptors (&rdset, &wrset);
 
 			rdy = select (maxfd + 1, &rdset, &wrset, NULL, toptr);
 		} while (rdy == -1 && errno == EINTR);
@@ -101,52 +85,52 @@ core (struct proxy *px)
 		/*
 		 * Gestione eventi.
 		 */
-		if (rdy > 0 ) for (i = 0; i < CHANNELS; i++) {
-			struct chan *ch;
-			ch = px->p_chptr[i];
+		if (rdy > 0 ) for (cd = 0; cd < CHANNELS; cd++) {
+			fd_t listfd = channel_get_listfd (cd);
+			fd_t sockfd = channel_get_sockfd (cd);
 
 			/* Connessione da concludere. */
-			if (channel_is_connecting (ch)
-			    && FD_ISSET (ch->c_sockfd, &wrset)) {
-				err = finalize_connection (ch);
+			if (channel_is_connecting (cd)
+			    && FD_ISSET (sockfd, &wrset)) {
+				err = finalize_connection (cd);
 				if (err) {
-					channel_invalidate (ch);
+					channel_invalidate (cd);
 				} else {
-					proxy_prepare_io (px, i);
+					channel_prepare_io (cd);
 					printf ("Canale %s connesso.\n",
-					        channel_name (ch));
+					        channel_name (cd));
 				}
 			}
 
 			/* Connessione da accettare. */
-			else if (channel_is_listening (ch)
-			         && FD_ISSET (ch->c_listfd, &rdset)) {
-				err = accept_connection (ch);
+			else if (channel_is_listening (cd)
+			         && FD_ISSET (listfd, &rdset)) {
+				err = accept_connection (cd);
 				if (err) {
-					channel_invalidate (ch);
+					channel_invalidate (cd);
 				} else {
-					proxy_prepare_io (px, i);
+					channel_prepare_io (cd);
 					printf ("Canale %s, connessione "
 					        "accettata.\n",
-						channel_name (ch));
+						channel_name (cd));
 				}
 			}
 
 			else {
 				/* Dati da leggere. */
-				if (channel_is_connected (ch)
-				    && FD_ISSET (ch->c_sockfd, &rdset)) {
+				if (channel_is_connected (cd)
+				    && FD_ISSET (sockfd, &rdset)) {
 					ssize_t nread;
-					nread = channel_read (ch);
+					nread = channel_read (cd);
 					/* FIXME controllo errore decente! */
 					assert (nread >= 0);
 				}
 
 				/* Dati da scrivere. */
-				if (channel_is_connected (ch)
-				    && FD_ISSET (ch->c_sockfd, &wrset)) {
+				if (channel_is_connected (cd)
+				    && FD_ISSET (sockfd, &wrset)) {
 					ssize_t nwrite;
-					nwrite = channel_write (ch);
+					nwrite = channel_write (cd);
 					/* FIXME controllo errore decente! */
 					assert (nwrite != -1);
 				}

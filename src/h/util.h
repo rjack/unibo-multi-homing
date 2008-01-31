@@ -22,8 +22,9 @@
 #define     MIN(a,b)     ((a) < (b) ? (a) : (b))
 
 
-/* Test sui valori dei bool: usata nelle assert. */
+/* Test sui valori dei bool e dei chan descriptor: usati nelle assert. */
 #define     BOOL_VALUE(b)     ((b) == FALSE || (b) == TRUE)
+#define     VALID_CD(cd)      ((cd) >= 0 && (cd) < CHANNELS)
 
 
 /* Valore assoluto. */

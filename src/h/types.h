@@ -31,9 +31,10 @@ typedef unsigned char bool;
 typedef uint16_t port_t;
 
 /*
- * File descriptor.
+ * Descrittori.
  */
-typedef int fd_t;
+typedef int fd_t;     /* file e socket */
+typedef int cd_t;     /* canali */
 
 /*
  * Puntatori a funzione.
@@ -65,15 +66,16 @@ typedef uint8_t seg_t;
 #define     NETCHANNELS    3
 /* Numero di canali totali. */
 #define     CHANNELS       (NETCHANNELS + 1)
-/* Id del primo canale di rete. */
-#define     NET            0
-/* Id del canale dell'host: nell'array viene subito dopo a quelli di rete. */
-#define     HOST           (NETCHANNELS)
+/* Channel descriptor del primo canale di rete. */
+#define     NETCD            0
+/* Channel descriptor del canale dell'host. */
+#define     HOSTCD           (NETCHANNELS)
+
 
 /*
  * Durate dei timeout in secondi.
  */
-#define     ACTIVITY_TIMEOUT     1000000000.0 /* 0.250 */
+#define     ACTIVITY_TIMEOUT     100000000.0 /* 0.250 */
 #define     NAK_TIMEOUT          0.130
 #define     ACK_TIMEOUT          2
 
@@ -170,29 +172,8 @@ struct chan {
 	size_t c_tcp_rcvbuf_len;
 	size_t c_tcp_sndbuf_len;
 
-	/* Puntatori ai buffer applicazione. */
-	void *c_rcvbufptr;
-	void *c_sndbufptr;
-
 	/* Timeout di attivita'. */
 	timeout_t *c_activity;
-
-	/* Funzione che decide quando il canale sia attivabile. */
-	condition_checker_t c_is_activable;
-
-	/* Funzioni che controllano le condizioni in cui il canale puo' fare
-	 * I/O sul suo c_sockfd. */
-	condition_checker_t c_can_read;
-	condition_checker_t c_can_write;
-
-	/* Funzioni di I/O sul sockfd. */
-	io_performer_t c_read;
-	io_performer_t c_write;
-
-	/* Puntatori agli argomenti delle funzioni. */
-	void *c_activable_args;
-	void *c_can_read_args;
-	void *c_can_write_args;
 };
 
 
@@ -242,54 +223,5 @@ typedef struct {
 	 * segmento in arrivo. */
 	size_t rq_nbytes;
 } rqueue_t;
-
-
-/*
- * Proxy: i vari canali, i buffer e i contatori.
- */
-struct proxy {
-	/* Canale con l'host. */
-	struct chan p_host;
-	/* Canali con il ritardatore. */
-	struct chan p_net[NETCHANNELS];
-	/* Array di puntatori ai canali, per facilitare iterazioni. */
-	struct chan *p_chptr[CHANNELS];
-
-	cqueue_t *p_host_rcvbuf;
-	cqueue_t *p_host_sndbuf;
-
-	rqueue_t *p_net_rcvbuf[NETCHANNELS];
-	rqueue_t *p_net_sndbuf[NETCHANNELS];
-
-	/* Ultimo seqnum inviato. */
-	seq_t p_outseq;
-
-	/* TODO
-	 * - contatori:
-	 *   - ack/nack
-	 *   - etc
-	 * - coda segmenti da ritrasmettere
-	 * - OPPURE coda segmenti da ricostruire. */
-};
-
-
-/*
- * Argomenti per i timeout_handler_t.
- */
-
-/* Per idle_handler. */
-struct idle_args {
-	struct proxy *ia_px;
-	struct chan *ia_ch;
-};
-
-/* Per ack_handler. */
-struct ack_args {
-	struct proxy *aa_px;
-};
-
-/* TODO struct nak_args */
-
-
 
 #endif /* MH_TYPES_H */

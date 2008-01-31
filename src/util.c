@@ -173,7 +173,6 @@ tcp_close (fd_t *fd)
 ssize_t
 tcp_get_buffer_size (fd_t sockfd, int bufname)
 {
-
 	int err;
 	int optval;
 	socklen_t optlen;

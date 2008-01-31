@@ -5,79 +5,101 @@
 
 
 /*******************************************************************************
-				     Enum
-*******************************************************************************/
-
-enum set_condition {
-	SET_ACTIVABLE,
-	SET_CAN_READ,
-	SET_CAN_WRITE
-};
-
-
-/*******************************************************************************
 				  Prototipi
 *******************************************************************************/
 
 bool
-channel_can_read (struct chan *ch);
+channel_can_read (cd_t cd);
 
 
 bool
-channel_can_write (struct chan *ch);
+channel_can_write (cd_t cd);
+
+
+fd_t
+channel_get_listfd (cd_t cd);
+
+
+fd_t
+channel_get_sockfd (cd_t cd);
+
+
+int
+channel_init (cd_t cd, port_t listport, char *connip, port_t connport);
 
 
 void
-channel_init (struct chan *ch);
-/* Inizializza i campi della struttura ch. */
-
-
-void
-channel_invalidate (struct chan *ch);
+channel_invalidate (cd_t cd);
 /* Rende il canale inutilizzabile. */
 
 
 bool
-channel_is_activable (struct chan *ch);
+channel_is_activable (cd_t cd);
 
 
 bool
-channel_is_connected (struct chan *ch);
+channel_is_connected (cd_t cd);
 
 
 bool
-channel_is_connecting (struct chan *ch);
+channel_is_connecting (cd_t cd);
 
 
 bool
-channel_is_listening (struct chan *ch);
+channel_is_listening (cd_t cd);
 
 
 bool
-channel_must_connect (struct chan *ch);
+channel_must_connect (cd_t cd);
 
 
 bool
-channel_must_listen (struct chan *ch);
+channel_must_listen (cd_t cd);
 
 
 char *
-channel_name (struct chan *ch);
+channel_name (cd_t cd);
 /* Ritorna una stringa allocata staticamente e terminata da '\0' della forma
  * "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il primo e'
  * l'indirizzo locale, il secondo quello remoto. */
 
 
+void
+channel_prepare_io (cd_t cd);
+
+
 int
-channel_read (struct chan *ch);
+channel_read (cd_t cd);
+
+
+int
+channel_write (cd_t cd);
 
 
 void
-channel_set_condition
-(struct chan *ch, enum set_condition, condition_checker_t fun, void *arg);
+feed_upload (void);
 
 
 int
-channel_write (struct chan *ch);
+proxy_init (port_t hostlistport,
+		char *netconnaddr[NETCHANNELS],
+		port_t netconnport[NETCHANNELS],
+		port_t netlistport[NETCHANNELS],
+		char *hostconnaddr, port_t hostconnport);
+
+int
+accept_connection (cd_t cd);
+
+
+void
+activate_channels (void);
+
+
+int
+finalize_connection (cd_t cd);
+
+
+fd_t
+set_file_descriptors (fd_set *rdset, fd_set *wrset);
 
 #endif /* CHANNEL_H */

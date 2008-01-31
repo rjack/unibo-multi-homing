@@ -1,7 +1,6 @@
 #include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"
-#include "h/proxy.h"
 #include "h/util.h"
 #include "h/types.h"
 
@@ -21,28 +20,32 @@
  */
 
 /* Indirizzi per connessioni al Ritardatore. */
-static char* defconnaddr[NETCHANNELS] = {
+static char* netconnaddr[NETCHANNELS] = {
 	"127.0.0.1",
 	"127.0.0.1",
 	"127.0.0.1"
 };
 
 /* Porte per connessioni al Ritardatore. */
-static port_t defconnport[NETCHANNELS] = {
+static port_t netconnport[NETCHANNELS] = {
 	7001,
 	7002,
 	7003
 };
 
 /* Porta di ascolto per accettare la connessione del Sender. */
-static port_t deflistport = 6001;
+static port_t hostlistport = 6001;
 
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static bool activable_if_connected (void *arg);
+static int
+get_psend_args (int argc, char **argv,
+		port_t *hostlistport,
+		char *netconnaddr[NETCHANNELS],
+		port_t netconnport[NETCHANNELS]);
 static void print_help (const char *);
 
 
@@ -53,61 +56,31 @@ static void print_help (const char *);
 int
 main (int argc, char **argv)
 {
-
-	int i;
 	int err;
-	struct proxy ps;
+	cd_t cd;
 
-	/*
-	 * Inizializzazioni con valori di default.
-	 */
-	proxy_init (&ps);
+	err = get_psend_args (argc, argv,
+			&hostlistport, netconnaddr, netconnport);
+	if (err)
+		goto error;
 
-	/* Canali con il Ritardatore:
-	 * - indirizzi remoti
-	 * - dimensione buffer tcp di invio
-	 * - condizione di attivazione. */
-	for (i = 0; i < NETCHANNELS; i++) {
-		channel_init (&ps.p_net[i]);
-
-		err = set_addr (&ps.p_net[i].c_raddr,
-		                defconnaddr[i], defconnport[i]);
-		assert (!err);
-
-		/* Piu' piccolo possibile per notare prima congestioni e
-		 * blocchi. */
-		ps.p_net[i].c_tcp_sndbuf_len = 1024;
-
-		channel_set_condition (&ps.p_net[i], SET_ACTIVABLE,
-		                       &activable_if_connected, &ps.p_host);
-	}
-
-	/* Canale con il Sender: porta di ascolto. */
-	channel_init (&ps.p_host);
-	err = set_addr (&ps.p_host.c_laddr, NULL, deflistport);
-	assert (!err);
-
-	/*
-	 * Impostazioni da riga di comando.
-	 */
-	err = getargs (argc, argv, "papapap",
-	              &ps.p_host.c_laddr.sin_port,
-		      &ps.p_net[0].c_raddr, &ps.p_net[0].c_raddr.sin_port,
-		      &ps.p_net[1].c_raddr, &ps.p_net[1].c_raddr.sin_port,
-		      &ps.p_net[2].c_raddr, &ps.p_net[2].c_raddr.sin_port);
-	if (err) {
-		print_help (argv[0]);
-		exit (EXIT_FAILURE);
-	}
+	err = proxy_init (hostlistport, netconnaddr, netconnport,
+			NULL, NULL, 0);
+	if (err)
+		goto error;
 
 	/* Stampa informazioni. */
-	printf ("Canale con il Sender: %s\n", channel_name (&ps.p_host));
-	for (i = 0; i < NETCHANNELS; i++) {
-		printf ("Canale %d con il Ritardatore: %s\n",
-		         i, channel_name (&ps.p_net[i]));
+	printf ("Canale con il Sender: %s\n", channel_name (HOSTCD));
+	for (cd = NETCD; cd < NETCHANNELS; cd++) {
+		printf ("Canale %d con il Ritardatore: %s\n", cd,
+				channel_name (cd));
 	}
 
-	return core (&ps);
+	return core ();
+
+error:
+	print_help (argv[0]);
+	exit (EXIT_FAILURE);
 }
 
 
@@ -115,20 +88,14 @@ main (int argc, char **argv)
 			       Funzioni locali
 *******************************************************************************/
 
-static bool
-activable_if_connected (void *arg)
+static int
+get_psend_args (int argc, char **argv,
+		port_t *hostlistport,
+		char *netconnaddr[NETCHANNELS],
+		port_t netconnport[NETCHANNELS])
 {
-	/* Condizione di connessione per i canali con il Ritardatore. */
-
-	struct chan *ch;
-
-	assert (arg != NULL);
-
-	ch = (struct chan *)arg;
-	if (channel_is_connected (ch)) {
-		return TRUE;
-	}
-	return FALSE;
+	/* TODO get_psend_args */
+	return 0;
 }
 
 

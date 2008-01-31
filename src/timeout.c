@@ -37,6 +37,10 @@ static timeout_t *tqueue[CLASSNO];
  * XXX Sara' passato ad add_timeout alla ricezione del primo segmento. */
 static timeout_t ack_timeout;
 
+/* Per controllare che le funzioni di gestione dei timeout non vengano
+ * chiamate senza aver inizializzato il modulo. */
+static bool init_done = FALSE;
+
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
@@ -62,6 +66,7 @@ add_timeout (timeout_t *to, timeout_class class)
 
 	assert (to != NULL);
 	assert (class < CLASSNO);
+	assert (init_done);
 
 	qenqueue (&tqueue[class], to);
 }
@@ -78,6 +83,8 @@ check_timeouts (void)
 	double min = HUGE_TIMEOUT;
 	timeout_t *cur;
 	timeout_t *tmp;
+
+	assert (init_done);
 
 	for (i = 0; i < CLASSNO; i++) {
 		cur = getHead (tqueue[i]);
@@ -106,24 +113,31 @@ del_timeout (timeout_t *to, timeout_class class)
 
 	assert (to != NULL);
 	assert (class < CLASSNO);
+	assert (init_done);
 
 	qremove (&tqueue[class], to);
 }
 
 
 void
-init_timeout_module (struct ack_args *args)
+init_timeout_module (void)
 {
-	/* Da chiamare prima di ogni altra funzione del modulo;
-	 * "static" assicura che abbia effetto una volta sola. */
+	/* Inizializza le code delle classi dei timeout e imposta il timeout
+	 * degli ack. */
 
-	static int i = 0;
+	int i;
+
+	assert (!init_done);
+
+	i = 0;
 	while (i < CLASSNO) {
 		tqueue[i] = newQueue ();
 		i++;
 	}
 
-	timeout_init (&ack_timeout, ACK, ack_handler, args, FALSE);
+	timeout_init (&ack_timeout, ACK, ack_handler, NULL, FALSE);
+
+	init_done = TRUE;
 }
 
 
@@ -131,6 +145,9 @@ timeout_t *
 timeout_create
 (double maxval, timeout_handler_t trigger, void *trigger_args, bool oneshot)
 {
+	/* Crea e inizializza un timeout, restituendone il puntatore.
+	 * Il timeout puo' essere attivato con timeout_reset. */
+
 	timeout_t *newto;
 
 	assert (maxval > 0);
@@ -147,6 +164,8 @@ timeout_create
 void
 timeout_destroy (timeout_t *to)
 {
+	/* Dealloca le strutture dati associate a to. */
+
 	assert (to != NULL);
 	xfree (to);
 }
@@ -156,6 +175,9 @@ void
 timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
               void *trigger_args, bool oneshot)
 {
+	/* Inizializza il timeout con i valori dati.
+	 * Il timeout puo' essere attivato con timeout_reset. */
+
 	assert (to != NULL);
 	assert (maxval > 0);
 	assert (trigger != NULL);
@@ -171,6 +193,9 @@ timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
 void
 timeout_reset (timeout_t *to)
 {
+	/* Reinizilizza la durata del timeout facendo ripartire il cronometro
+	 * associato. */
+
 	assert (to != NULL);
 	crono_start (&to->to_crono);
 }
@@ -183,12 +208,6 @@ timeout_reset (timeout_t *to)
 static void
 ack_handler (void *args)
 {
-	struct proxy *px;
-
-	assert (args != NULL);
-
-	px = ((struct ack_args *)args)->aa_px;
-
 	/* TODO manda ack */
 	fprintf (stderr, "ACK!\n");
 }

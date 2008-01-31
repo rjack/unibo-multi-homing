@@ -52,12 +52,10 @@ rqueue_add_nak (rqueue_t *rq, seq_t seq)
 
 
 bool
-rqueue_can_read (void *arg)
+rqueue_can_read (rqueue_t *rq)
 {
-	rqueue_t *rq = (rqueue_t *)arg;
-
 	assert (rq != NULL);
-	return cqueue_can_read ((void *)rq->rq_data);
+	return cqueue_can_read (rq->rq_data);
 }
 
 

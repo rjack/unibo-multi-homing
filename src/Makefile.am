@@ -5,8 +5,6 @@ precv_SOURCES=precv.c h/types.h \
 	      channel.c h/channel.h \
 	      getargs.c h/getargs.h \
 	      core.c h/core.h \
-	      conn_mng.c h/conn_mng.h \
-	      proxy.c h/proxy.h \
 	      crono.c h/crono.h \
 	      cqueue.c h/cqueue.h \
 	      timeout.c h/timeout.h \
@@ -17,8 +15,6 @@ psend_SOURCES=psend.c h/types.h \
 	      channel.c h/channel.h \
 	      getargs.c h/getargs.h \
 	      core.c h/core.h \
-	      conn_mng.c h/conn_mng.h \
-	      proxy.c h/proxy.h \
 	      crono.c h/crono.h \
 	      cqueue.c h/cqueue.h \
 	      timeout.c h/timeout.h \

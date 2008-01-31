@@ -20,7 +20,7 @@ del_timeout (timeout_t *to, timeout_class class);
 
 
 void
-init_timeout_module (struct ack_args *args);
+init_timeout_module (void);
 
 
 timeout_t *
