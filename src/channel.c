@@ -121,7 +121,7 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport)
 
 	ch[cd].c_activity = NULL;
 	if (cd != HOSTCD) {
-		ch[cd].c_tcp_sndbuf_len = 1;
+		ch[cd].c_tcp_sndbuf_len = TCP_MIN_SNDBUF_SIZE;
 		ch[cd].c_activity = timeout_create (ACTIVITY_TIMEOUT,
 				idle_handler, NULL, FALSE);
 	}
@@ -145,6 +145,13 @@ bool
 channel_is_activable (cd_t cd)
 {
 	assert (VALID_CD (cd));
+
+	if (channel_is_connected (cd)
+	    || channel_is_listening (cd)
+	    || (!addr_is_set (&ch[cd].c_laddr)
+	        && !addr_is_set (&ch[cd].c_raddr))) {
+		return FALSE;
+	}
 
 	if (cd == HOSTCD) {
 		/* Proxy Receiver. */
@@ -376,7 +383,7 @@ feed_upload (void)
 
 	needmask = 0x7;
 	used = cqueue_get_used (host_rcvbuf),
-	pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
+	pldlen = (used < PLDDEFLEN ? used : PLDDEFLEN);
 	while (needmask != 0x0 && used > 0) {
 		if (channel_is_connected (ncd)
 		    && rqueue_get_aval (net_sndbuf[ncd]) >= (HDRMAXLEN

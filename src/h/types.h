@@ -79,6 +79,12 @@ typedef uint8_t seg_t;
 #define     NAK_TIMEOUT          0.130
 #define     ACK_TIMEOUT          2
 
+
+/* Valore minimo del buffer tcp di spedizione.
+ * Per Linux e' 1024, NetBSD sembra accettare anche 1 (!). */
+#define     TCP_MIN_SNDBUF_SIZE     1024
+
+
 /*
  * Segmenti.
  */
