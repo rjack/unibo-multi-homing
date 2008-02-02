@@ -33,7 +33,7 @@ seg_seq (seg_t *seg);
 
 
 struct segwrap *
-segwrap_create (seq_t seq, len_t pldlen);
+segwrap_get (seq_t seq, len_t pldlen);
 
 
 #endif /* SEGMENT_H */

@@ -142,6 +142,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	assert (fd >= 0);
 	assert (rq != NULL);
 	assert (rqueue_can_write (rq));
+	assert (rq->rq_nbytes > 0);
 
 	nsent = cqueue_write (fd, rq->rq_data);
 
@@ -165,5 +166,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 		}
 	}
 
-	return (errno != 0 ? -1 : 0);
+	if (errno == 0)
+		return 0;
+	return -1;
 }

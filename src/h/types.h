@@ -50,7 +50,7 @@ typedef int (*io_performer_t)(fd_t fd, void *args);
 typedef uint8_t seq_t;
 /* Lunghezza del segmento. */
 typedef uint8_t len_t;
-/* Dati */
+/* Dati. */
 typedef uint8_t pld_t;
 /* Flag conformazione segmento. */
 typedef uint8_t flag_t;
@@ -97,6 +97,9 @@ typedef uint8_t seg_t;
 #define     SEQLEN     sizeof(seq_t)
 #define     LENLEN     sizeof(len_t)
 #define     FLGLEN     sizeof(flag_t)
+
+/* Massimo numero di sequenza. */
+#define     SEQMAX     UINT8_MAX
 
 /* Limiti dei segmenti, in byte. */
 #define     HDRMINLEN     (FLGLEN + SEQLEN)
@@ -207,7 +210,7 @@ typedef struct {
  * Wrapper per creare code di segmenti.
  */
 struct segwrap {
-	seg_t *sw_seg;
+	seg_t sw_seg[SEGMAXLEN];
 	size_t sw_seglen;
 	struct segwrap *sw_next;
 	struct segwrap *sw_prev;
@@ -220,13 +223,12 @@ struct segwrap {
 typedef struct {
 	/* Buffer circolare per I/O sul sockfd. */
 	cqueue_t *rq_data;
-	/* Coda dei segmenti in uscita. */
+	/* Coda dei segmenti in uscita / in entrata. */
 	struct segwrap *rq_seg;
 	/* Coda dei segmenti spediti. */
 	struct segwrap *rq_sent;
-	/* In invio e' il numero di byte da spedire per completare il segmento
-	 * corrente, in ricezione il numero di byte che mancano alla fine del
-	 * segmento in arrivo. */
+	/* Numero di byte da spedire per completare il segmento
+	 * corrente. */
 	size_t rq_nbytes;
 } rqueue_t;
 

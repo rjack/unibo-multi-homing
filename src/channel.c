@@ -762,7 +762,7 @@ mov_host2net (cd_t ncd, len_t pldlen)
 
 	assert (VALID_CD (ncd));
 
-	newsw = segwrap_create (outseq, pldlen);
+	newsw = segwrap_get (outseq, pldlen);
 	outseq++;
 
 	pld = seg_pld (newsw->sw_seg);

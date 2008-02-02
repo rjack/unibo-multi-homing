@@ -1,9 +1,17 @@
 #include "h/types.h"
+#include "h/segment.h"
 #include "h/util.h"
 
 #include <assert.h>
 #include <config.h>
 
+
+/*******************************************************************************
+			       Variabili locali
+*******************************************************************************/
+
+/* Tutti i segmenti disponibili preallocati. */
+static struct segwrap sgmt[SEQMAX];
 
 /*******************************************************************************
 			      Funzioni pubbliche
@@ -36,10 +44,14 @@ seg_is_nak (seg_t *seg)
 pld_t *
 seg_pld (seg_t *seg)
 {
+	/* Ritorna il puntatore al campo pld di seg, oppure NULL se il payload
+	 * e' assente. */
+
 	assert (seg != NULL);
 	if (seg[FLG] & PLDFLAG) {
 		return (seg[FLG] & LENFLAG ? &seg[LEN + 1] : &seg[LEN]);
 	}
+	assert (seg_pld_len (seg) == 0);
 	return NULL;
 }
 
@@ -47,10 +59,14 @@ seg_pld (seg_t *seg)
 len_t
 seg_pld_len (seg_t *seg)
 {
+	/* Ritorna il valore del campo len di seg, oppure 0 se il payload e'
+	 * assente. */
+
 	assert (seg != NULL);
 	if (seg[FLG] & PLDFLAG) {
 		return (seg[FLG] & LENFLAG ? seg[LEN] : PLDDEFLEN);
 	}
+	assert (seg_pld (seg) == NULL);
 	return 0;
 }
 
@@ -58,35 +74,30 @@ seg_pld_len (seg_t *seg)
 seq_t
 seg_seq (seg_t *seg)
 {
+	/* Ritorna il numero di sequenza di seg. */
+
 	assert (seg != NULL);
 	return seg[SEQ];
 }
 
 
 struct segwrap *
-segwrap_create (seq_t seq, len_t pldlen)
+segwrap_get (seq_t seq, len_t pldlen)
 {
-	struct segwrap *newsw;
-	size_t seglen;
-
 	assert (pldlen > 0);
 
-	seglen = FLGLEN + SEQLEN + (pldlen == PLDDEFLEN ? 0 : LENLEN)
-	         + pldlen;
-
-	newsw = xmalloc (sizeof(struct segwrap));
-	newsw->sw_seg = xmalloc (seglen);
-
-	newsw->sw_seg[FLG] = 0 | PLDFLAG;
-	newsw->sw_seg[SEQ] = seq;
+	sgmt[seq].sw_seg[FLG] = 0 | PLDFLAG;
+	sgmt[seq].sw_seg[SEQ] = seq;
 	if (pldlen != PLDDEFLEN) {
-		newsw->sw_seg[LEN] = pldlen;
-		newsw->sw_seg[FLG] |= LENFLAG;
+		sgmt[seq].sw_seg[LEN] = pldlen;
+		sgmt[seq].sw_seg[FLG] |= LENFLAG;
 	}
 
-	newsw->sw_seglen = seglen;
-	newsw->sw_prev = NULL;
-	newsw->sw_next = NULL;
+	sgmt[seq].sw_seglen = FLGLEN + SEQLEN
+		+ (pldlen == PLDDEFLEN ? 0 : LENLEN) + pldlen;
 
-	return newsw;
+	sgmt[seq].sw_prev = NULL;
+	sgmt[seq].sw_next = NULL;
+
+	return &sgmt[seq];
 }
