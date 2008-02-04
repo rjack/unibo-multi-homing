@@ -224,9 +224,7 @@ typedef struct {
 	/* Buffer circolare per I/O sul sockfd. */
 	cqueue_t *rq_data;
 	/* Coda dei segmenti in uscita / in entrata. */
-	struct segwrap *rq_seg;
-	/* Coda dei segmenti spediti. */
-	struct segwrap *rq_sent;
+	struct segwrap *rq_sgmt;
 	/* Numero di byte da spedire per completare il segmento
 	 * corrente. */
 	size_t rq_nbytes;

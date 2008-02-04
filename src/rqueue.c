@@ -13,10 +13,10 @@
 #define     EMPTYQ   NULL
 #include "src/queue_template"
 
-/* Invarianti di una rqueue:
- * - rq_data contiene la prima parte (al massimo tutta) della coda rq_seg
+/* Invarianti di una rqueue di spedizione:
+ * - rq_data contiene la prima parte (al massimo tutta) della coda rq_sgmt
  * - rq_nbytes indica sempre quanti byte mancano per completare la spedizione
- *   del segmento alla testa della rq_seg. */
+ *   del segmento alla testa della rq_sgmt. */
 
 /*******************************************************************************
 			      Funzioni pubbliche
@@ -34,10 +34,10 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen > 0);
 	assert (!seg_is_nak (sw->sw_seg));
 
-	if (isEmpty (rq->rq_seg)) {
+	if (isEmpty (rq->rq_sgmt)) {
 		rq->rq_nbytes = sw->sw_seglen;
 	}
-	qenqueue (&rq->rq_seg, sw);
+	qenqueue (&rq->rq_sgmt, sw);
 	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
 	assert (!err);
 	return err;
@@ -78,8 +78,7 @@ rqueue_create (size_t len)
 
 	newrq = xmalloc (sizeof (rqueue_t));
 	newrq->rq_data = cqueue_create (len);
-	newrq->rq_seg = newQueue ();
-	newrq->rq_sent = newQueue ();
+	newrq->rq_sgmt = newQueue ();
 	newrq->rq_nbytes = 0;
 
 	return newrq;
@@ -124,9 +123,9 @@ rqueue_remove (rqueue_t *rq)
 	struct segwrap *sw;
 
 	assert (rq != NULL);
-	assert (rq->rq_seg != NULL);
+	assert (rq->rq_sgmt != NULL);
 
-	sw = qdequeue (&rq->rq_seg);
+	sw = qdequeue (&rq->rq_sgmt);
 	if (sw != NULL) {
 		cqueue_drop (rq->rq_data, sw->sw_seglen);
 	}
@@ -155,11 +154,11 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 		 * accoda a rq_sent. */
 		if (rq->rq_nbytes == 0) {
 			struct segwrap *head;
-			head = qdequeue (&rq->rq_seg);
+			head = qdequeue (&rq->rq_sgmt);
 			assert (head != NULL);
-			qenqueue (&rq->rq_sent, head);
+			segwrap_add_sent (head);
 			/* Ricalcola rq_nbytes. */
-			head = getHead (rq->rq_seg);
+			head = getHead (rq->rq_sgmt);
 			if (head != NULL) {
 				rq->rq_nbytes = head->sw_seglen;
 			}

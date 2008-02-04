@@ -8,6 +8,10 @@
 				  Prototipi
 *******************************************************************************/
 
+void
+init_segment_module (void);
+
+
 bool
 seg_is_ack (seg_t *seg);
 
@@ -30,6 +34,10 @@ seg_pld_len (seg_t *seg);
 
 seq_t
 seg_seq (seg_t *seg);
+
+
+void
+segwrap_add_sent (struct segwrap *sw);
 
 
 struct segwrap *

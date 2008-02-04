@@ -1,5 +1,6 @@
 #include "h/channel.h"
 #include "h/crono.h"
+#include "h/segment.h"
 #include "h/timeout.h"
 #include "h/types.h"
 #include "h/util.h"
@@ -38,9 +39,10 @@ core (void)
 	}
 
 	/*
-	 * Preparazione timeout.
+	 * Inizializzazione timeout e segmenti.
 	 */
 	init_timeout_module ();
+	init_segment_module ();
 
 	for (;;) {
 		activate_channels ();
