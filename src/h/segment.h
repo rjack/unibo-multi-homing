@@ -35,13 +35,4 @@ seg_pld_len (seg_t *seg);
 seq_t
 seg_seq (seg_t *seg);
 
-
-void
-segwrap_add_sent (struct segwrap *sw);
-
-
-struct segwrap *
-segwrap_get (seq_t seq, len_t pldlen);
-
-
 #endif /* SEGMENT_H */

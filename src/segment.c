@@ -2,26 +2,8 @@
 #include "h/segment.h"
 #include "h/util.h"
 
-#include <assert.h>
 #include <config.h>
-
-#define     TYPE     struct segwrap
-#define     NEXT     sw_next
-#define     PREV     sw_prev
-#define     EMPTYQ   NULL
-#include "src/queue_template"
-
-
-/*******************************************************************************
-			       Variabili locali
-*******************************************************************************/
-
-/* Tutti i segmenti disponibili preallocati. */
-static struct segwrap sgmt[SEQMAX];
-
-/* Code dei segmenti spediti e ricevuti. */
-static struct segwrap *sgmt_sent;
-static struct segwrap *sgmt_rcvd;
+#include <assert.h>
 
 
 /*******************************************************************************
@@ -31,9 +13,9 @@ static struct segwrap *sgmt_rcvd;
 void
 init_segment_module (void)
 {
-	sgmt_rcvd = newQueue ();
-	sgmt_sent = newQueue ();
+	/* TODO init_segment_module. */
 }
+
 
 bool
 seg_is_ack (seg_t *seg)
@@ -96,37 +78,4 @@ seg_seq (seg_t *seg)
 
 	assert (seg != NULL);
 	return seg[SEQ];
-}
-
-
-void
-segwrap_add_sent (struct segwrap *sw)
-{
-	assert (sw != NULL);
-
-	qenqueue (&sgmt_sent, sw);
-}
-
-
-struct segwrap *
-segwrap_get (seq_t seq, len_t pldlen)
-{
-	assert (pldlen > 0);
-	assert (sgmt[seq].sw_prev == NULL);
-	assert (sgmt[seq].sw_next == NULL);
-
-	sgmt[seq].sw_seg[FLG] = 0 | PLDFLAG;
-	sgmt[seq].sw_seg[SEQ] = seq;
-	if (pldlen != PLDDEFLEN) {
-		sgmt[seq].sw_seg[LEN] = pldlen;
-		sgmt[seq].sw_seg[FLG] |= LENFLAG;
-	}
-
-	sgmt[seq].sw_seglen = FLGLEN + SEQLEN
-		+ (pldlen == PLDDEFLEN ? 0 : LENLEN) + pldlen;
-
-	sgmt[seq].sw_prev = NULL;
-	sgmt[seq].sw_next = NULL;
-
-	return &sgmt[seq];
 }

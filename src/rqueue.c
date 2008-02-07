@@ -156,7 +156,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 			struct segwrap *head;
 			head = qdequeue (&rq->rq_sgmt);
 			assert (head != NULL);
-			segwrap_add_sent (head);
+			/* TODO segwrap_add_sent (head); */
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_sgmt);
 			if (head != NULL) {
