@@ -34,20 +34,92 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen > 0);
 	assert (!seg_is_nak (sw->sw_seg));
 
+	/* Inizializza rq_nbytes se la coda segmenti uscenti e' vuota. */
 	if (isEmpty (rq->rq_sgmt)) {
+		assert (cqueue_get_used (rq->rq_data) == 0);
+		assert (rq->rq_nbytes == 0);
 		rq->rq_nbytes = sw->sw_seglen;
 	}
+	/* Se c'e' posto nella cqueue rq_data ci copia il segmento. */
+	if (sw->sw_seglen <= cqueue_get_aval (rq->rq_data)) {
+		err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
+	}
+	/* Accoda sewrap nei segmenti uscenti. */
 	qenqueue (&rq->rq_sgmt, sw);
-	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
-	assert (!err);
-	return err;
+
+	return 0;
 }
 
 
 void
-rqueue_add_nak (rqueue_t *rq, seq_t seq)
+rqueue_add_nak (rqueue_t *rq, seq_t nakseq)
 {
-	/* TODO rqueue_add_nak */
+	/* Aggiunge un NAK in testa alla coda dei segmenti uscenti, oppure al
+	 * secondo posto se c'e' un segmento parzialmente spedito da finire di
+	 * inviare.
+	 * XXX rq deve avere abbastanza spazio per contenere il NAK. */
+
+	int err;
+	struct segwrap *nak;
+	struct segwrap *head;
+
+	assert (rq != NULL);
+
+	/* TODO nak = segwrap_nak_create (nakseq); */
+	assert (nak->sw_seglen <= cqueue_get_aval (rq->rq_data));
+
+	head = getHead (rq->rq_sgmt);
+	assert (head == NULL || rq->rq_nbytes <= head->sw_seglen);
+
+	/* Inserimento NAK: 3 casi. */
+	/* FIXME una volta che funzia per certo, collassare i primi due. */
+	/* 1. Coda vuota, semplice accodamento. */
+	if (isEmpty (rq->rq_sgmt)) {
+		assert (cqueue_get_used (rq->rq_data) == 0);
+		assert (rq->rq_nbytes == 0);
+
+		err = cqueue_add (rq->rq_data, nak->sw_seg, nak->sw_seglen);
+		assert (!err);
+		qenqueue (&rq->rq_sgmt, nak);
+
+		rq->rq_nbytes = nak->sw_seglen;
+	}
+	/* 2. Primo segmento non ancora spedito, aggiunta in testa. */
+	else if (head->sw_seglen == rq->rq_nbytes) {
+		assert (cqueue_get_used (rq->rq_data) > 0);
+		assert (rq->rq_nbytes > 0);
+
+		err = cqueue_push (rq->rq_data, nak->sw_seg, nak->sw_seglen);
+		assert (!err);
+		qpush (&rq->rq_sgmt, nak);
+
+		rq->rq_nbytes = nak->sw_seglen;
+	}
+	/* 3. Altrimenti inserimento subito dopo il primo segmento. */
+	else {
+		size_t fresh;
+
+		assert (cqueue_get_used (rq->rq_data) > 0);
+		assert (rq->rq_nbytes > 0);
+
+		/* Rimozione primo segmento e scarto dei suoi byte rimasti. */
+		head = qdequeue (&rq->rq_sgmt);
+		cqueue_drop (rq->rq_data, rq->rq_nbytes);
+
+		/* Inserimento NAK. */
+		err = cqueue_push (rq->rq_data, nak->sw_seg, nak->sw_seglen);
+		assert (!err);
+		qpush (&rq->rq_sgmt, nak);
+
+		/* Reinserimento primo segmento a partire dai byte non ancora
+		 * spediti. */
+		fresh = head->sw_seglen - rq->rq_nbytes;
+		err = cqueue_push (rq->rq_data,
+				&head->sw_seg[fresh],
+				rq->rq_nbytes);
+		assert (!err);
+		qpush (&rq->rq_sgmt, head);
+	}
 }
 
 
