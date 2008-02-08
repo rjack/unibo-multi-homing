@@ -1,4 +1,5 @@
 #include "h/cqueue.h"
+#include "h/segment.h"
 #include "h/types.h"
 #include "h/util.h"
 
@@ -167,6 +168,45 @@ cqueue_get_used (cqueue_t *cq)
 }
 
 
+size_t
+cqueue_seglen (cqueue_t *cq)
+{
+	/* Ritorna la lunghezza del primo segmento contenuto se cq ha in testa
+	 * un segmento completo, 0 altrimenti.
+	 * XXX assume che il byte in testa sia l'inizio di un segmento e che
+	 * quindi contenga il campo flags. */
+
+	seg_t *flgptr;
+	size_t used;
+
+	assert (cq != NULL);
+
+	flgptr = &cq->cq_data[cq->cq_head];
+	used = cqueue_get_used (cq);
+
+	if (seg_is_nak (flgptr) && used >= NAKLEN)
+		return NAKLEN;
+
+	if (seg_is_ack (flgptr) && used >= ACKLEN)
+		return ACKLEN;
+
+	assert (*flgptr & PLDFLAG);
+
+	if (!(*flgptr & LENFLAG) && used >= FLGLEN + SEQLEN + PLDDEFLEN)
+		return (FLGLEN + SEQLEN + PLDDEFLEN);
+
+	/* Payload di lunghezza non standard, bisogna accedere al campo len,
+	 * se presente. */
+	if (used > LEN) {
+		int i;
+		i = (cq->cq_head + LEN) % cq->cq_len;
+		if (used >= FLGLEN + SEQLEN + LENLEN + cq->cq_data[i])
+			return (FLGLEN + SEQLEN + LENLEN + cq->cq_data[i]);
+	}
+
+	return 0;
+}
+
 int
 cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
@@ -201,10 +241,16 @@ cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 }
 
 
-int
+size_t
 cqueue_read (fd_t fd, cqueue_t *cq)
 {
+	/* Legge piu' byte possibili da fd dentro a cq.
+	 * Ritorna il numero di byte letti (0 o piu').
+	 * In caso di errore imposta errno come quello di read, altrimenti a
+	 * zero; se la read legge l'EOF imposta errno a EREOF. */
+
 	ssize_t nread;
+	size_t nrcvd;
 	size_t chunk;
 
 	assert (fd > 0);
@@ -216,9 +262,11 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	assert (chunk > 0);
 
 	/* Questo ciclo viene eseguito al massimo due volte. */
+	nrcvd = 0;
 	do {
 		nread = read (fd, &cq->cq_data[cq->cq_tail], chunk);
 		if (nread > 0) {
+			nrcvd += nread;
 			CINC (cq->cq_tail, nread, cq->cq_len);
 			if (cq->cq_tail == 0) {
 				assert (!cq->cq_wrap);
@@ -230,10 +278,12 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	} while ((nread > 0 && cq->cq_tail == 0 && chunk > 0)
 	          || (nread == -1 && errno == EINTR));
 
-	if (nread > 0 || (nread == -1 && errno == EAGAIN)) {
-		nread = 1;
-	}
-	return nread;
+	if (nread > 0)
+		errno = 0;
+	else if (nread == 0)
+		errno = EREOF;
+
+	return nrcvd;
 }
 
 
@@ -271,16 +321,16 @@ cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 }
 
 
-int
+size_t
 cqueue_write (fd_t fd, cqueue_t *cq)
 {
 	/* Scrive piu' dati possibile sul file descriptor fd dalla coda cq.
-	 * Ritorna il numero di byte scritti, 0 se e' completamente fallita.
-	 * Se e' avvenuto un errore imposta l'errno corrispondente, se riesce
-	 * imposta errno = 0. */
+	 * Ritorna il numero di byte spediti (0 o piu').
+	 * In caso di errore imposta l'errno come quello di send, altrimenti a
+	 * zero. */
 
-	ssize_t nsent;
 	ssize_t nwrite;
+	size_t nsent;
 	size_t chunk;
 
 	assert (fd > 0);
@@ -288,7 +338,6 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	assert (cqueue_get_used (cq) > 0);
 	/* TODO assert (NONBLOCK); */
 
-	nsent = 0;
 	chunk = cqueue_get_used_chunk (cq);
 	assert (chunk > 0);
 
@@ -296,9 +345,11 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	 * ciclato e la prima iterazione scrive tutti i dati dalla testa alla
 	 * fine del buffer, prova a scrivere anche i dati dall'inizio del
 	 * buffer alla coda. */
+	nsent = 0;
 	do {
 		nwrite = send (fd, &cq->cq_data[cq->cq_head], chunk,
-			       MSG_NOSIGNAL);
+				MSG_NOSIGNAL);
+		assert (nwrite != 0);
 		if (nwrite > 0) {
 			nsent += nwrite;
 			CINC (cq->cq_head, nwrite, cq->cq_len);
@@ -312,12 +363,10 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	} while ((nwrite > 0 && cq->cq_head == 0 && chunk > 0)
 	          || (nwrite == -1 && errno == EINTR));
 
-	assert (nwrite != 0);
 	/* Pulisce il valore di errno se tutto e' andato liscio. */
-	if (nwrite > 0
-	    || errno == EAGAIN || errno == EWOULDBLOCK) {
+	if (nwrite > 0)
 		errno = 0;
-	}
+
 	return nsent;
 }
 

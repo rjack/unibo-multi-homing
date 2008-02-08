@@ -62,14 +62,22 @@ typedef uint8_t seg_t;
 				   Costanti
 *******************************************************************************/
 
+/*
+ * Codici errno: quelli che non possono accadere in questo programma possono
+ * essere riciclati per scopi piu' utili.
+ */
+
+/* Read end-of-file, usato da cqueue_read. */
+#define     EREOF     EISDIR
+
 /* Numero di canali di rete. */
 #define     NETCHANNELS    3
 /* Numero di canali totali. */
 #define     CHANNELS       (NETCHANNELS + 1)
 /* Channel descriptor del primo canale di rete. */
-#define     NETCD            0
+#define     NETCD          0
 /* Channel descriptor del canale dell'host. */
-#define     HOSTCD           (NETCHANNELS)
+#define     HOSTCD         (NETCHANNELS)
 
 
 /*
@@ -113,6 +121,9 @@ typedef uint8_t seg_t;
 
 #define     SEGMINLEN     (PLDMINLEN + HDRMAXLEN)
 #define     SEGMAXLEN     (PLDMAXLEN + HDRMAXLEN)
+
+#define     NAKLEN        FLGLEN + SEQLEN
+#define     ACKLEN        NAKLEN
 
 /* Bit del campo flag */
 #define     CRTFLAG     0x1
@@ -227,7 +238,7 @@ typedef struct {
 	struct segwrap *rq_sgmt;
 	/* Numero di byte da spedire per completare il segmento
 	 * corrente. */
-	size_t rq_nbytes;
+	ssize_t rq_nbytes;
 } rqueue_t;
 
 #endif /* MH_TYPES_H */

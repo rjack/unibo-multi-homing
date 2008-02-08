@@ -181,11 +181,31 @@ rqueue_get_used (rqueue_t *rq)
 }
 
 
-int
+size_t
 rqueue_read (fd_t fd, rqueue_t *rq)
 {
-	/* TODO rqueue_read */
-	return 0;
+	/* Chiama cqueue_read su fd e rq->rq_data e gestisce i segmenti letti
+	 * completamente.
+	 * Ritorna esattamente il valore e l'errno di cqueue_read. */
+
+	int errno_s;
+	size_t seglen;
+	size_t nread;
+	size_t retval;
+
+	assert (fd >= 0);
+	assert (rq != NULL);
+	assert (rqueue_can_read (rq));
+
+	retval = nread = cqueue_read (fd, rq->rq_data);
+	errno_s = errno;
+
+	while (nread > 0 && (seglen = cqueue_seglen (rq->rq_data)) > 0) {
+		/* TODO rimozione e gestione segmenti */
+	}
+
+	errno = errno_s;
+	return retval;
 }
 
 
@@ -212,17 +232,24 @@ rqueue_remove (rqueue_t *rq)
 }
 
 
-int
+size_t
 rqueue_write (fd_t fd, rqueue_t *rq)
 {
-	ssize_t nsent;
+	/* Chiama cqueue_write su fd e rq->rq_data e gestisce di conseguenza
+	 * la coda dei segwrap uscenti.
+	 * Ritorna esattamente il valore e l'errno di cqueue_write. */
+
+	int errno_s;
+	size_t nsent;
+	size_t retval;
 
 	assert (fd >= 0);
 	assert (rq != NULL);
 	assert (rqueue_can_write (rq));
 	assert (rq->rq_nbytes > 0);
 
-	nsent = cqueue_write (fd, rq->rq_data);
+	retval = nsent = cqueue_write (fd, rq->rq_data);
+	errno_s = errno;
 
 	while (nsent > 0) {
 		size_t min;
@@ -232,7 +259,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 		rq->rq_nbytes -= min;
 
 		/* Se primo segmento spedito completamente, lo rimuove e lo
-		 * accoda a rq_sent. */
+		 * registra tra quelli spediti. */
 		if (rq->rq_nbytes == 0) {
 			struct segwrap *head;
 
@@ -251,7 +278,6 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 		}
 	}
 
-	if (errno == 0)
-		return 0;
-	return -1;
+	errno = errno_s;
+	return retval;
 }

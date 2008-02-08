@@ -118,6 +118,7 @@ core (void)
 				}
 			}
 
+			/* I/O. */
 			else {
 				/* Dati da leggere. */
 				if (channel_is_connected (cd)
@@ -125,7 +126,7 @@ core (void)
 					ssize_t nread;
 					nread = channel_read (cd);
 					/* FIXME controllo errore decente! */
-					assert (nread >= 0);
+					/* FIXME controllo EOF! */
 				}
 
 				/* Dati da scrivere. */
@@ -134,7 +135,6 @@ core (void)
 					ssize_t nwrite;
 					nwrite = channel_write (cd);
 					/* FIXME controllo errore decente! */
-					assert (nwrite != -1);
 				}
 			}
 		}

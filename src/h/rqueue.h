@@ -40,7 +40,7 @@ size_t
 rqueue_get_used (rqueue_t *rq);
 
 
-int
+size_t
 rqueue_read (fd_t fd, rqueue_t *rq);
 
 
@@ -48,7 +48,7 @@ struct segwrap *
 rqueue_remove (rqueue_t *rq);
 
 
-int
+size_t
 rqueue_write (fd_t fd, rqueue_t *rq);
 
 

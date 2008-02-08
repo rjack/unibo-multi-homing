@@ -37,6 +37,10 @@ cqueue_get_aval (cqueue_t *cq);
 
 
 size_t
+cqueue_seglen (cqueue_t *cq);
+
+
+size_t
 cqueue_get_used (cqueue_t *cq);
 
 
@@ -44,7 +48,7 @@ int
 cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes);
 
 
-int
+size_t
 cqueue_read (fd_t fd, cqueue_t *cq);
 
 
@@ -52,7 +56,7 @@ int
 cqueue_remove (cqueue_t *cq, seg_t *buf, size_t buflen);
 
 
-int
+size_t
 cqueue_write (fd_t fd, cqueue_t *cq);
 
 
