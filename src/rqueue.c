@@ -192,16 +192,23 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 struct segwrap *
 rqueue_remove (rqueue_t *rq)
 {
-	struct segwrap *sw;
+	struct segwrap *rmvd;
+	struct segwrap *head;
 
 	assert (rq != NULL);
 	assert (rq->rq_sgmt != NULL);
 
-	sw = qdequeue (&rq->rq_sgmt);
-	if (sw != NULL) {
-		cqueue_drop (rq->rq_data, sw->sw_seglen);
+	rmvd = qdequeue (&rq->rq_sgmt);
+	if (rmvd != NULL) {
+		assert (rq->rq_nbytes > 0);
+		cqueue_drop (rq->rq_data, rq->rq_nbytes);
+		head = getHead (rq->rq_sgmt);
+		if (head != NULL) {
+			rq->rq_nbytes = head->sw_seglen;
+		}
 	}
-	return sw;
+
+	return rmvd;
 }
 
 
@@ -218,7 +225,9 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	nsent = cqueue_write (fd, rq->rq_data);
 
 	while (nsent > 0) {
-		size_t min = MIN (nsent, rq->rq_nbytes);
+		size_t min;
+
+		min = MIN (nsent, rq->rq_nbytes);
 		nsent -= min;
 		rq->rq_nbytes -= min;
 
@@ -226,9 +235,14 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 		 * accoda a rq_sent. */
 		if (rq->rq_nbytes == 0) {
 			struct segwrap *head;
+
 			head = qdequeue (&rq->rq_sgmt);
 			assert (head != NULL);
+
+			/* Scartare i NAK e' responsabilita' di
+			 * segwrap_add_sent. */
 			/* TODO segwrap_add_sent (head); */
+
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_sgmt);
 			if (head != NULL) {
