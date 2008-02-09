@@ -11,6 +11,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#if !HAVE_MSG_NOSIGNAL
+#include <signal.h>
+#endif
 
 
 /*******************************************************************************
@@ -443,8 +446,8 @@ proxy_init (port_t hostlistport,
 			perror ("sigaction");
 			goto error;
 		}
-		fprintf (stderr, "Manca MSG_NOSIGNAL, tutti i SIGPIPE
-				ignorati.\n");
+		fprintf (stderr, "Manca MSG_NOSIGNAL, tutti i SIGPIPE "
+				"ignorati.\n");
 	}
 #endif
 	return 0;
