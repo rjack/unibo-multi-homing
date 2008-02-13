@@ -5,15 +5,54 @@
 #include <config.h>
 #include <assert.h>
 
+#define     TYPE     struct segwrap
+#define     NEXT     sw_next
+#define     PREV     sw_prev
+#define     EMPTYQ   NULL
+#include "src/queue_template"
+
+
+/*******************************************************************************
+			       Variabili locali
+*******************************************************************************/
+
+/* Coda dei segwrap inutilizzati. */
+static struct segwrap *swcache;
+
+/* Coda dei segwrap urgenti. */
+static struct segwrap *urg;
+
+static bool init_done = FALSE;
+
 
 /*******************************************************************************
 			      Funzioni pubbliche
 *******************************************************************************/
 
 void
+handle_rcvd_segment (struct segwrap *rcvd)
+{
+	assert (rcvd != NULL);
+
+	/* TODO handle_rcvd_segment */
+}
+
+
+void
+handle_sent_segment (struct segwrap *sent)
+{
+	assert (sent != NULL);
+
+	/* TODO handle_sent_segment */
+}
+
+
+void
 init_segment_module (void)
 {
-	/* TODO init_segment_module. */
+	swcache = newQueue ();
+	urg = newQueue ();
+	init_done = TRUE;
 }
 
 
@@ -78,4 +117,114 @@ seg_seq (seg_t *seg)
 
 	assert (seg != NULL);
 	return seg[SEQ];
+}
+
+
+struct segwrap *
+segwrap_create (void)
+{
+	/* Ritorna un nuovo segwrap, recuperandolo dalla cache di quelli
+	 * inutilizzati oppure, se questa e' vuota, allocandone uno nuovo. */
+
+	struct segwrap *newsw;
+
+	assert (init_done == TRUE);
+
+	if (isEmpty (swcache)) {
+		newsw = xmalloc (sizeof (struct segwrap));
+		newsw->sw_prev = NULL;
+		newsw->sw_next = NULL;
+	} else
+		newsw = qdequeue (&swcache);
+
+	return newsw;
+}
+
+
+struct segwrap *
+segwrap_nak_create (seq_t nakseq)
+{
+	struct segwrap *nak;
+
+	nak = segwrap_create ();
+	nak->sw_seg[FLG] = 0 | NAKFLAG;
+	nak->sw_seg[SEQ] = nakseq;
+	nak->sw_seglen = NAKLEN;
+
+	return nak;
+}
+
+
+int
+segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
+{
+	/* TODO segwrap_fill */
+	return -1;
+}
+
+
+void
+urgent_add (struct segwrap *sw)
+{
+	/* Aggiunge sw alla struttura dati dei segmenti urgenti, in ordine di
+	 * seqnum.
+	 * XXX costo O(n). Si puo' fare meglio? */
+
+	seq_t seq;
+	struct segwrap *cur;
+
+	assert (init_done == TRUE);
+	assert (sw != NULL);
+	assert (!seg_is_nak (sw->sw_seg));
+	assert (!seg_is_ack (sw->sw_seg));
+
+	seq = seg_seq (sw->sw_seg);
+	cur = getHead (urg);
+
+	/* Casi limite: coda vuota, nuovo seqnum piu' piccolo di quello in
+	 * testa oppure piu' grande di quello in coda (comprendono il caso di
+	 * un solo elemento nella coda). */
+	if (cur == NULL
+	    ||  seq < seg_seq (cur->sw_seg))
+		qpush (&urg, sw);
+	else if (seq > seg_seq (urg->sw_seg))
+		qenqueue (&urg, sw);
+	/* Caso generale di inserimento all'interno. */
+	else {
+		/* Scorre tutti i seqnum minori di seq. */
+		while ((cur = getNext (cur)) != urg
+		       && seq > seg_seq (cur->sw_seg))
+			assert (seq != seg_seq (cur->sw_seg));
+
+		assert (cur != getHead (urg));
+		assert (cur != urg);
+
+		sw->sw_prev = cur->sw_prev;
+		sw->sw_next = cur;
+		sw->sw_prev->sw_next = sw;
+		cur->sw_prev = sw;
+	}
+}
+
+
+bool
+urgent_empty (void)
+{
+	/* Ritorna TRUE se la struttura dei segmenti urgenti e' vuota, FALSE
+	 * altrimenti. */
+
+	assert (init_done == TRUE);
+	return (isEmpty (urg));
+}
+
+
+struct segwrap *
+urgent_remove (void)
+{
+	/* Rimuove e ritorna un segwrap dalla struttura dati dei segmenti
+	 * urgenti, in ordine crescente di seqnum.
+	 * Se la coda e' vuota ritorna NULL.  */
+
+	assert (init_done == TRUE);
+	return (qdequeue (&urg));
 }

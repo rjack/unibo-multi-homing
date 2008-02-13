@@ -65,7 +65,7 @@ rqueue_add_nak (rqueue_t *rq, seq_t nakseq)
 
 	assert (rq != NULL);
 
-	/* TODO nak = segwrap_nak_create (nakseq); */
+	nak = segwrap_nak_create (nakseq);
 	assert (nak->sw_seglen <= cqueue_get_aval (rq->rq_data));
 
 	head = getHead (rq->rq_sgmt);
@@ -104,7 +104,7 @@ rqueue_add_nak (rqueue_t *rq, seq_t nakseq)
 
 		/* Rimozione primo segmento e scarto dei suoi byte rimasti. */
 		head = qdequeue (&rq->rq_sgmt);
-		cqueue_drop (rq->rq_data, rq->rq_nbytes);
+		cqueue_drop_head (rq->rq_data, rq->rq_nbytes);
 
 		/* Inserimento NAK. */
 		err = cqueue_push (rq->rq_data, nak->sw_seg, nak->sw_seglen);
@@ -189,23 +189,31 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 	 * Ritorna esattamente il valore e l'errno di cqueue_read. */
 
 	int errno_s;
-	size_t seglen;
+	int err;
 	size_t nread;
-	size_t retval;
 
 	assert (fd >= 0);
 	assert (rq != NULL);
+	assert (isEmpty (rq->rq_sgmt));
+	assert (rq->rq_nbytes == 0);
 	assert (rqueue_can_read (rq));
 
-	retval = nread = cqueue_read (fd, rq->rq_data);
+	nread = cqueue_read (fd, rq->rq_data);
 	errno_s = errno;
 
-	while (nread > 0 && (seglen = cqueue_seglen (rq->rq_data)) > 0) {
-		/* TODO rimozione e gestione segmenti */
+	if (nread > 0) {
+		size_t seglen;
+		while ((seglen = cqueue_seglen (rq->rq_data)) > 0) {
+			struct segwrap *sw;
+			sw = segwrap_create ();
+			err = cqueue_remove (rq->rq_data, sw->sw_seg, seglen);
+			assert (!err);
+			handle_rcvd_segment (sw);
+		}
 	}
 
 	errno = errno_s;
-	return retval;
+	return nread;
 }
 
 
@@ -221,7 +229,7 @@ rqueue_remove (rqueue_t *rq)
 	rmvd = qdequeue (&rq->rq_sgmt);
 	if (rmvd != NULL) {
 		assert (rq->rq_nbytes > 0);
-		cqueue_drop (rq->rq_data, rq->rq_nbytes);
+		cqueue_drop_head (rq->rq_data, rq->rq_nbytes);
 		head = getHead (rq->rq_sgmt);
 		if (head != NULL) {
 			rq->rq_nbytes = head->sw_seglen;
@@ -267,8 +275,8 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 			assert (head != NULL);
 
 			/* Scartare i NAK e' responsabilita' di
-			 * segwrap_add_sent. */
-			/* TODO segwrap_add_sent (head); */
+			 * handle_sent_segment. */
+			handle_sent_segment (head);
 
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_sgmt);

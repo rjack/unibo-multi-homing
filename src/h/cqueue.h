@@ -29,7 +29,11 @@ cqueue_destroy (cqueue_t *cq);
 
 
 void
-cqueue_drop (cqueue_t *cq, size_t nbytes);
+cqueue_drop_head (cqueue_t *cq, size_t nbytes);
+
+
+void
+cqueue_drop_tail (cqueue_t *cq, size_t nbytes);
 
 
 size_t

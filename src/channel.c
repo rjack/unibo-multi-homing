@@ -23,6 +23,9 @@
 /* Canali. */
 static struct chan ch[CHANNELS];
 
+/* Contatore statico per politica round robin. */
+static cd_t rrcd = NETCD;
+
 /* Buffer applicazione. */
 static cqueue_t *host_rcvbuf;
 static cqueue_t *host_sndbuf;
@@ -42,13 +45,21 @@ static seq_t outseq;
 
 
 /*******************************************************************************
+				    Macro
+*******************************************************************************/
+
+#define     ROTATE_RRCD     (rrcd = (rrcd + 1) % NETCHANNELS)
+
+
+/*******************************************************************************
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
 static int connect_noblock (cd_t cd);
 static int listen_noblock (cd_t cd);
+static void host2net (void);
+static void urg2net (void);
 static void idle_handler (void *args);
-static void mov_host2net (cd_t ncd, len_t pldlen);
 
 
 /*******************************************************************************
@@ -370,35 +381,9 @@ channel_write (cd_t cd)
 void
 feed_upload (void)
 {
-	/* Il routing e' banale: un segmento a ogni canale, finche' ci stanno
-	 * nei net o si svuota l'host.
-	 * XXX round robin: id variabile statica che tiene traccia dell'ultimo
-	 * XXX canale servito.
-	 * XXX solo i canali connessi.
-	 * XXX le code dei net devono essere sempre piu' o meno uguali. */
-
-	/* Ogni canale inattivo o pieno spegne il proprio bit. */
-	int needmask;
-	/* Contatore, statico per politica round robin. */
-	static cd_t ncd = NETCD;
-	size_t used;
-	len_t pldlen;
-
-	needmask = 0x7;
-	used = cqueue_get_used (host_rcvbuf),
-	pldlen = (used < PLDDEFLEN ? used : PLDDEFLEN);
-	while (needmask != 0x0 && used > 0) {
-		if (channel_is_connected (ncd)
-		    && rqueue_get_aval (net_sndbuf[ncd]) >= (HDRMAXLEN
-		                                             + pldlen)) {
-			mov_host2net (ncd, pldlen);
-			used = cqueue_get_used (host_rcvbuf),
-			pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
-		} else {
-			/* Spegnimento bit. */
-			needmask &= ~(0x1 << ncd);
-		}
-		ncd = (ncd + 1) % NETCHANNELS;
+	urg2net ();
+	if (urgent_empty ()) {
+		host2net ();
 	}
 }
 
@@ -749,28 +734,66 @@ error:
 
 
 static void
-idle_handler (void *args)
+host2net (void)
 {
-	assert (FALSE);
-	/* TODO idle_handler */
+	/* Ogni canale inattivo o pieno spegne il proprio bit. */
+	int needmask;
+	size_t used;
+	len_t pldlen;
+
+	needmask = 0x7;
+	used = cqueue_get_used (host_rcvbuf),
+	pldlen = (used < PLDDEFLEN ? used : PLDDEFLEN);
+	while (needmask != 0x0 && used > 0) {
+		if (channel_is_connected (rrcd)
+		    && rqueue_get_aval (net_sndbuf[rrcd]) >= (HDRMAXLEN
+		                                              + pldlen)) {
+			int err;
+			struct segwrap *newsw;
+
+			newsw = segwrap_create ();
+			err = segwrap_fill (newsw, host_rcvbuf, pldlen,
+					outseq++);
+			assert (!err);
+
+			rqueue_add (net_sndbuf[rrcd], newsw);
+
+			used = cqueue_get_used (host_rcvbuf),
+			pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
+		} else
+			needmask &= ~(0x1 << rrcd);
+		ROTATE_RRCD;
+	}
 }
 
 
 static void
-mov_host2net (cd_t ncd, len_t pldlen)
+urg2net (void)
 {
+	/* Trasferisce i segwrap dalla struttura dei segmenti urgenti ai
+	 * buffer dei canali di rete in maniera round robin, finche' ci sono
+	 * segmenti urgenti oppure i buffer si riempono. */
+
 	int err;
-	struct segwrap *newsw;
-	pld_t *pld = NULL;
+	int needmask;
+	struct segwrap *sw;
 
-	assert (VALID_CD (ncd));
+	needmask = 0x7;
+	while ((sw = urgent_remove ()) != NULL && needmask != 0x0) {
+		if (channel_is_connected (rrcd)
+		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
+			err = rqueue_add (net_sndbuf[rrcd], sw);
+			assert (!err);
+		} else
+			needmask &= ~(0x1 << rrcd);
+		ROTATE_RRCD;
+	}
+}
 
-	/* TODO newsw = segwrap_create (outseq, pldlen). */
-	outseq++;
 
-	pld = seg_pld (newsw->sw_seg);
-	err = cqueue_remove (host_rcvbuf, pld, pldlen);
-	assert (!err);
-
-	rqueue_add (net_sndbuf[ncd], newsw);
+static void
+idle_handler (void *args)
+{
+	assert (FALSE);
+	/* TODO idle_handler */
 }

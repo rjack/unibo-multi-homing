@@ -18,7 +18,7 @@
 #define     CINC(x,inc,len)     ((x) = ((x) + (inc)) % (len))
 #define     CDEC(x,dec,len)     ((x) = ((x) - (dec)) % (len))
 
-#if ! HAVE_MSG_NOSIGNAL
+#if !HAVE_MSG_NOSIGNAL
 #define     MSG_NOSIGNAL     0
 #endif
 
@@ -129,16 +129,28 @@ cqueue_destroy (cqueue_t *cq)
 
 
 void
-cqueue_drop (cqueue_t *cq, size_t nbytes)
+cqueue_drop_head (cqueue_t *cq, size_t nbytes)
 {
 	assert (cq != NULL);
 	assert (nbytes > 0);
-	assert (nbytes <= cqueue_get_aval (cq));
+	assert (nbytes <= cqueue_get_used (cq));
 
 	CINC (cq->cq_head, nbytes, cq->cq_len);
-	if (cq->cq_head <= cq->cq_tail) {
+	if (cq->cq_head <= cq->cq_tail)
 		cq->cq_wrap = FALSE;
-	}
+}
+
+
+void
+cqueue_drop_tail (cqueue_t *cq, size_t nbytes)
+{
+	assert (cq != NULL);
+	assert (nbytes > 0);
+	assert (nbytes <= cqueue_get_used (cq));
+
+	CDEC (cq->cq_tail, nbytes, cq->cq_len);
+	if (cq->cq_head <= cq->cq_tail)
+		cq->cq_wrap = FALSE;
 }
 
 
