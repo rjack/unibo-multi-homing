@@ -152,6 +152,7 @@ channel_invalidate (cd_t cd)
 	/* TODO deallocare tutte le strutture dati associate al canale. */
 	/* TODO impostare il canale in modo che activate_channels non lo
 	 * TODO riattivi. */
+	assert (FALSE);
 }
 
 
@@ -163,9 +164,8 @@ channel_is_activable (cd_t cd)
 	if (channel_is_connected (cd)
 	    || channel_is_listening (cd)
 	    || (!addr_is_set (&ch[cd].c_laddr)
-	        && !addr_is_set (&ch[cd].c_raddr))) {
+	        && !addr_is_set (&ch[cd].c_raddr)))
 		return FALSE;
-	}
 
 	if (cd == HOSTCD) {
 		/* Proxy Receiver. */
@@ -185,9 +185,8 @@ channel_is_activable (cd_t cd)
 	/* NETCD */
 
 	/* Proxy Sender. */
-	if (channel_must_connect (cd)) {
+	if (channel_must_connect (cd))
 		return channel_is_connected (HOSTCD);
-	}
 	/* Proxy Receiver. */
 	return TRUE;
 }
@@ -201,9 +200,9 @@ channel_is_connected (cd_t cd)
 	if (ch[cd].c_listfd < 0
 	    && ch[cd].c_sockfd >= 0
 	    && addr_is_set (&ch[cd].c_laddr)
-	    && addr_is_set (&ch[cd].c_raddr)) {
+	    && addr_is_set (&ch[cd].c_raddr))
 		return TRUE;
-	}
+
 	return FALSE;
 }
 
@@ -223,6 +222,7 @@ channel_is_connecting (cd_t cd)
 		assert (ch[cd].c_listfd < 0);
 		return TRUE;
 	}
+
 	return FALSE;
 }
 
@@ -736,30 +736,27 @@ error:
 static void
 host2net (void)
 {
-	/* Ogni canale inattivo o pieno spegne il proprio bit. */
 	int needmask;
-	size_t used;
+	size_t host_nbytes;
 	len_t pldlen;
 
 	needmask = 0x7;
-	used = cqueue_get_used (host_rcvbuf),
-	pldlen = (used < PLDDEFLEN ? used : PLDDEFLEN);
-	while (needmask != 0x0 && used > 0) {
+	host_nbytes = cqueue_get_used (host_rcvbuf);
+	pldlen = MIN (host_nbytes, PLDDEFLEN);
+	while (needmask != 0x0 && host_nbytes > 0) {
 		if (channel_is_connected (rrcd)
 		    && rqueue_get_aval (net_sndbuf[rrcd]) >= (HDRMAXLEN
 		                                              + pldlen)) {
-			int err;
 			struct segwrap *newsw;
 
 			newsw = segwrap_create ();
-			err = segwrap_fill (newsw, host_rcvbuf, pldlen,
+			segwrap_fill (newsw, host_rcvbuf, pldlen,
 					outseq++);
-			assert (!err);
 
 			rqueue_add (net_sndbuf[rrcd], newsw);
 
-			used = cqueue_get_used (host_rcvbuf),
-			pldlen = (used >= PLDDEFLEN ? PLDDEFLEN : used);
+			host_nbytes = cqueue_get_used (host_rcvbuf);
+			pldlen = MIN (host_nbytes, PLDDEFLEN);
 		} else
 			needmask &= ~(0x1 << rrcd);
 		ROTATE_RRCD;
@@ -779,9 +776,13 @@ urg2net (void)
 	struct segwrap *sw;
 
 	needmask = 0x7;
-	while ((sw = urgent_remove ()) != NULL && needmask != 0x0) {
+	while (!urgent_empty () && needmask != 0x0) {
+		sw = urgent_head ();
+		assert (sw != NULL);
 		if (channel_is_connected (rrcd)
 		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
+			sw = urgent_remove ();
+			assert (sw != NULL);
 			err = rqueue_add (net_sndbuf[rrcd], sw);
 			assert (!err);
 		} else

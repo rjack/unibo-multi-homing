@@ -33,6 +33,7 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_prev == NULL);
 	assert (sw->sw_seglen > 0);
 	assert (!seg_is_nak (sw->sw_seg));
+	assert (sw->sw_seglen <= cqueue_get_aval (rq->rq_data));
 
 	/* Inizializza rq_nbytes se la coda segmenti uscenti e' vuota. */
 	if (isEmpty (rq->rq_sgmt)) {
@@ -40,10 +41,9 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 		assert (rq->rq_nbytes == 0);
 		rq->rq_nbytes = sw->sw_seglen;
 	}
-	/* Se c'e' posto nella cqueue rq_data ci copia il segmento. */
-	if (sw->sw_seglen <= cqueue_get_aval (rq->rq_data)) {
-		err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
-	}
+	/* Copia dati nel buffer circolare di spedizione. */
+	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
+	assert (!err);
 	/* Accoda sewrap nei segmenti uscenti. */
 	qenqueue (&rq->rq_sgmt, sw);
 

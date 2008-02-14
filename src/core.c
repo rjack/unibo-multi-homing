@@ -39,7 +39,7 @@ core (void)
 	}
 
 	/*
-	 * Inizializzazione timeout e segmenti.
+	 * Inizializzazione moduli.
 	 */
 	init_timeout_module ();
 	init_segment_module ();

@@ -88,6 +88,7 @@ check_timeouts (void)
 
 	for (i = 0; i < CLASSNO; i++) {
 		cur = getHead (tqueue[i]);
+		/* TODO questo ciclo e' da riscrivere, e' orrendo. */
 		while (!isEmpty (tqueue[i]) && cur != NULL) {
 			tmp = (cur->to_next == getHead (tqueue[i]) ?
 			       NULL : cur->to_next);
