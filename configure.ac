@@ -64,7 +64,7 @@ esac
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
-AC_CHECK_FUNCS([gettimeofday memset select socket strchr strerror strtol])
+AC_CHECK_FUNCS([floor gettimeofday memset select socket strchr strerror strtol])
 
 if test "${SYS}" = "linux"; then
 	AC_DEFINE(LINUX_OS, 1, Define if we compile for a Linux system)
