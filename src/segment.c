@@ -1,5 +1,6 @@
 #include "h/types.h"
 #include "h/segment.h"
+#include "h/cqueue.h"
 #include "h/util.h"
 
 #include <config.h>
@@ -50,8 +51,11 @@ handle_sent_segment (struct segwrap *sent)
 void
 init_segment_module (void)
 {
+	assert (init_done == FALSE);
+
 	swcache = newQueue ();
 	urg = newQueue ();
+
 	init_done = TRUE;
 }
 
@@ -155,11 +159,31 @@ segwrap_nak_create (seq_t nakseq)
 }
 
 
-int
+void
 segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 {
-	/* TODO segwrap_fill */
-	return -1;
+	/* Riempe il segmento del segwrap sw con i dati presi dalla coda src.
+	 * Il segmento avra' payload lungo pldlen, il numero di sequenza
+	 * seqnum e le flag PLDFLAG e LENFLAG appropriate. */
+
+	int err;
+	pld_t *pld;
+
+	assert (sw != NULL);
+	assert (src != NULL);
+	assert (pldlen > 0);
+	assert (cqueue_get_used (src) > 0);
+
+	/* Flags. */
+	sw->sw_seg[FLG] = 0 | PLDFLAG;
+	if (pldlen != PLDDEFLEN)
+		sw->sw_seg[FLG] |= LENFLAG;
+	/* Seqnum. */
+	sw->sw_seg[SEQ] = seqnum;
+	/* Payload. */
+	pld = seg_pld (sw->sw_seg);
+	err = cqueue_remove (src, pld, pldlen);
+	assert (!err);
 }
 
 
@@ -214,7 +238,15 @@ urgent_empty (void)
 	 * altrimenti. */
 
 	assert (init_done == TRUE);
-	return (isEmpty (urg));
+	return isEmpty (urg);
+}
+
+
+struct segwrap *
+urgent_head (void)
+{
+	assert (init_done == TRUE);
+	return getHead (urg);
 }
 
 
@@ -226,5 +258,5 @@ urgent_remove (void)
 	 * Se la coda e' vuota ritorna NULL.  */
 
 	assert (init_done == TRUE);
-	return (qdequeue (&urg));
+	return qdequeue (&urg);
 }

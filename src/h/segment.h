@@ -52,7 +52,7 @@ struct segwrap *
 segwrap_nak_create (seq_t nakseq);
 
 
-int
+void
 segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum);
 
 
@@ -62,6 +62,10 @@ urgent_add (struct segwrap *sw);
 
 bool
 urgent_empty (void);
+
+
+struct segwrap *
+urgent_head (void);
 
 
 struct segwrap *
