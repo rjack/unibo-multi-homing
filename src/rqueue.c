@@ -280,9 +280,10 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_sgmt);
-			if (head != NULL) {
+			if (head != NULL)
 				rq->rq_nbytes = head->sw_seglen;
-			}
+			else
+				assert (nsent == 0);
 		}
 	}
 

@@ -35,7 +35,14 @@ handle_rcvd_segment (struct segwrap *rcvd)
 {
 	assert (rcvd != NULL);
 
-	/* TODO handle_rcvd_segment */
+	/* TODO se e' un nak */
+		/* TODO handle_rcvd_nak (seq) */
+		/* TODO handle_rcvd_ack (seq - 1) */
+	/* TODO altrimenti se e' un ack */
+		/* TODO handle_rcvd_ack (seq) */
+	/* TODO altrimenti */
+		/* TODO assert ha il payload */
+		/* TODO handle_rcvd_data (rcvd) */
 }
 
 
@@ -44,7 +51,10 @@ handle_sent_segment (struct segwrap *sent)
 {
 	assert (sent != NULL);
 
-	/* TODO handle_sent_segment */
+	/* TODO se non ha il payload */
+		/* TODO deallocazione segwrap */
+	/* TODO altrimenti */
+		/* TODO aggiunta alla struttura dati segmenti spediti */
 }
 
 

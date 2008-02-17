@@ -32,11 +32,10 @@ core (void)
 	struct timeval tv_timeout;
 
 	/* DEBUG */
-	if (ACTIVITY_TIMEOUT > 1) {
+	if (ACTIVITY_TIMEOUT > 1)
 		fprintf (stderr,
 		        "\nOCCHIO!!!\nACTIVITY_TIMEOUT = %f\n\n",
 		        ACTIVITY_TIMEOUT);
-	}
 
 	/*
 	 * Inizializzazione moduli.
@@ -64,9 +63,8 @@ core (void)
 			if (min_timeout > 0) {
 				toptr = &tv_timeout;
 				d2tv (min_timeout, toptr);
-			} else {
+			} else
 				toptr = NULL;
-			}
 
 			/* Inizializzazione dei set. */
 			FD_ZERO (&rdset);
@@ -100,7 +98,7 @@ core (void)
 				} else {
 					channel_prepare_io (cd);
 					printf ("Canale %s connesso.\n",
-					        channel_name (cd));
+							channel_name (cd));
 				}
 			}
 
@@ -113,8 +111,8 @@ core (void)
 				} else {
 					channel_prepare_io (cd);
 					printf ("Canale %s, connessione "
-					        "accettata.\n",
-						channel_name (cd));
+							"accettata.\n",
+							channel_name (cd));
 				}
 			}
 
@@ -123,18 +121,22 @@ core (void)
 				/* Dati da leggere. */
 				if (channel_is_connected (cd)
 				    && FD_ISSET (sockfd, &rdset)) {
-					ssize_t nread;
-					nread = channel_read (cd);
+					ssize_t nr;
+					nr = channel_read (cd);
 					/* FIXME controllo errore decente! */
 					/* FIXME controllo EOF! */
+					/* TODO se nr > 0 */
+						/* TODO reset attiv. tmout */
 				}
 
 				/* Dati da scrivere. */
 				if (channel_is_connected (cd)
 				    && FD_ISSET (sockfd, &wrset)) {
-					ssize_t nwrite;
-					nwrite = channel_write (cd);
+					ssize_t nw;
+					nw = channel_write (cd);
 					/* FIXME controllo errore decente! */
+					/* TODO se nw > 0 */
+						/* TODO reset attiv. tmout */
 				}
 			}
 		}
