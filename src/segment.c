@@ -1,6 +1,7 @@
 #include "h/types.h"
 #include "h/segment.h"
 #include "h/cqueue.h"
+#include "h/crono.h"
 #include "h/util.h"
 
 #include <config.h>
@@ -24,6 +25,14 @@ static struct segwrap *swcache;
 static struct segwrap *urg;
 
 static bool init_done = FALSE;
+
+
+/*******************************************************************************
+		       Prototipi delle funzioni locali
+*******************************************************************************/
+
+static int
+urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 
 
 /*******************************************************************************
@@ -101,9 +110,8 @@ seg_pld (seg_t *seg)
 	 * e' assente. */
 
 	assert (seg != NULL);
-	if (seg[FLG] & PLDFLAG) {
+	if (seg[FLG] & PLDFLAG)
 		return (seg[FLG] & LENFLAG ? &seg[LEN + 1] : &seg[LEN]);
-	}
 	assert (seg_pld_len (seg) == 0);
 	return NULL;
 }
@@ -116,9 +124,8 @@ seg_pld_len (seg_t *seg)
 	 * assente. */
 
 	assert (seg != NULL);
-	if (seg[FLG] & PLDFLAG) {
+	if (seg[FLG] & PLDFLAG)
 		return (seg[FLG] & LENFLAG ? seg[LEN] : PLDDEFLEN);
-	}
 	assert (seg_pld (seg) == NULL);
 	return 0;
 }
@@ -141,6 +148,7 @@ segwrap_create (void)
 	 * inutilizzati oppure, se questa e' vuota, allocandone uno nuovo. */
 
 	struct segwrap *newsw;
+	static struct timeval now;
 
 	assert (init_done == TRUE);
 
@@ -150,6 +158,10 @@ segwrap_create (void)
 		newsw->sw_next = NULL;
 	} else
 		newsw = qdequeue (&swcache);
+
+	/* Timestamp. */
+	gettime (&now);
+	newsw->sw_tstamp = tv2d (&now, FALSE);
 
 	return newsw;
 }
@@ -174,7 +186,8 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 {
 	/* Riempe il segmento del segwrap sw con i dati presi dalla coda src.
 	 * Il segmento avra' payload lungo pldlen, il numero di sequenza
-	 * seqnum e le flag PLDFLAG e LENFLAG appropriate. */
+	 * seqnum e le flag PLDFLAG e LENFLAG appropriate.
+	 * Il segwrap viene marcato con il timestamp dell'istante attuale. */
 
 	int err;
 	pld_t *pld;
@@ -197,14 +210,31 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 }
 
 
+int
+seqcmp (seq_t a, seq_t b)
+{
+	/* Ritorna -1 o 1 a seconda che b rispettivamente preceda o segua a
+	 * nell'ordine dei numeri di sequenza. Se a == b ritorna 0. */
+
+	if (a == b)
+		return 0;
+
+	if ((a < b && (b - a) > (SEQMAX / 2))
+	     || (a > b && (a - b) < (SEQMAX / 2)))
+		return -1;
+
+	return 1;
+}
+
+
 void
 urgent_add (struct segwrap *sw)
 {
-	/* Aggiunge sw alla struttura dati dei segmenti urgenti, in ordine di
-	 * seqnum.
-	 * XXX costo O(n). Si puo' fare meglio? */
+	/* Aggiunge sw alla struttura dati dei segmenti urgenti, i piu'
+	 * urgenti prima.
+	 * XXX costo O(n). Vale la pena di usare una priority queue basata su
+	 * XXX heap? */
 
-	seq_t seq;
 	struct segwrap *cur;
 
 	assert (init_done == TRUE);
@@ -212,23 +242,20 @@ urgent_add (struct segwrap *sw)
 	assert (!seg_is_nak (sw->sw_seg));
 	assert (!seg_is_ack (sw->sw_seg));
 
-	seq = seg_seq (sw->sw_seg);
 	cur = getHead (urg);
 
-	/* Casi limite: coda vuota, nuovo seqnum piu' piccolo di quello in
-	 * testa oppure piu' grande di quello in coda (comprendono il caso di
-	 * un solo elemento nella coda). */
-	if (cur == NULL
-	    ||  seq < seg_seq (cur->sw_seg))
+	/* Casi limite: coda vuota, nuovo segmento piu' urgente di quello in
+	 * testa oppure meno di quello in coda (comprendono il caso di un solo
+	 * elemento nella coda). */
+	if (cur == NULL || urgcmp (sw, cur) > 0)
 		qpush (&urg, sw);
-	else if (seq > seg_seq (urg->sw_seg))
+	else if (urgcmp (sw, urg) < 0)
 		qenqueue (&urg, sw);
 	/* Caso generale di inserimento all'interno. */
 	else {
-		/* Scorre tutti i seqnum minori di seq. */
-		while ((cur = getNext (cur)) != urg
-		       && seq > seg_seq (cur->sw_seg))
-			assert (seq != seg_seq (cur->sw_seg));
+		/* Salta tutti i segwrap piu' urgenti di sw. */
+		while ((cur = getNext (cur)) != urg && urgcmp (sw, cur) < 0)
+			;
 
 		assert (cur != getHead (urg));
 		assert (cur != urg);
@@ -255,6 +282,9 @@ urgent_empty (void)
 struct segwrap *
 urgent_head (void)
 {
+	/* Ritorna il segmento in testa alla coda dei segmenti urgenti senza
+	 * rimuoverlo, oppure NULL se la coda e' vuota. */
+
 	assert (init_done == TRUE);
 	return getHead (urg);
 }
@@ -264,9 +294,33 @@ struct segwrap *
 urgent_remove (void)
 {
 	/* Rimuove e ritorna un segwrap dalla struttura dati dei segmenti
-	 * urgenti, in ordine crescente di seqnum.
+	 * urgenti, in ordine di urgenza.
 	 * Se la coda e' vuota ritorna NULL.  */
 
 	assert (init_done == TRUE);
 	return qdequeue (&urg);
+}
+
+
+/*******************************************************************************
+			       Funzioni locali
+*******************************************************************************/
+
+static int
+urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
+{
+	/* Ritorna 1 se sw_1 e' piu' urgente di sw_2, -1 altrimenti. */
+
+	int res;
+
+	if (sw_1->sw_tstamp < sw_2->sw_tstamp)
+		return 1;
+	if (sw_1->sw_tstamp > sw_2->sw_tstamp)
+		return -1;
+	/* Timestamp identici, confronta il seqnum. */
+	res = seqcmp (seg_seq (sw_1->sw_seg), seg_seq (sw_2->sw_seg));
+	assert (res != 0);
+	if (res < 0)
+		return 1;
+	return -1;
 }

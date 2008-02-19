@@ -225,6 +225,7 @@ struct segwrap {
 	size_t sw_seglen;
 	struct segwrap *sw_next;
 	struct segwrap *sw_prev;
+	double sw_tstamp;
 };
 
 

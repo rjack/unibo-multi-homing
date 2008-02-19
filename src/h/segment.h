@@ -56,6 +56,10 @@ void
 segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum);
 
 
+int
+seqcmp (seq_t a, seq_t b);
+
+
 void
 urgent_add (struct segwrap *sw);
 
