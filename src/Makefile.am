@@ -10,7 +10,8 @@ precv_SOURCES=precv.c h/types.h \
 	      timeout.c h/timeout.h \
 	      rqueue.c h/rqueue.h \
 	      segment.c h/segment.h \
-	      seghash.c h/seghash.h
+	      seghash.c h/seghash.h \
+	      queue_template
 psend_SOURCES=psend.c h/types.h \
 	      util.c h/util.h \
 	      channel.c h/channel.h \
@@ -21,4 +22,5 @@ psend_SOURCES=psend.c h/types.h \
 	      timeout.c h/timeout.h \
 	      rqueue.c h/rqueue.h \
 	      segment.c h/segment.h \
-	      seghash.c h/seghash.h
+	      seghash.c h/seghash.h \
+	      queue_template

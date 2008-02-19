@@ -179,3 +179,22 @@ qdequeue (TYPE **tp)
 	}
 	return head;
 }
+
+
+HIDDEN void
+qinorder_insert (TYPE **tp, TYPE *ptr, int (*cmpfun)(TYPE *, TYPE *))
+{
+	TYPE *cur = getHead (*tp);
+
+	if (cur == NULL || cmpfun (ptr, *tp) > 0)
+		qenqueue (tp, ptr);
+	else {
+		while (cmpfun (ptr, cur) > 0)
+			cur = getNext (cur);
+
+		ptr->PREV = cur->PREV;
+		cur->PREV->NEXT = ptr;
+		cur->PREV = ptr;
+		ptr->NEXT = cur;
+	}
+}
