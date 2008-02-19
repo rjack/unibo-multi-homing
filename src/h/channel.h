@@ -102,4 +102,8 @@ finalize_connection (cd_t cd);
 fd_t
 set_file_descriptors (fd_set *rdset, fd_set *wrset);
 
+
+void
+set_net_upload_reorg (void);
+
 #endif /* CHANNEL_H */

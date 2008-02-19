@@ -36,6 +36,10 @@ static rqueue_t *net_sndbuf[NETCHANNELS];
 /* Ultimo seqnum inviato. */
 static seq_t outseq;
 
+/* Vera se feed_upload deve riorganizzare i buffer di upload dei canali col
+ * ritardatore per inserire segmenti critici. */
+static bool net_upload_reorg = FALSE;
+
 /* TODO
  * - contatori:
  *   - ack/nack
@@ -58,6 +62,7 @@ static seq_t outseq;
 static int connect_noblock (cd_t cd);
 static int listen_noblock (cd_t cd);
 static void host2net (void);
+static void net2urg (void);
 static void urg2net (void);
 static void idle_handler (void *args);
 
@@ -381,10 +386,13 @@ channel_write (cd_t cd)
 void
 feed_upload (void)
 {
-	urg2net ();
-	if (urgent_empty ()) {
-		host2net ();
+	if (net_upload_reorg) {
+		net2urg ();
+		net_upload_reorg = FALSE;
 	}
+	urg2net ();
+	if (urgent_empty ())
+		host2net ();
 }
 
 
@@ -598,6 +606,16 @@ set_file_descriptors (fd_set *rdset, fd_set *wrset)
 	return max;
 }
 
+
+void
+set_net_upload_reorg (void)
+{
+	/* Imposta a TRUE la variabile che informa feed_upload che deve
+	 * riorganizzare i buffer di rete perche' ci sono segmenti speciali
+	 * (nak o segmenti da rispedire) da inserire. */
+	net_upload_reorg = TRUE;
+}
+
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
@@ -761,6 +779,13 @@ host2net (void)
 			needmask &= ~(0x1 << rrcd);
 		ROTATE_RRCD;
 	}
+}
+
+
+static void
+net2urg (void)
+{
+	/* TODO net2urg */
 }
 
 
