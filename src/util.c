@@ -1,5 +1,6 @@
 #include "h/types.h"
 #include "h/util.h"
+#include "h/segment.h"
 
 #include <config.h>
 #include <assert.h>
@@ -140,8 +141,12 @@ xmalloc (size_t size)
 
 	ptr = malloc (size);
 	if (ptr == NULL) {
-		perror ("Impossibile allocare memoria");
-		exit (EXIT_FAILURE);
+		segwrap_flush_cache ();
+		ptr = malloc (size);
+		if (ptr == NULL) {
+			perror ("Impossibile allocare memoria");
+			exit (EXIT_FAILURE);
+		}
 	}
 	return ptr;
 }

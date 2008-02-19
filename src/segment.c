@@ -1,7 +1,9 @@
 #include "h/types.h"
 #include "h/segment.h"
+#include "h/channel.h"
 #include "h/cqueue.h"
 #include "h/crono.h"
+#include "h/seghash.h"
 #include "h/util.h"
 
 #include <config.h>
@@ -20,9 +22,13 @@
 
 /* Coda dei segwrap inutilizzati. */
 static struct segwrap *swcache;
-
 /* Coda dei segwrap urgenti. */
 static struct segwrap *urg;
+/* Coda dei segmenti da ricostruire per spedirli all'host. */
+static struct segwrap *join;
+/* Tabella hash dei segwrap spediti. */
+#define     HT_SENT_SIZE     10
+static struct segwrap *ht_sent[HT_SENT_SIZE];
 
 static bool init_done = FALSE;
 
@@ -31,8 +37,10 @@ static bool init_done = FALSE;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static int
-urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
+static int urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
+static void handle_rcvd_ack (seq_t ack);
+static void handle_rcvd_nak (seq_t nak);
+static void handle_rcvd_data (struct segwrap *sw);
 
 
 /*******************************************************************************
@@ -42,16 +50,23 @@ urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 void
 handle_rcvd_segment (struct segwrap *rcvd)
 {
+	seq_t seq;
+
 	assert (rcvd != NULL);
 
-	/* TODO se e' un nak */
-		/* TODO handle_rcvd_nak (seq) */
-		/* TODO handle_rcvd_ack (seq - 1) */
-	/* TODO altrimenti se e' un ack */
-		/* TODO handle_rcvd_ack (seq) */
-	/* TODO altrimenti */
-		/* TODO assert ha il payload */
-		/* TODO handle_rcvd_data (rcvd) */
+	seq = seg_seq (rcvd->sw_seg);
+
+	if (seg_is_nak (rcvd->sw_seg)) {
+		handle_rcvd_nak (seq);
+		handle_rcvd_ack (seq - 1);
+		segwrap_destroy (rcvd);
+	} else if (seg_is_ack (rcvd->sw_seg)) {
+		handle_rcvd_ack (seq);
+		segwrap_destroy (rcvd);
+	} else {
+		assert (seg_pld (rcvd->sw_seg) != NULL);
+		handle_rcvd_data (rcvd);
+	}
 }
 
 
@@ -60,10 +75,10 @@ handle_sent_segment (struct segwrap *sent)
 {
 	assert (sent != NULL);
 
-	/* TODO se non ha il payload */
-		/* TODO deallocazione segwrap */
-	/* TODO altrimenti */
-		/* TODO aggiunta alla struttura dati segmenti spediti */
+	if (seg_pld (sent->sw_seg) == NULL)
+		segwrap_destroy (sent);
+	else
+		seghash_add (ht_sent, HT_SENT_SIZE, sent);
 }
 
 
@@ -74,6 +89,8 @@ init_segment_module (void)
 
 	swcache = newQueue ();
 	urg = newQueue ();
+	join = newQueue ();
+	seghash_init (ht_sent, HT_SENT_SIZE);
 
 	init_done = TRUE;
 }
@@ -141,11 +158,21 @@ seg_seq (seg_t *seg)
 }
 
 
+int
+segwrap_cmp (struct segwrap *sw_1, struct segwrap *sw_2)
+{
+	assert (sw_1 != NULL);
+	assert (sw_2 != NULL);
+	return seqcmp (seg_seq (sw_1->sw_seg), seg_seq (sw_2->sw_seg));
+}
+
+
 struct segwrap *
 segwrap_create (void)
 {
 	/* Ritorna un nuovo segwrap, recuperandolo dalla cache di quelli
-	 * inutilizzati oppure, se questa e' vuota, allocandone uno nuovo. */
+	 * inutilizzati oppure, se questa e' vuota, allocandone uno nuovo.
+	 * Il segwrap viene marcato con il timestamp dell'istante attuale. */
 
 	struct segwrap *newsw;
 	static struct timeval now;
@@ -182,12 +209,19 @@ segwrap_nak_create (seq_t nakseq)
 
 
 void
+segwrap_destroy (struct segwrap *sw)
+{
+	assert (init_done == TRUE);
+	qenqueue (&swcache, sw);
+}
+
+
+void
 segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 {
 	/* Riempe il segmento del segwrap sw con i dati presi dalla coda src.
 	 * Il segmento avra' payload lungo pldlen, il numero di sequenza
-	 * seqnum e le flag PLDFLAG e LENFLAG appropriate.
-	 * Il segwrap viene marcato con il timestamp dell'istante attuale. */
+	 * seqnum e le flag PLDFLAG e LENFLAG appropriate. */
 
 	int err;
 	pld_t *pld;
@@ -207,6 +241,18 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 	pld = seg_pld (sw->sw_seg);
 	err = cqueue_remove (src, pld, pldlen);
 	assert (!err);
+}
+
+
+void
+segwrap_flush_cache (void)
+{
+	struct segwrap *cur;
+
+	while ((cur = qdequeue (&swcache)) != NULL)
+		xfree (cur);
+
+	assert (isEmpty (swcache));
 }
 
 
@@ -235,36 +281,12 @@ urgent_add (struct segwrap *sw)
 	 * XXX costo O(n). Vale la pena di usare una priority queue basata su
 	 * XXX heap? */
 
-	struct segwrap *cur;
-
 	assert (init_done == TRUE);
 	assert (sw != NULL);
 	assert (!seg_is_nak (sw->sw_seg));
 	assert (!seg_is_ack (sw->sw_seg));
 
-	cur = getHead (urg);
-
-	/* Casi limite: coda vuota, nuovo segmento piu' urgente di quello in
-	 * testa oppure meno di quello in coda (comprendono il caso di un solo
-	 * elemento nella coda). */
-	if (cur == NULL || urgcmp (sw, cur) > 0)
-		qpush (&urg, sw);
-	else if (urgcmp (sw, urg) < 0)
-		qenqueue (&urg, sw);
-	/* Caso generale di inserimento all'interno. */
-	else {
-		/* Salta tutti i segwrap piu' urgenti di sw. */
-		while ((cur = getNext (cur)) != urg && urgcmp (sw, cur) < 0)
-			;
-
-		assert (cur != getHead (urg));
-		assert (cur != urg);
-
-		sw->sw_prev = cur->sw_prev;
-		sw->sw_next = cur;
-		sw->sw_prev->sw_next = sw;
-		cur->sw_prev = sw;
-	}
+	qinorder_insert (&urg, sw, &urgcmp);
 }
 
 
@@ -309,18 +331,50 @@ urgent_remove (void)
 static int
 urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 {
-	/* Ritorna 1 se sw_1 e' piu' urgente di sw_2, -1 altrimenti. */
+	/* Ritorna -1 se sw_1 e' piu' urgente di sw_2, 1 altrimenti. */
 
 	int res;
 
 	if (sw_1->sw_tstamp < sw_2->sw_tstamp)
-		return 1;
-	if (sw_1->sw_tstamp > sw_2->sw_tstamp)
 		return -1;
+	if (sw_1->sw_tstamp > sw_2->sw_tstamp)
+		return 1;
 	/* Timestamp identici, confronta il seqnum. */
 	res = seqcmp (seg_seq (sw_1->sw_seg), seg_seq (sw_2->sw_seg));
 	assert (res != 0);
-	if (res < 0)
-		return 1;
-	return -1;
+	return res;
+}
+
+
+static void
+handle_rcvd_ack (seq_t ack)
+{
+	/* TODO handle_rcvd_ack */
+}
+
+
+static void
+handle_rcvd_nak (seq_t nak)
+{
+	/* Recupera il segwrap con il seqnum nak e lo aggiunge alla coda
+	 * urgente. Imposta la riorganizzazione di tutte le code di upload
+	 * alla prossima feed_upload, in modo che il segwrap abbia la giusta
+	 * collocazione. */
+
+	struct segwrap *needed;
+
+	needed = seghash_remove (ht_sent, HT_SENT_SIZE, nak);
+	if (needed != NULL) {
+		/* XXX volendo si puo' frammentare needed qui. */
+		urgent_add (needed);
+		set_net_upload_reorg ();
+	}
+}
+
+
+static void
+handle_rcvd_data (struct segwrap *sw)
+{
+	assert (sw != NULL);
+	qinorder_insert (&join, sw, &segwrap_cmp);
 }

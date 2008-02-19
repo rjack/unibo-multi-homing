@@ -44,6 +44,10 @@ seq_t
 seg_seq (seg_t *seg);
 
 
+int
+segwrap_cmp (struct segwrap *sw_1, struct segwrap *sw_2);
+
+
 struct segwrap *
 segwrap_create (void);
 
@@ -53,7 +57,15 @@ segwrap_nak_create (seq_t nakseq);
 
 
 void
+segwrap_destroy (struct segwrap *sw);
+
+
+void
 segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum);
+
+
+void
+segwrap_flush_cache (void);
 
 
 int
