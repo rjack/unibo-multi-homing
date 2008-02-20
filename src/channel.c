@@ -33,19 +33,16 @@ static cqueue_t *host_sndbuf;
 static rqueue_t *net_rcvbuf[NETCHANNELS];
 static rqueue_t *net_sndbuf[NETCHANNELS];
 
+/* Code dei segmenti urgenti. */
+static rqueue_t *urgent[4];
+/* Relativi indici: il loro ordine deve essere coerente con segwrap_urgcmp. */
+#define     NAKQ     0
+#define     CRTQ     1
+#define     ACKQ     2
+#define     DATQ     3
+
 /* Ultimo seqnum inviato. */
 static seq_t outseq;
-
-/* Vera se feed_upload deve riorganizzare i buffer di upload dei canali col
- * ritardatore per inserire segmenti critici. */
-static bool net_upload_reorg = FALSE;
-
-/* TODO
- * - contatori:
- *   - ack/nack
- *   - etc
- * - coda segmenti da ritrasmettere
- * - OPPURE coda segmenti da ricostruire. */
 
 
 /*******************************************************************************
@@ -343,8 +340,10 @@ channel_prepare_io (cd_t cd)
 		assert (net_rcvbuf[cd] == NULL);
 		assert (net_sndbuf[cd] == NULL);
 
-		buflen = MAX (SEGMAXLEN, tcp_get_buffer_size (ch[cd].c_sockfd,
-					SO_RCVBUF));
+		buflen = MAX (SEGMAXLEN,
+				tcp_get_buffer_size (ch[cd].c_sockfd,
+					SO_RCVBUF))
+			+ SEGMAXLEN;
 		net_rcvbuf[cd] = rqueue_create (buflen);
 
 		buflen = tcp_get_buffer_size (ch[cd].c_sockfd, SO_SNDBUF);
@@ -386,13 +385,14 @@ channel_write (cd_t cd)
 void
 feed_upload (void)
 {
-	if (net_upload_reorg) {
-		net2urg ();
-		net_upload_reorg = FALSE;
-	}
-	urg2net ();
-	if (urgent_empty ())
-		host2net ();
+	/* TODO feed_upload */
+	/* TODO gestione segmenti urgenti. */
+	/* TODO se almeno una coda urgent non e' vuota */
+		/* TODO reorg rqueue: tutti i segmenti non parzialmente
+		 * TODO spediti vengono rimossi e reinseriti nella loro coda
+		 * TODO urgent, usa rqueue_cut_unsent;
+		 * TODO poi, urg2net per riempire i buffer di upload. */
+	/* TODO gestione segmenti letti dall'host. */
 }
 
 
@@ -607,15 +607,6 @@ set_file_descriptors (fd_set *rdset, fd_set *wrset)
 }
 
 
-void
-set_net_upload_reorg (void)
-{
-	/* Imposta a TRUE la variabile che informa feed_upload che deve
-	 * riorganizzare i buffer di rete perche' ci sono segmenti speciali
-	 * (nak o segmenti da rispedire) da inserire. */
-	net_upload_reorg = TRUE;
-}
-
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
@@ -795,6 +786,11 @@ urg2net (void)
 	/* Trasferisce i segwrap dalla struttura dei segmenti urgenti ai
 	 * buffer dei canali di rete in maniera round robin, finche' ci sono
 	 * segmenti urgenti oppure i buffer si riempono. */
+
+	/* TODO deve gestire riorganizzazione dei netbuf di upload se ci sono
+	 * TODO nuovi segmenti nella coda urgent. */
+
+	/* TODO deve gestire i segmenti con CRTFLAG accesa */
 
 	int err;
 	int needmask;
