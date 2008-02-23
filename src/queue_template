@@ -50,7 +50,7 @@ newQueue (void)
 }
 
 
-HIDDEN int
+HIDDEN bool
 isEmpty (TYPE *tp)
 {
 	/* Return TRUE if tp points a empty queue, FALSE otherwise. */
@@ -82,7 +82,7 @@ getHead (TYPE *tp)
 }
 
 
-HIDDEN int
+HIDDEN bool
 isLast (TYPE *tp, TYPE *ptr)
 {
 	/* Return TRUE if ptr is the last element of tp's queue. */

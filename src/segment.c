@@ -55,6 +55,7 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
 		handle_rcvd_ack (seq - 1);
+		segwrap_destroy (rcvd);
 	} else if (seg_is_ack (rcvd->sw_seg)) {
 		handle_rcvd_ack (seq);
 		segwrap_destroy (rcvd);
@@ -75,7 +76,10 @@ handle_sent_segment (struct segwrap *sent)
 	else {
 		struct segwrap *old;
 
-		old = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (sent->sw_seg));
+		/* ht_sent non deve contenere due segwrap con lo stesso
+		 * seqnum. */
+		old = seghash_remove (ht_sent, HT_SENT_SIZE,
+				seg_seq (sent->sw_seg));
 		if (old != NULL)
 			segwrap_destroy (old);
 		seghash_add (ht_sent, HT_SENT_SIZE, sent);
@@ -247,6 +251,19 @@ segwrap_flush_cache (void)
 
 
 int
+segwrap_prio (struct segwrap *sw)
+{
+	/* Ritorna
+	 * 0 se sw e' un NAK
+	 * 1 se sw e' un segmento dati da rispedire
+	 * 2 se sw e' un ACK
+	 * 3 se sw e' un segmento dati. */
+
+	/* TODO segwrap_prio. */
+}
+
+
+int
 segwrap_seqcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 {
 	assert (sw_1 != NULL);
@@ -259,11 +276,7 @@ static int
 segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 {
 	/* Ritorna -1 se sw_1 e' piu' urgente di sw_2, 1 altrimenti.
-	 * L'ordine di urgenza per tipo e':
-	 * 1. NAK
-	 * 2. dati da rispedire
-	 * 3. ACK
-	 * 4. dati da spedire.
+	 * L'ordine di urgenza per tipo e'dato da segwrap_prio.
 	 * A parita' di tipo e' piu' urgente quello con timestamp minore.
 	 * A parita' di timestamp, quello con il seqnum minore. */
 
@@ -295,15 +308,19 @@ seqcmp (seq_t a, seq_t b)
 static void
 handle_rcvd_ack (seq_t ack)
 {
-	/* TODO handle_rcvd_ack: rimuove tutti i segmenti da last_ack_recvd
-	 * TODO fino a ack da ht_sent */
-	/* TODO chiama rqueue_ack_prune da tutte le code attive. */
+	/* Rimuove e dealloca tutti i segmenti con seqnum minore o uguale ad
+	 * ack da tutte le strutture dati del proxy. */
+
+	/* TODO handle_rcvd_ack */
 }
 
 
 static void
 handle_rcvd_nak (struct segwrap *nak)
 {
+	/* Recupera il segmento con il seqnum indicato dal nak e lo
+	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
+
 	/* TODO handle_rcvd_nak */
 }
 
@@ -314,5 +331,5 @@ handle_rcvd_data (struct segwrap *sw)
 	/* Accoda sw alla coda dei segmenti dati ricevuti. La coda e' ordinata
 	 * in modo che sia immediato riconoscere i segmenti consecutivi. */
 
-	/* TODO */
+	/* TODO handle_rcvd_data */
 }

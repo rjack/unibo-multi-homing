@@ -81,11 +81,16 @@ typedef uint8_t seg_t;
 
 
 /*
- * Durate dei timeout in secondi.
+ * Tipo e durata dei timeout in secondi.
  */
-#define     ACTIVITY_TIMEOUT     100000000.0 /* 0.250 */
-#define     NAK_TIMEOUT          0.130
-#define     ACK_TIMEOUT          2
+#define     TOACT_VAL     100000000.0 /* 0.250 */
+#define     TONAK_VAL     0.130
+#define     TOACK_VAL     2
+/* Numero di tipi di timeout. */
+#define     TMOUTS      3
+#define     TONAK       0
+#define     TOACT       1
+#define     TOACK       2
 
 
 /* Valore minimo del buffer tcp di spedizione.
@@ -166,14 +171,6 @@ typedef struct timeout_t {
 	struct timeout_t *to_next;
 	struct timeout_t *to_prev;
 } timeout_t;
-
-
-/*
- * Classi di timeout.
- */
-typedef enum {
-	ACTIVITY, NACK, ACK
-} timeout_class;
 
 
 /*

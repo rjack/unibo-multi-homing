@@ -15,6 +15,12 @@
 #include <signal.h>
 #endif
 
+#define     TYPE     struct segwrap
+#define     NEXT     sw_next
+#define     PREV     sw_prev
+#define     EMPTYQ   NULL
+#include "src/queue_template"
+
 
 /*******************************************************************************
 			       Variabili locali
@@ -34,15 +40,20 @@ static rqueue_t *net_rcvbuf[NETCHANNELS];
 static rqueue_t *net_sndbuf[NETCHANNELS];
 
 /* Code dei segmenti urgenti. */
-static rqueue_t *urgent[4];
+#define     URGNO     4
+static struct segwrap *urgentq[URGNO];
 /* Relativi indici: il loro ordine deve essere coerente con segwrap_urgcmp. */
 #define     NAKQ     0
 #define     CRTQ     1
 #define     ACKQ     2
 #define     DATQ     3
 
+/* Coda dei segmenti ricevuti. */
+static struct segwrap *joinq;
+
 /* Ultimo seqnum inviato. */
 static seq_t outseq;
+static seq_t last_host_sent_seq;
 
 
 /*******************************************************************************
@@ -138,8 +149,8 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport)
 	ch[cd].c_activity = NULL;
 	if (cd != HOSTCD) {
 		ch[cd].c_tcp_sndbuf_len = TCP_MIN_SNDBUF_SIZE;
-		ch[cd].c_activity = timeout_create (ACTIVITY_TIMEOUT,
-				idle_handler, NULL, FALSE);
+		ch[cd].c_activity = timeout_create (TOACT_VAL, idle_handler,
+				NULL, FALSE);
 	}
 	return 0;
 
@@ -350,7 +361,7 @@ channel_prepare_io (cd_t cd)
 		net_sndbuf[cd] = rqueue_create (buflen);
 
 		timeout_reset (ch[cd].c_activity);
-		add_timeout (ch[cd].c_activity, ACTIVITY);
+		add_timeout (ch[cd].c_activity, TOACT);
 	}
 }
 
@@ -383,16 +394,37 @@ channel_write (cd_t cd)
 
 
 void
+feed_download (void)
+{
+	int err;
+	struct segwrap *head;
+	seq_t newlhss;
+
+	while ((head = getHead (joinq)) != NULL
+	       && seg_seq (head->sw_seg) == last_host_sent_seq + 1
+	       && seg_pld_len (head->sw_seg) <= cqueue_get_aval (host_sndbuf))
+	{
+		head = qdequeue (&joinq);
+		assert (head != NULL);
+		err = cqueue_add (host_sndbuf,
+				seg_pld (head->sw_seg),
+				seg_pld_len (head->sw_seg));
+		assert (!err);
+		newlhss = seg_seq (head->sw_seg);
+		segwrap_destroy (head);
+	}
+	if (newlhss != last_host_sent_seq) {
+		/* TODO prune_nak_timeouts (newlhss) */
+		last_host_sent_seq = newlhss;
+	}
+}
+
+
+void
 feed_upload (void)
 {
-	/* TODO feed_upload */
-	/* TODO gestione segmenti urgenti. */
-	/* TODO se almeno una coda urgent non e' vuota */
-		/* TODO reorg rqueue: tutti i segmenti non parzialmente
-		 * TODO spediti vengono rimossi e reinseriti nella loro coda
-		 * TODO urgent, usa rqueue_cut_unsent;
-		 * TODO poi, urg2net per riempire i buffer di upload. */
-	/* TODO gestione segmenti letti dall'host. */
+	urg2net ();
+	host2net ();
 }
 
 
@@ -404,6 +436,7 @@ proxy_init (port_t hostlistport,
 		char *hostconnaddr, port_t hostconnport)
 {
 	int err;
+	int i;
 	cd_t cd;
 
 	err = channel_init (HOSTCD, hostlistport, hostconnaddr, hostconnport);
@@ -425,6 +458,11 @@ proxy_init (port_t hostlistport,
 	}
 
 	outseq = 0;
+	last_host_sent_seq = SEQMAX;
+
+	joinq = newQueue ();
+	for (i = 0; i < URGNO; i++)
+		urgentq[i] = newQueue ();
 
 #if !HAVE_MSG_NOSIGNAL
 	{
@@ -774,32 +812,42 @@ host2net (void)
 
 
 static void
-net2urg (void)
-{
-	/* TODO net2urg */
-}
-
-
-static void
 urg2net (void)
 {
 	/* Trasferisce i segwrap dalla struttura dei segmenti urgenti ai
 	 * buffer dei canali di rete in maniera round robin, finche' ci sono
 	 * segmenti urgenti oppure i buffer si riempono. */
 
-	/* TODO deve gestire riorganizzazione dei netbuf di upload se ci sono
-	 * TODO nuovi segmenti nella coda urgent. */
-
-	/* TODO deve gestire i segmenti con CRTFLAG accesa */
-
+	int i;
 	int err;
 	int needmask;
+	cd_t cd;
 	struct segwrap *sw;
+	struct segwrap *most_urg;
 
+	most_urg = urgent_head ();
+	if (most_urg == NULL)
+		goto transfer;
+
+	/* I net_sndbuf contengono i segmenti in ordine di urgenza. Se il piu'
+	 * urgente della urgentq e' piu' urgente dell'ultimo segmento di una
+	 * rqueue bisogna inserirlo in mezzo: si travasa la rqueue nella
+	 * urgentq e si ririempe successivamente in ordine di urgenza. */
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+		if (rqueue_get_used (net_sndbuf[cd]) > 0
+		    && segwrap_urgcmp (net_sndbuf[cd]->rq_sgmt, most_urg) > 0)
+		{
+			struct segwrap *unsentq;
+			/* Taglio e travaso. */
+			unsentq = rqueue_cut_unsent (net_sndbuf[cd]);
+			while (sw = qdequeue (unsentq))
+				qenqueue (&urgentq[segwrap_prio (sw)], sw);
+		}
+
+	/* Riempimento net_sndbuf. */
+transfer:
 	needmask = 0x7;
-	while (!urgent_empty () && needmask != 0x0) {
-		sw = urgent_head ();
-		assert (sw != NULL);
+	while (sw = urgent_head && needmask != 0x0) {
 		if (channel_is_connected (rrcd)
 		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
 			sw = urgent_remove ();

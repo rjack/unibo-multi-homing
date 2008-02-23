@@ -31,7 +31,7 @@ rqueue_ack_prune (rqueue_t *rq, seq_t ack)
 	/* Rimuove tutti i segwrap che non devono piu' essere spediti perche'
 	 * hanno il seqnum minore o uguale ad ack, tranne il primo se e'
 	 * parzialmente spedito.
-	 * Se necessario, consilida rq. */
+	 * Se necessario, consolida rq. */
 
 	/* TODO rqueue_ack_prune */
 }

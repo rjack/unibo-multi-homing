@@ -20,7 +20,6 @@
 *******************************************************************************/
 
 #define     HUGE_TIMEOUT     1000000000
-#define     CLASSNO          3
 
 
 /*******************************************************************************
@@ -29,7 +28,7 @@
 
 /* Teste e code delle linked list di timeout.
  * Per ogni classe l'ordine dei timeout e' indifferente. */
-static timeout_t *tqueue[CLASSNO];
+static timeout_t *tqueue[TMOUTS];
 
 /* Intervallo spedizione ACK.
  * XXX per ora viene solo inizializzato da init_timeout_module, quindi non
@@ -56,7 +55,7 @@ static void ack_handler (void *args);
 
 
 void
-add_timeout (timeout_t *to, timeout_class class)
+add_timeout (timeout_t *to, int class)
 {
 	/* Aggiunge to alla lista dei timeout di classe class, in modo che
 	 * venga gestito da check_timeouts.
@@ -65,7 +64,7 @@ add_timeout (timeout_t *to, timeout_class class)
 	 * deallocato senza rischiare un segfault. */
 
 	assert (to != NULL);
-	assert (class < CLASSNO);
+	assert (class < TMOUTS);
 	assert (init_done);
 
 	qenqueue (&tqueue[class], to);
@@ -82,24 +81,25 @@ check_timeouts (void)
 	double left;
 	double min = HUGE_TIMEOUT;
 	timeout_t *cur;
-	timeout_t *tmp;
+	timeout_t *nxt;
 
 	assert (init_done);
 
-	for (i = 0; i < CLASSNO; i++) {
+	for (i = 0; i < TMOUTS; i++) {
 		cur = getHead (tqueue[i]);
-		/* TODO questo ciclo e' da riscrivere, e' orrendo. */
 		while (!isEmpty (tqueue[i]) && cur != NULL) {
-			tmp = (cur->to_next == getHead (tqueue[i]) ?
-			       NULL : cur->to_next);
+			if (cur->to_next == getHead (tqueue[i]))
+				nxt = NULL;
+			else
+				nxt = cur->to_next;
 			left = timeout_check (cur);
-			if (left > 0) {
+			if (left > 0)
 				min = MIN (min, left);
-			} else if (cur->to_oneshot == TRUE) {
+			else if (cur->to_oneshot == TRUE) {
 				del_timeout (cur, i);
 				timeout_destroy (cur);
 			}
-			cur = tmp;
+			cur = nxt;
 		}
 	}
 
@@ -108,12 +108,12 @@ check_timeouts (void)
 
 
 void
-del_timeout (timeout_t *to, timeout_class class)
+del_timeout (timeout_t *to, int class)
 {
 	/* Rimuove to dalla lista di classe class. */
 
 	assert (to != NULL);
-	assert (class < CLASSNO);
+	assert (class < TMOUTS);
 	assert (init_done);
 
 	qremove (&tqueue[class], to);
@@ -131,7 +131,7 @@ init_timeout_module (void)
 	assert (!init_done);
 
 	i = 0;
-	while (i < CLASSNO) {
+	while (i < TMOUTS) {
 		tqueue[i] = newQueue ();
 		i++;
 	}

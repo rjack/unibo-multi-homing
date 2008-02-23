@@ -32,10 +32,10 @@ core (void)
 	struct timeval tv_timeout;
 
 	/* DEBUG */
-	if (ACTIVITY_TIMEOUT > 1)
+	if (TOACT_VAL > 1)
 		fprintf (stderr,
-		        "\nOCCHIO!!!\nACTIVITY_TIMEOUT = %f\n\n",
-		        ACTIVITY_TIMEOUT);
+		        "\nOCCHIO!!!\nTIMEOUT ATTIVITA' = %f\n\n",
+		        TOACT_VAL);
 
 	/*
 	 * Inizializzazione moduli.
@@ -51,7 +51,7 @@ core (void)
 		/* Lo stato dei canali p_net e' controllato dalle funzioni. */
 		if (channel_is_connected (HOSTCD)) {
 			feed_upload ();
-			/* TODO feed_download (); */
+			feed_download ();
 		}
 
 		/*
