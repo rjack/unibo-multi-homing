@@ -8,7 +8,7 @@
 *******************************************************************************/
 
 void
-add_timeout (timeout_t *to, timeout_class class);
+add_timeout (timeout_t *to, int class);
 
 
 double
@@ -16,7 +16,7 @@ check_timeouts (void);
 
 
 void
-del_timeout (timeout_t *to, timeout_class class);
+del_timeout (timeout_t *to, int class);
 
 
 void

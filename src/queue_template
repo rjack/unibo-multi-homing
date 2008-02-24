@@ -198,3 +198,27 @@ qinorder_insert (TYPE **tp, TYPE *ptr, int (*cmpfun)(TYPE *, TYPE *))
 		ptr->NEXT = cur;
 	}
 }
+
+
+HIDDEN TYPE *
+qremove_all_that (TYPE **tp, bool (*cmpfun) (TYPE *, TYPE *), TYPE *term)
+{
+	TYPE *cur;
+	TYPE *nxt;
+	TYPE *rmq;
+
+	rmq = newQueue ();
+	cur = getHead (*tp);
+	while (!isEmpty (*tp) && cur != NULL) {
+		if (getNext (cur) == getHead (*tp))
+			nxt = NULL;
+		else
+			nxt = getNext (cur);
+		if (cmpfun (cur, term)) {
+			qremove (tp, cur);
+			qenqueue (&rmq, cur);
+		}
+		cur = nxt;
+	}
+	return rmq;
+}

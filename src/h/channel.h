@@ -77,6 +77,10 @@ channel_write (cd_t cd);
 
 
 void
+feed_download (void);
+
+
+void
 feed_upload (void);
 
 
@@ -105,5 +109,25 @@ set_file_descriptors (fd_set *rdset, fd_set *wrset);
 
 void
 set_net_upload_reorg (void);
+
+
+void
+urgent_add (struct segwrap *sw);
+
+
+bool
+urgent_empty (void);
+
+
+struct segwrap *
+urgent_head (void);
+
+
+struct segwrap *
+urgent_remove (void);
+
+
+void
+urgent_rm_acked (struct segwrap *ack);
 
 #endif /* CHANNEL_H */

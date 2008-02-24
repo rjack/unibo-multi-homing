@@ -88,6 +88,25 @@ seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key)
 }
 
 
+void
+seghash_rm_acked
+(struct segwrap **hash_table, size_t table_size, struct segwrap *ack)
+{
+	int i;
+	struct segwrap *rmvdq;
+
+	assert (hash_table != NULL);
+	assert (table_size > 0);
+
+	for (i = 0; i < table_size; i++) {
+		rmvdq = qremove_all_that (&hash_table[i], &segwrap_is_acked,
+				ack);
+		while (!isEmpty (rmvdq))
+			segwrap_destroy (qdequeue (&rmvdq));
+	}
+}
+
+
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/

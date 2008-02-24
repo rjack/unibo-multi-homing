@@ -88,10 +88,10 @@ check_timeouts (void)
 	for (i = 0; i < TMOUTS; i++) {
 		cur = getHead (tqueue[i]);
 		while (!isEmpty (tqueue[i]) && cur != NULL) {
-			if (cur->to_next == getHead (tqueue[i]))
+			if (getNext (cur) == getHead (tqueue[i]))
 				nxt = NULL;
 			else
-				nxt = cur->to_next;
+				nxt = getNext (cur);
 			left = timeout_check (cur);
 			if (left > 0)
 				min = MIN (min, left);
@@ -136,7 +136,7 @@ init_timeout_module (void)
 		i++;
 	}
 
-	timeout_init (&ack_timeout, ACK, ack_handler, NULL, FALSE);
+	timeout_init (&ack_timeout, TOACK, ack_handler, NULL, FALSE);
 
 	init_done = TRUE;
 }

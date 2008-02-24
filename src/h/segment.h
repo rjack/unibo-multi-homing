@@ -64,11 +64,19 @@ void
 segwrap_flush_cache (void);
 
 
+bool
+segwrap_is_acked (struct segwrap *sw, struct segwrap *ack);
+
+
+int
+segwrap_prio (struct segwrap *sw);
+
+
 int
 segwrap_seqcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 
 
-static int
+int
 segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 
 

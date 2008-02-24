@@ -21,4 +21,8 @@ struct segwrap *
 seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key);
 
 
+void
+seghash_rm_acked
+(struct segwrap **hash_table, size_t table_size, struct segwrap *ack);
+
 #endif /* SEGHASH_H */

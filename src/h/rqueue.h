@@ -12,10 +12,6 @@ int
 rqueue_add (rqueue_t *rq, struct segwrap *sw);
 
 
-void
-rqueue_add_nak (rqueue_t *rq, seq_t seq);
-
-
 bool
 rqueue_can_read (void *arg);
 
@@ -26,6 +22,10 @@ rqueue_can_write (void *arg);
 
 rqueue_t *
 rqueue_create (size_t len);
+
+
+struct segwrap *
+rqueue_cut_unsent (rqueue_t *rq);
 
 
 void
@@ -46,6 +46,10 @@ rqueue_read (fd_t fd, rqueue_t *rq);
 
 struct segwrap *
 rqueue_remove (rqueue_t *rq);
+
+
+int
+rqueue_rm_acked (rqueue_t *rq, struct segwrap *sw);
 
 
 size_t

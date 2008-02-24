@@ -34,7 +34,7 @@ static bool init_done = FALSE;
 *******************************************************************************/
 
 static int urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
-static void handle_rcvd_ack (seq_t ack);
+static void handle_rcvd_ack (struct segwrap *ack);
 static void handle_rcvd_nak (struct segwrap *nak);
 static void handle_rcvd_data (struct segwrap *sw);
 
@@ -54,10 +54,11 @@ handle_rcvd_segment (struct segwrap *rcvd)
 
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
-		handle_rcvd_ack (seq - 1);
+		rcvd->sw_seg[SEQ]--;
+		handle_rcvd_ack (rcvd);
 		segwrap_destroy (rcvd);
 	} else if (seg_is_ack (rcvd->sw_seg)) {
-		handle_rcvd_ack (seq);
+		handle_rcvd_ack (rcvd);
 		segwrap_destroy (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
@@ -250,6 +251,15 @@ segwrap_flush_cache (void)
 }
 
 
+bool
+segwrap_is_acked (struct segwrap *sw, struct segwrap *ack)
+{
+	if (segwrap_seqcmp (sw, ack) <= 0)
+		return TRUE;
+	return FALSE;
+}
+
+
 int
 segwrap_prio (struct segwrap *sw)
 {
@@ -260,6 +270,7 @@ segwrap_prio (struct segwrap *sw)
 	 * 3 se sw e' un segmento dati. */
 
 	/* TODO segwrap_prio. */
+	return -1;
 }
 
 
@@ -272,7 +283,7 @@ segwrap_seqcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 }
 
 
-static int
+int
 segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 {
 	/* Ritorna -1 se sw_1 e' piu' urgente di sw_2, 1 altrimenti.
@@ -281,6 +292,7 @@ segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 	 * A parita' di timestamp, quello con il seqnum minore. */
 
 	/* TODO segwrap_urgcmp */
+	return -1;
 }
 
 
@@ -306,12 +318,16 @@ seqcmp (seq_t a, seq_t b)
 *******************************************************************************/
 
 static void
-handle_rcvd_ack (seq_t ack)
+handle_rcvd_ack (struct segwrap *ack)
 {
 	/* Rimuove e dealloca tutti i segmenti con seqnum minore o uguale ad
 	 * ack da tutte le strutture dati del proxy. */
 
-	/* TODO handle_rcvd_ack */
+	assert (init_done);
+
+	seghash_rm_acked (ht_sent, HT_SENT_SIZE, ack);
+	urgent_rm_acked (ack);
+	netsndbuf_rm_acked (ack);
 }
 
 
@@ -321,7 +337,13 @@ handle_rcvd_nak (struct segwrap *nak)
 	/* Recupera il segmento con il seqnum indicato dal nak e lo
 	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
 
-	/* TODO handle_rcvd_nak */
+	struct segwrap *urg;
+
+	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));
+	if (urg != NULL) {
+		urg->sw_seg[FLG] |= CRTFLAG;
+		urgent_add (urg);
+	}
 }
 
 

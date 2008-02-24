@@ -25,17 +25,6 @@ static void consolidate (rqueue_t *rq);
 			      Funzioni pubbliche
 *******************************************************************************/
 
-void
-rqueue_ack_prune (rqueue_t *rq, seq_t ack)
-{
-	/* Rimuove tutti i segwrap che non devono piu' essere spediti perche'
-	 * hanno il seqnum minore o uguale ad ack, tranne il primo se e'
-	 * parzialmente spedito.
-	 * Se necessario, consolida rq. */
-
-	/* TODO rqueue_ack_prune */
-}
-
 
 int
 rqueue_add (rqueue_t *rq, struct segwrap *sw)
@@ -43,8 +32,6 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	/* Accoda sw alla coda rq e lo copia nel buffer.
 	 * La coda deve risultare in ordine di urgenza e sw deve poter essere
 	 * contenuto nel buffer. */
-
-	int err;
 
 	assert (rq != NULL);
 	assert (sw != NULL);
@@ -103,6 +90,7 @@ rqueue_cut_unsent (rqueue_t *rq)
 	 * Puo' ritornare una coda vuota. */
 
 	/* TODO rqueue_cut_unsent */
+	return NULL;
 }
 
 
@@ -165,6 +153,17 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 	return nread;
 }
 
+
+int
+rqueue_rm_acked (rqueue_t *rq, struct segwrap *sw)
+{
+	/* Rimuove tutti i segwrap che non devono piu' essere spediti perche'
+	 * hanno il seqnum minore o uguale ad ack, tranne il primo se e'
+	 * parzialmente spedito.
+	 * Se necessario, consolida rq. */
+
+	/* TODO rqueue_ack_prune */
+}
 
 size_t
 rqueue_write (fd_t fd, rqueue_t *rq)

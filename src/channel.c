@@ -608,6 +608,17 @@ finalize_connection (cd_t cd)
 }
 
 
+void
+netsndbuf_rm_acked (struct segwrap *ack)
+{
+	cd_t cd;
+
+	for (cd = NETCD; cd < NETCHANNELS; cd++)
+		if (channel_is_connected (cd))
+			rqueue_rm_acked (net_sndbuf[cd], ack);
+}
+
+
 fd_t
 set_file_descriptors (fd_set *rdset, fd_set *wrset)
 {
@@ -642,6 +653,67 @@ set_file_descriptors (fd_set *rdset, fd_set *wrset)
 		}
 	}
 	return max;
+}
+
+
+void
+urgent_add (struct segwrap *sw)
+{
+	int i;
+
+	assert (sw != NULL);
+
+	i = segwrap_prio (sw);
+	qinorder_insert (&urgentq[i], sw, &segwrap_urgcmp);
+}
+
+
+bool
+urgent_empty (void)
+{
+	int i;
+
+	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
+
+	if (i < URGNO)
+		return TRUE;
+	return FALSE;
+}
+
+
+struct segwrap *
+urgent_head (void)
+{
+	int i;
+
+	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
+
+	return getHead (urgentq[i]);
+}
+
+
+struct segwrap *
+urgent_remove (void)
+{
+	int i;
+
+	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
+
+	return qdequeue (&urgentq[i]);
+}
+
+
+void
+urgent_rm_acked (struct segwrap *ack)
+{
+	int i;
+	struct segwrap *rmvdq;
+
+	for (i = 0; i < URGNO; i++) {
+		rmvdq = qremove_all_that (&urgentq[i], &segwrap_is_acked, ack);
+		while (!isEmpty (rmvdq))
+			segwrap_destroy (qdequeue (&rmvdq));
+	}
 }
 
 
@@ -818,7 +890,6 @@ urg2net (void)
 	 * buffer dei canali di rete in maniera round robin, finche' ci sono
 	 * segmenti urgenti oppure i buffer si riempono. */
 
-	int i;
 	int err;
 	int needmask;
 	cd_t cd;
@@ -840,14 +911,14 @@ urg2net (void)
 			struct segwrap *unsentq;
 			/* Taglio e travaso. */
 			unsentq = rqueue_cut_unsent (net_sndbuf[cd]);
-			while (sw = qdequeue (unsentq))
+			while ((sw = qdequeue (&unsentq)) != NULL)
 				qenqueue (&urgentq[segwrap_prio (sw)], sw);
 		}
 
 	/* Riempimento net_sndbuf. */
 transfer:
 	needmask = 0x7;
-	while (sw = urgent_head && needmask != 0x0) {
+	while ((sw = urgent_head ()) != NULL  && needmask != 0x0) {
 		if (channel_is_connected (rrcd)
 		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
 			sw = urgent_remove ();
