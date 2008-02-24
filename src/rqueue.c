@@ -155,14 +155,42 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 
 
 int
-rqueue_rm_acked (rqueue_t *rq, struct segwrap *sw)
+rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 {
 	/* Rimuove tutti i segwrap che non devono piu' essere spediti perche'
 	 * hanno il seqnum minore o uguale ad ack, tranne il primo se e'
 	 * parzialmente spedito.
 	 * Se necessario, consolida rq. */
 
-	/* TODO rqueue_ack_prune */
+	struct segwrap *head;
+	struct segwrap *rmvdq;
+
+	head = getHead (rq->rq_sgmt);
+	if (head == NULL)
+		return;
+
+	/* Se il primo e' stato spedito parzialmente lo salva a parte e lo
+	 * ripristina successivamente. */
+	if (rq->rq_nbytes < head->sw_seglen) {
+		head = qdequeue (&rq->rq_sgmt);
+	else
+		head = NULL;
+
+	/* Rimozione acked. */
+	rmvdq = qremove_all_that (&rq->rq_sgmt, &segwrap_is_acked, ack);
+
+	/* Ripristino primo segmento parziale. */
+	if (head != NULL)
+		qpush (&rq->rq_sgmt, head);
+
+	/* Se sono stati rimossi dei segmenti, la coda va riportata in uno
+	 * stato coerente. */
+	if (!isEmpty (rmvdq))
+		consolidate (rq);
+
+	/* Deallocazione rimossi. */
+	while (!isEmpty (rmvdq))
+		segwrap_destroy (qdequeue (&rmvdq));
 }
 
 size_t
@@ -222,10 +250,9 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 static void
 consolidate (rqueue_t *rq)
 {
-	/* Copia uno dopo l'altro i segmenti della coda di segrap di rq nella
-	 * coda circolare; quelli che non ci stanno vengono riaccodati alla
-	 * coda urgente appropriata.
-	 * I segwrap devono essere gia' ordinati per urgenza. */
+	/* Riporta rq_data in uno stato coerente con rq_sgmt.
+	 * Assume che il segmento alla testa di sw_seg e rq_nbytes siano
+	 * corretti. */
 
 	/* TODO consolidate */
 }
