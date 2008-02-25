@@ -269,8 +269,15 @@ segwrap_prio (struct segwrap *sw)
 	 * 2 se sw e' un ACK
 	 * 3 se sw e' un segmento dati. */
 
-	/* TODO segwrap_prio. */
-	return -1;
+	if (seg_is_nak (sw->sw_seg))
+		return 0;
+	if (seg_is_ack (sw->sw_seg))
+		return 2;
+
+	assert (seg_pld (sw->sw_seg) != NULL);
+	if (seg_is_critical (sw->sw_seg))
+		return 1;
+	return 3;
 }
 
 
@@ -291,8 +298,21 @@ segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 	 * A parita' di tipo e' piu' urgente quello con timestamp minore.
 	 * A parita' di timestamp, quello con il seqnum minore. */
 
-	/* TODO segwrap_urgcmp */
-	return -1;
+	/* Controllo priorita'. */
+	if (segwrap_prio (sw_1) < segwrap_prio (sw_2))
+		return -1;
+	if (segwrap_prio (sw_1) > segwrap_prio (sw_2))
+		return 1;
+
+	/* Priorita' identica, controllo timestamp. */
+	if (sw_1->sw_tstamp < sw_2->sw_tstamp)
+		return -1;
+	if (sw_1->sw_tstamp > sw_2->sw_tstamp)
+		return 1;
+
+	/* Timestamp identico, controllo seqnum. */
+	assert (segwrap_seqcmp (sw_1, sw_2) != 0);
+	return segwrap_seqcmp (sw_1, sw_2);
 }
 
 

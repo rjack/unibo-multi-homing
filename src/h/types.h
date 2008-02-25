@@ -39,7 +39,7 @@ typedef int cd_t;     /* canali */
 /*
  * Puntatori a funzione.
  */
-typedef void (*timeout_handler_t)(void *args);
+typedef void (*timeout_handler_t)(int args);
 typedef bool (*condition_checker_t)(void *args);
 typedef int (*io_performer_t)(fd_t fd, void *args);
 
@@ -88,6 +88,7 @@ typedef uint8_t seg_t;
 #define     TOACK_VAL     2
 /* Numero di tipi di timeout. */
 #define     TMOUTS      3
+/* Indici */
 #define     TONAK       0
 #define     TOACT       1
 #define     TOACK       2
@@ -165,7 +166,7 @@ typedef struct timeout_t {
 
 	/* Funzione da eseguire allo scadere. */
 	timeout_handler_t to_trigger;
-	void *to_trigger_args;
+	int to_trigger_arg;
 
 	/* Per la coda mantenuta dal timeout_manager. */
 	struct timeout_t *to_next;

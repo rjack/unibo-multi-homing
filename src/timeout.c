@@ -16,10 +16,13 @@
 
 
 /*******************************************************************************
-			      Definizioni locali
+			  Macro e definizioni locali
 *******************************************************************************/
 
 #define     HUGE_TIMEOUT     1000000000
+
+#define     VALID_CLASS(cn)                             \
+	((cn) == TOACK || (cn) == TOACT || (cn) == TONAK)
 
 
 /*******************************************************************************
@@ -46,7 +49,7 @@ static bool init_done = FALSE;
 *******************************************************************************/
 
 static double timeout_check (timeout_t *to);
-static void ack_handler (void *args);
+static void ack_handler (int seq);
 
 
 /*******************************************************************************
@@ -60,12 +63,13 @@ add_timeout (timeout_t *to, int class)
 	/* Aggiunge to alla lista dei timeout di classe class, in modo che
 	 * venga gestito da check_timeouts.
 	 * XXX se to e' oneshot il chiamante non deve piu' usare il puntatore
-	 * a to, perche' non ha modo di sapere con sicurezza quando verra'
-	 * deallocato senza rischiare un segfault. */
+	 * XXX a to, perche' non ha modo di sapere con sicurezza quando verra'
+	 * XXX deallocato senza rischiare un segfault. */
 
 	assert (to != NULL);
-	assert (class < TMOUTS);
+	assert (VALID_CLASS (class));
 	assert (init_done);
+	assert (!qcontains (tqueue[class], to));
 
 	qenqueue (&tqueue[class], to);
 }
@@ -120,6 +124,37 @@ del_timeout (timeout_t *to, int class)
 }
 
 
+timeout_t *
+get_timeout (int class, int id)
+{
+	timeout_t *cur;
+	timeout_t *head;
+
+	assert (VALID_CLASS (class));
+	assert (init_done);
+
+	head = getHead (tqueue[class]);
+
+	switch (class) {
+	case TOACK :
+		return cur;
+
+	case TOACT :
+	case TONAK :
+		cur = head;
+		while (cur->to_trigger_arg != id
+		       && (cur = getNext (cur)) != head)
+			;
+		if (cur->to_trigger_arg == id)
+			return cur;
+		return NULL;
+
+	default :
+		assert (FALSE);
+	}
+}
+
+
 void
 init_timeout_module (void)
 {
@@ -130,13 +165,10 @@ init_timeout_module (void)
 
 	assert (!init_done);
 
-	i = 0;
-	while (i < TMOUTS) {
+	for (i = 0; i < TMOUTS; i++)
 		tqueue[i] = newQueue ();
-		i++;
-	}
 
-	timeout_init (&ack_timeout, TOACK, ack_handler, NULL, FALSE);
+	timeout_init (&ack_timeout, TOACK, ack_handler, 0, FALSE);
 
 	init_done = TRUE;
 }
@@ -144,7 +176,7 @@ init_timeout_module (void)
 
 timeout_t *
 timeout_create
-(double maxval, timeout_handler_t trigger, void *trigger_args, bool oneshot)
+(double maxval, timeout_handler_t trigger, int trigger_arg, bool oneshot)
 {
 	/* Crea e inizializza un timeout, restituendone il puntatore.
 	 * Il timeout puo' essere attivato con timeout_reset. */
@@ -156,7 +188,7 @@ timeout_create
 	assert (BOOL_VALUE (oneshot));
 
 	newto = xmalloc (sizeof (timeout_t));
-	timeout_init (newto, maxval, trigger, trigger_args, oneshot);
+	timeout_init (newto, maxval, trigger, trigger_arg, oneshot);
 
 	return newto;
 }
@@ -174,7 +206,7 @@ timeout_destroy (timeout_t *to)
 
 void
 timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
-              void *trigger_args, bool oneshot)
+              int trigger_arg, bool oneshot)
 {
 	/* Inizializza il timeout con i valori dati.
 	 * Il timeout puo' essere attivato con timeout_reset. */
@@ -186,7 +218,7 @@ timeout_init (timeout_t *to, double maxval, timeout_handler_t trigger,
 
 	to->to_maxval = maxval;
 	to->to_trigger = trigger;
-	to->to_trigger_args = trigger_args;
+	to->to_trigger_arg = trigger_arg;
 	to->to_oneshot = oneshot;
 }
 
@@ -207,7 +239,7 @@ timeout_reset (timeout_t *to)
 *******************************************************************************/
 
 static void
-ack_handler (void *args)
+ack_handler (int ack)
 {
 	/* TODO manda ack */
 	fprintf (stderr, "ACK!\n");
@@ -228,7 +260,7 @@ timeout_check (timeout_t *to)
 	left = to->to_maxval - crono_measure (&to->to_crono);
 	if (left <= 0) {
 		timeout_reset (to);
-		to->to_trigger (to->to_trigger_args);
+		to->to_trigger (to->to_trigger_arg);
 	}
 	return left;
 }

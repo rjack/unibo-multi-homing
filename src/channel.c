@@ -72,7 +72,7 @@ static int listen_noblock (cd_t cd);
 static void host2net (void);
 static void net2urg (void);
 static void urg2net (void);
-static void idle_handler (void *args);
+static void idle_handler (cd_t cd);
 
 
 /*******************************************************************************
@@ -150,7 +150,7 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport)
 	if (cd != HOSTCD) {
 		ch[cd].c_tcp_sndbuf_len = TCP_MIN_SNDBUF_SIZE;
 		ch[cd].c_activity = timeout_create (TOACT_VAL, idle_handler,
-				NULL, FALSE);
+				cd, FALSE);
 	}
 	return 0;
 
@@ -398,24 +398,18 @@ feed_download (void)
 {
 	int err;
 	struct segwrap *head;
-	seq_t newlhss;
 
 	while ((head = getHead (joinq)) != NULL
 	       && seg_seq (head->sw_seg) == last_host_sent_seq + 1
 	       && seg_pld_len (head->sw_seg) <= cqueue_get_aval (host_sndbuf))
 	{
 		head = qdequeue (&joinq);
-		assert (head != NULL);
 		err = cqueue_add (host_sndbuf,
 				seg_pld (head->sw_seg),
 				seg_pld_len (head->sw_seg));
 		assert (!err);
-		newlhss = seg_seq (head->sw_seg);
+		last_host_sent_seq = seg_seq (head->sw_seg);
 		segwrap_destroy (head);
-	}
-	if (newlhss != last_host_sent_seq) {
-		/* TODO prune_nak_timeouts (newlhss) */
-		last_host_sent_seq = newlhss;
 	}
 }
 
@@ -431,10 +425,9 @@ feed_upload (void)
 void
 join_add (struct segwrap *sw)
 {
+
 	assert (sw != NULL);
 	assert (seg_pld (sw->sw_seg) != NULL);
-
-	qinorder_insert (&joinq, sw, &segwrap_seqcmp);
 }
 
 
@@ -943,7 +936,7 @@ transfer:
 
 
 static void
-idle_handler (void *args)
+idle_handler (cd_t cd)
 {
 	assert (FALSE);
 	/* TODO idle_handler */

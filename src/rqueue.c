@@ -34,6 +34,8 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	 * La coda deve risultare in ordine di urgenza e sw deve poter essere
 	 * contenuto nel buffer. */
 
+	int err;
+
 	assert (rq != NULL);
 	assert (sw != NULL);
 	assert (sw->sw_next == NULL);
@@ -42,7 +44,12 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen <= cqueue_get_aval (rq->rq_data));
 	assert (rq->rq_sgmt == NULL || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
 
-	/* TODO rqueue_add */
+	if (rqueue_get_used (rq) == 0)
+		rq->rq_nbytes = sw->sw_seglen;
+
+	qenqueue (&rq->rq_sgmt, sw);
+	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
+	assert (!err);
 
 	return 0;
 }
@@ -127,16 +134,52 @@ rqueue_destroy (rqueue_t *rq)
 size_t
 rqueue_get_aval (rqueue_t *rq)
 {
+	size_t cqaval;
+
 	assert (rq != NULL);
-	return cqueue_get_aval (rq->rq_data);
+	cqaval = cqueue_get_aval (rq->rq_data);
+
+#if defined (NDEBUG)
+	if (cqaval == rq->rq_data->cq_len) {
+		assert (isEmpty (rq->rq_sgmt));
+		assert (rq->rq_nbytes == 0);
+	} else {
+		struct segwrap *head;
+		head = getHead (rq->rq_sgmt);
+		assert (!isEmpty (rq->rq_sgmt));
+		assert (rq->rq_nbytes > 0);
+		assert (head->sw_seglen >= rq->rq_nbytes);
+	}
+#endif /* NDEBUG */
+
+	return cqaval;
 }
 
 
 size_t
 rqueue_get_used (rqueue_t *rq)
 {
+	size_t cqused;
+
 	assert (rq != NULL);
-	return cqueue_get_used (rq->rq_data);
+
+	cqused = cqueue_get_used (rq->rq_data);
+
+#if defined (NDEBUG)
+	if (cqused == 0) {
+		assert (isEmpty (rq->rq_sgmt));
+		assert (rq->rq_nbytes == 0);
+	} else {
+		struct segwrap *head;
+		head = getHead (rq->rq_sgmt);
+		assert (!isEmpty (rq->rq_sgmt));
+		assert (rq->rq_nbytes > 0);
+		assert (head->sw_seglen >= rq->rq_nbytes);
+
+	}
+#endif /* NDEBUG */
+
+	return cqused;
 }
 
 
