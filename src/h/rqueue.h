@@ -13,11 +13,11 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw);
 
 
 bool
-rqueue_can_read (void *arg);
+rqueue_can_read (rqueue_t *rq);
 
 
 bool
-rqueue_can_write (void *arg);
+rqueue_can_write (rqueue_t *rq);
 
 
 rqueue_t *
@@ -48,7 +48,7 @@ struct segwrap *
 rqueue_remove (rqueue_t *rq);
 
 
-int
+void
 rqueue_rm_acked (rqueue_t *rq, struct segwrap *sw);
 
 

@@ -62,7 +62,7 @@ handle_rcvd_segment (struct segwrap *rcvd)
 		segwrap_destroy (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
-		handle_rcvd_data (rcvd);
+		join_add (rcvd);
 	}
 }
 
@@ -344,14 +344,4 @@ handle_rcvd_nak (struct segwrap *nak)
 		urg->sw_seg[FLG] |= CRTFLAG;
 		urgent_add (urg);
 	}
-}
-
-
-static void
-handle_rcvd_data (struct segwrap *sw)
-{
-	/* Accoda sw alla coda dei segmenti dati ricevuti. La coda e' ordinata
-	 * in modo che sia immediato riconoscere i segmenti consecutivi. */
-
-	/* TODO handle_rcvd_data */
 }

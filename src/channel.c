@@ -428,6 +428,16 @@ feed_upload (void)
 }
 
 
+void
+join_add (struct segwrap *sw)
+{
+	assert (sw != NULL);
+	assert (seg_pld (sw->sw_seg) != NULL);
+
+	qinorder_insert (&joinq, sw, &segwrap_seqcmp);
+}
+
+
 int
 proxy_init (port_t hostlistport,
 		char *netconnaddr[NETCHANNELS],

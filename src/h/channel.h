@@ -84,6 +84,10 @@ void
 feed_upload (void);
 
 
+void
+join_add (struct segwrap *sw);
+
+
 int
 proxy_init (port_t hostlistport,
 		char *netconnaddr[NETCHANNELS],
@@ -103,12 +107,12 @@ int
 finalize_connection (cd_t cd);
 
 
+void
+netsndbuf_rm_acked (struct segwrap *ack);
+
+
 fd_t
 set_file_descriptors (fd_set *rdset, fd_set *wrset);
-
-
-void
-set_net_upload_reorg (void);
 
 
 void

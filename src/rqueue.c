@@ -1,3 +1,4 @@
+#include "h/rqueue.h"
 #include "h/cqueue.h"
 #include "h/segment.h"
 #include "h/types.h"
@@ -56,10 +57,8 @@ rqueue_can_read (rqueue_t *rq)
 
 
 bool
-rqueue_can_write (void *arg)
+rqueue_can_write (rqueue_t *rq)
 {
-	rqueue_t *rq = (rqueue_t *)arg;
-
 	assert (rq != NULL);
 	return cqueue_can_write ((void *)rq->rq_data);
 }
@@ -89,8 +88,31 @@ rqueue_cut_unsent (rqueue_t *rq)
 	 * conseguenza.
 	 * Puo' ritornare una coda vuota. */
 
-	/* TODO rqueue_cut_unsent */
-	return NULL;
+	struct segwrap *head;
+	struct segwrap *rmvdq;
+
+	assert (rq != NULL);
+
+	rmvdq = newQueue ();
+	head = getHead (rq->rq_sgmt);
+
+	if (head == NULL) {
+		assert (rqueue_get_used (rq) == 0);
+		return rmvdq;
+	}
+	assert (rqueue_get_used (rq) > 0);
+
+	rmvdq = rq->rq_sgmt;
+	rq->rq_sgmt = newQueue ();
+	head = getHead (rmvdq);
+	if (head->sw_seglen < rq->rq_nbytes) {
+		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
+	} else
+		rq->rq_nbytes = 0;
+
+
+	consolidate (rq);
+	return rmvdq;
 }
 
 
@@ -154,12 +176,12 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 }
 
 
-int
+void
 rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 {
-	/* Rimuove tutti i segwrap che non devono piu' essere spediti perche'
-	 * hanno il seqnum minore o uguale ad ack, tranne il primo se e'
-	 * parzialmente spedito.
+	/* Rimuove e distrugge tutti i segwrap che non devono piu' essere
+	 * spediti perche' hanno il seqnum minore o uguale ad ack, tranne il
+	 * primo se e' parzialmente spedito.
 	 * Se necessario, consolida rq. */
 
 	struct segwrap *head;
@@ -171,7 +193,7 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 
 	/* Se il primo e' stato spedito parzialmente lo salva a parte e lo
 	 * ripristina successivamente. */
-	if (rq->rq_nbytes < head->sw_seglen) {
+	if (rq->rq_nbytes < head->sw_seglen)
 		head = qdequeue (&rq->rq_sgmt);
 	else
 		head = NULL;
@@ -192,6 +214,7 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	while (!isEmpty (rmvdq))
 		segwrap_destroy (qdequeue (&rmvdq));
 }
+
 
 size_t
 rqueue_write (fd_t fd, rqueue_t *rq)
@@ -251,8 +274,29 @@ static void
 consolidate (rqueue_t *rq)
 {
 	/* Riporta rq_data in uno stato coerente con rq_sgmt.
-	 * Assume che il segmento alla testa di sw_seg e rq_nbytes siano
-	 * corretti. */
+	 * Se il segmento in testa e' stato parzialmente spedito lo ignora,
+	 * perche' assume che le altre funzioni non lo modifichino. */
 
-	/* TODO consolidate */
+	struct segwrap *head;
+	struct segwrap *tmp;
+	size_t todrop;
+
+	assert (rq != NULL);
+
+	if (rqueue_get_used (rq) == 0)
+		return;
+
+	todrop = cqueue_get_used (rq->rq_data);
+	tmp = rq->rq_sgmt;
+	rq->rq_sgmt = newQueue ();
+	head = getHead (tmp);
+	if (head->sw_seglen > rq->rq_nbytes) {
+		qenqueue (&rq->rq_sgmt, qdequeue (&tmp));
+		todrop -= rq->rq_nbytes;
+	} else
+		rq->rq_nbytes = 0;
+	cqueue_drop_tail (rq->rq_data, todrop);
+
+	while (!isEmpty (tmp))
+		rqueue_add (rq, qdequeue (&tmp));
 }
