@@ -55,12 +55,12 @@ seghash_add
 
 
 struct segwrap *
-seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key)
+seghash_get (struct segwrap **hash_table, size_t table_size, seq_t key)
 {
 	int i;
 	struct segwrap *head;
 	struct segwrap *cur;
-	struct segwrap *rmvd;
+	struct segwrap *selected;
 
 	assert (hash_table != NULL);
 	assert (table_size > 0);
@@ -69,22 +69,36 @@ seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key)
 	assert (i >= 0);
 	assert (i < table_size);
 
-	rmvd = NULL;
+	selected = NULL;
 	head = getHead (hash_table[i]);
 	if (head != NULL) {
 		cur = head;
 		do {
 			if (key == seg_seq (cur->sw_seg))
-				rmvd = cur;
+				selected = cur;
 			else
 				cur = getNext (cur);
-		} while (rmvd == NULL && cur != getHead (hash_table[i]));
+		} while (selected == NULL && cur != getHead (hash_table[i]));
 
-		if (rmvd != NULL)
-			qremove (&hash_table[i], rmvd);
 	}
 
-	return rmvd;
+	return selected;
+
+}
+
+
+struct segwrap *
+seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key)
+{
+	struct segwrap *selected;
+
+	selected = seghash_get (hash_table, table_size, key);
+	if (selected != NULL) {
+		int i;
+		i = hash_fun (key, table_size);
+		qremove (&hash_table[i], selected);
+	}
+	return selected;
 }
 
 

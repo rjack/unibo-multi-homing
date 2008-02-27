@@ -2,6 +2,7 @@
 #include "h/cqueue.h"
 #include "h/rqueue.h"
 #include "h/segment.h"
+#include "h/seghash.h"
 #include "h/timeout.h"
 #include "h/types.h"
 #include "h/util.h"
@@ -48,8 +49,9 @@ static struct segwrap *urgentq[URGNO];
 #define     ACKQ     2
 #define     DATQ     3
 
-/* Coda dei segmenti ricevuti. */
-static struct segwrap *joinq;
+/* Tabella hash dei segmenti ricevuti. */
+#define     HT_JOIN_SIZE     10
+static struct segwrap *ht_join[HT_JOIN_SIZE];
 
 /* Ultimo seqnum inviato. */
 static seq_t outseq;
@@ -399,17 +401,21 @@ feed_download (void)
 	int err;
 	struct segwrap *head;
 
-	while ((head = getHead (joinq)) != NULL
-	       && seg_seq (head->sw_seg) == last_host_sent_seq + 1
-	       && seg_pld_len (head->sw_seg) <= cqueue_get_aval (host_sndbuf))
-	{
-		head = qdequeue (&joinq);
-		err = cqueue_add (host_sndbuf,
-				seg_pld (head->sw_seg),
-				seg_pld_len (head->sw_seg));
-		assert (!err);
-		last_host_sent_seq = seg_seq (head->sw_seg);
-		segwrap_destroy (head);
+	while (NULL != (head = seghash_remove (ht_join, HT_JOIN_SIZE,
+					last_host_sent_seq + 1))) {
+
+		if (seg_pld_len (head->sw_seg)
+				<= cqueue_get_aval (host_sndbuf)) {
+			err = cqueue_add (host_sndbuf,
+					seg_pld (head->sw_seg),
+					seg_pld_len (head->sw_seg));
+			assert (!err);
+			last_host_sent_seq = seg_seq (head->sw_seg);
+			segwrap_destroy (head);
+		} else {
+			seghash_add (ht_join, HT_JOIN_SIZE, head);
+			break;
+		}
 	}
 }
 
@@ -425,9 +431,17 @@ feed_upload (void)
 void
 join_add (struct segwrap *sw)
 {
+	/* Inserisce sw nella ht_join, tranne se:
+	 * - in ht_join e' gia' presente un segwrap avente il seqnum di sw. */
 
 	assert (sw != NULL);
 	assert (seg_pld (sw->sw_seg) != NULL);
+
+	if (seghash_get (ht_join, HT_JOIN_SIZE, seg_seq (sw->sw_seg)) != NULL)
+		segwrap_destroy (sw);
+	else {
+		seghash_add (ht_join, HT_JOIN_SIZE, sw);
+	}
 }
 
 
@@ -463,7 +477,8 @@ proxy_init (port_t hostlistport,
 	outseq = 0;
 	last_host_sent_seq = SEQMAX;
 
-	joinq = newQueue ();
+	seghash_init (ht_join, HT_JOIN_SIZE);
+
 	for (i = 0; i < URGNO; i++)
 		urgentq[i] = newQueue ();
 

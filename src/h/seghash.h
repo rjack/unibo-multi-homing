@@ -18,6 +18,10 @@ seghash_add
 
 
 struct segwrap *
+seghash_get (struct segwrap **hash_table, size_t table_size, seq_t key);
+
+
+struct segwrap *
 seghash_remove (struct segwrap **hash_table, size_t table_size, seq_t key);
 
 
