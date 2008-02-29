@@ -31,7 +31,7 @@
 static struct chan ch[CHANNELS];
 
 /* Contatore statico per politica round robin. */
-static cd_t rrcd = NETCD;
+static cd_t rrcd;
 
 /* Buffer applicazione. */
 static cqueue_t *host_rcvbuf;
@@ -483,17 +483,21 @@ proxy_init (port_t hostlistport,
 		port_t netlistport[NETCHANNELS],
 		char *hostconnaddr, port_t hostconnport)
 {
+	/* Inizializza le strutture dati del proxy. */
+
 	int err;
 	int i;
 	cd_t cd;
 
+	/* Canale con l'host e relativi buffer applicazione. */
 	err = channel_init (HOSTCD, hostlistport, hostconnaddr, hostconnport);
 	if (err)
 		goto error;
 	host_rcvbuf = NULL;
 	host_sndbuf = NULL;
 
-	for (cd = NETCD; cd < NETCHANNELS; cd++) {
+	/* Canali con il ritardatore e relativi buffer applicazione. */
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
 		port_t listport = (netlistport ? netlistport[cd] : 0);
 		port_t connport = (netconnport ? netconnport[cd] : 0);
 		char *connaddr = (netconnaddr ? netconnaddr[cd] : NULL);
@@ -505,15 +509,20 @@ proxy_init (port_t hostlistport,
 		net_sndbuf[cd] = NULL;
 	}
 
+	/* Contatori numeri di sequenza. */
 	outseq = 0;
 	last_sent = SEQMAX;
 
+	/* Code di segmenti. */
 	joinq = newQueue ();
-
 	for (i = 0; i < URGNO; i++)
 		urgentq[i] = newQueue ();
 
+	/* Indice round robin per routing. */
+	rrcd = NETCD;
+
 #if !HAVE_MSG_NOSIGNAL
+	/* Ignora SIGPIPE nei sistemi che non hanno MSG_NOSIGNAL. */
 	{
 		int err;
 		struct sigaction act;

@@ -30,8 +30,8 @@
 			       Variabili locali
 *******************************************************************************/
 
-/* Teste e code delle linked list di timeout.
- * Per ogni classe l'ordine dei timeout e' indifferente. */
+/* Code di timeout.
+ * Per ogni coda l'ordine dei timeout e' indifferente. */
 static timeout_t *tqueue[TMOUTS];
 
 /* Intervallo spedizione ACK.
@@ -40,8 +40,7 @@ static timeout_t *tqueue[TMOUTS];
  * XXX Sara' passato ad add_timeout alla ricezione del primo segmento. */
 static timeout_t ack_timeout;
 
-/* Per controllare che le funzioni di gestione dei timeout non vengano
- * chiamate senza aver inizializzato il modulo. */
+/* Controllo paranoia. */
 static bool init_done = FALSE;
 
 
