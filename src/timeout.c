@@ -1,6 +1,7 @@
 #include "h/types.h"
 #include "h/util.h"
 #include "h/crono.h"
+#include "h/segment.h"
 #include "h/timeout.h"
 
 #include <assert.h>
@@ -48,8 +49,9 @@ static bool init_done = FALSE;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static double timeout_check (timeout_t *to);
 static void ack_handler (int seq);
+static void nak_handler (int seq);
+static double timeout_check (timeout_t *to);
 
 
 /*******************************************************************************
@@ -78,7 +80,15 @@ add_timeout (timeout_t *to, int class)
 void
 add_nak_timeout (seq_t seq)
 {
-	/* TODO add_nak_timeout */
+	timeout_t *to;
+
+	assert (init_done);
+
+	/* XXX Non e' oneshot perche' i nak non vengono spediti duplicati,
+	 * XXX quindi tocca insistere. */
+	to = timeout_create (TONAK_VAL, nak_handler, seq, FALSE);
+	timeout_reset (to);
+	add_timeout (to, TONAK);
 }
 
 
@@ -134,7 +144,15 @@ del_timeout (timeout_t *to, int class)
 void
 del_nak_timeout (seq_t seq)
 {
-	/* TODO del_nak_timeout */
+	timeout_t *nakto;
+
+	assert (init_done);
+
+	nakto = get_timeout (TONAK, seq);
+	assert (nakto != NULL);
+
+	del_timeout (nakto, TONAK);
+	timeout_destroy (nakto);
 }
 
 
@@ -253,10 +271,20 @@ timeout_reset (timeout_t *to)
 *******************************************************************************/
 
 static void
-ack_handler (int ack)
+ack_handler (int seq)
 {
 	/* TODO manda ack */
 	fprintf (stderr, "ACK!\n");
+}
+
+
+static void
+nak_handler (int seq)
+{
+	struct segwrap *nak;
+
+	nak = segwrap_nak_create (seq);
+	urgent_add (nak);
 }
 
 

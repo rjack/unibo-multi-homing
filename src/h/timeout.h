@@ -27,6 +27,10 @@ void
 del_nak_timeout (seq_t seq);
 
 
+timeout_t *
+get_timeout (int class, int id);
+
+
 void
 init_timeout_module (void);
 
