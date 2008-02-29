@@ -75,6 +75,13 @@ add_timeout (timeout_t *to, int class)
 }
 
 
+void
+add_nak_timeout (seq_t seq)
+{
+	/* TODO add_nak_timeout */
+}
+
+
 double
 check_timeouts (void)
 {
@@ -121,6 +128,13 @@ del_timeout (timeout_t *to, int class)
 	assert (init_done);
 
 	qremove (&tqueue[class], to);
+}
+
+
+void
+del_nak_timeout (seq_t seq)
+{
+	/* TODO del_nak_timeout */
 }
 
 

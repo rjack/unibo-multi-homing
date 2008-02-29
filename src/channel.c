@@ -49,13 +49,13 @@ static struct segwrap *urgentq[URGNO];
 #define     ACKQ     2
 #define     DATQ     3
 
-/* Tabella hash dei segmenti ricevuti. */
-#define     HT_JOIN_SIZE     10
-static struct segwrap *ht_join[HT_JOIN_SIZE];
+/* Coda dei segmenti ricevuti dal ritardatore. */
+static struct segwrap *joinq;
 
-/* Ultimo seqnum inviato. */
+/* Ultimo seqnum inviato all ritardatore. */
 static seq_t outseq;
-static seq_t last_host_sent_seq;
+/* Ultimo seqnum inviato all'host. */
+static seq_t last_sent;
 
 
 /*******************************************************************************
@@ -86,9 +86,8 @@ channel_can_read (cd_t cd)
 {
 	assert (VALID_CD (cd));
 
-	if (cd == HOSTCD) {
+	if (cd == HOSTCD)
 		return cqueue_can_read (host_rcvbuf);
-	}
 	return rqueue_can_read (net_rcvbuf[cd]);
 }
 
@@ -98,9 +97,8 @@ channel_can_write (cd_t cd)
 {
 	assert (VALID_CD (cd));
 
-	if (cd == HOSTCD) {
+	if (cd == HOSTCD)
 		return cqueue_can_write (host_sndbuf);
-	}
 	return rqueue_can_write (net_sndbuf[cd]);
 }
 
@@ -237,7 +235,6 @@ channel_is_connecting (cd_t cd)
 		assert (ch[cd].c_listfd < 0);
 		return TRUE;
 	}
-
 	return FALSE;
 }
 
@@ -401,21 +398,17 @@ feed_download (void)
 	int err;
 	struct segwrap *head;
 
-	while (NULL != (head = seghash_remove (ht_join, HT_JOIN_SIZE,
-					last_host_sent_seq + 1))) {
-
-		if (seg_pld_len (head->sw_seg)
-				<= cqueue_get_aval (host_sndbuf)) {
-			err = cqueue_add (host_sndbuf,
-					seg_pld (head->sw_seg),
-					seg_pld_len (head->sw_seg));
-			assert (!err);
-			last_host_sent_seq = seg_seq (head->sw_seg);
-			segwrap_destroy (head);
-		} else {
-			seghash_add (ht_join, HT_JOIN_SIZE, head);
-			break;
-		}
+	while ((head = getHead (joinq)) != NULL
+	       && seg_seq (head->sw_seg) == last_sent + 1
+	       && seg_pld_len (head->sw_seg) <= cqueue_get_aval (host_sndbuf))
+	{
+		head = qdequeue (&joinq);
+		err = cqueue_add (host_sndbuf,
+				seg_pld (head->sw_seg),
+				seg_pld_len (head->sw_seg));
+		assert (!err);
+		last_sent = seg_seq (head->sw_seg);
+		segwrap_destroy (head);
 	}
 }
 
@@ -431,16 +424,54 @@ feed_upload (void)
 void
 join_add (struct segwrap *sw)
 {
-	/* Inserisce sw nella ht_join, tranne se:
-	 * - in ht_join e' gia' presente un segwrap avente il seqnum di sw. */
+	seq_t s;
+	seq_t seqsw;
+	struct segwrap *head;
 
 	assert (sw != NULL);
-	assert (seg_pld (sw->sw_seg) != NULL);
 
-	if (seghash_get (ht_join, HT_JOIN_SIZE, seg_seq (sw->sw_seg)) != NULL)
+	seqsw = seg_seq (sw->sw_seg);
+
+	/* Segmento vecchio, scartato. */
+	if (seqcmp (seqsw, last_sent) <= 0) {
 		segwrap_destroy (sw);
-	else {
-		seghash_add (ht_join, HT_JOIN_SIZE, sw);
+		return;
+	}
+
+	head = getHead (joinq);
+	if (head == NULL) {
+		if (seqcmp (seqsw, last_sent + 1) != 0)
+			for (s = last_sent + 1; seqcmp (s, seqsw) < 0; s++)
+				add_nak_timeout (s);
+		qenqueue (&joinq, sw);
+	} else {
+		seq_t seqhd;
+		seq_t seqtl;
+		seqhd = seg_seq (head->sw_seg);
+		seqtl = seg_seq (joinq->sw_seg);
+		/* Maggiore della coda. */
+		if (seqcmp (seqsw, seqtl + 1) > 0) {
+			for (s = seqtl + 1; seqcmp (s, seqsw) < 0; s++)
+				add_nak_timeout (s);
+			qenqueue (&joinq, sw);
+		}
+		/* Successivo a quello in coda. */
+		else if (seqcmp (seqsw, seqtl + 1) == 0)
+			qenqueue (&joinq, sw);
+		/* Precedente alla testa. */
+		else if (seqcmp (seqsw, seqhd) < 0) {
+			del_nak_timeout (seqsw);
+			qpush (&joinq, sw);
+		}
+		/* Tra testa e coda. */
+		else {
+			del_nak_timeout (seqsw);
+			qinorder_insert (&joinq, sw, segwrap_seqcmp);
+			/* Annulla inserimento se duplicato. */
+			if (seg_seq (sw->sw_next->sw_seg) == seqsw
+			    || seg_seq (sw->sw_prev->sw_seg) == seqsw)
+				qremove (&joinq, sw);
+		}
 	}
 }
 
@@ -475,9 +506,9 @@ proxy_init (port_t hostlistport,
 	}
 
 	outseq = 0;
-	last_host_sent_seq = SEQMAX;
+	last_sent = SEQMAX;
 
-	seghash_init (ht_join, HT_JOIN_SIZE);
+	joinq = newQueue ();
 
 	for (i = 0; i < URGNO; i++)
 		urgentq[i] = newQueue ();

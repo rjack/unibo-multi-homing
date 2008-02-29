@@ -319,7 +319,7 @@ segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2)
 int
 seqcmp (seq_t a, seq_t b)
 {
-	/* Ritorna -1 o 1 a seconda che b rispettivamente preceda o segua a
+	/* Ritorna -1 o 1 a seconda che b rispettivamente segua o preceda a
 	 * nell'ordine dei numeri di sequenza. Se a == b ritorna 0. */
 
 	if (a == b)
@@ -327,9 +327,9 @@ seqcmp (seq_t a, seq_t b)
 
 	if ((a < b && (b - a) > (SEQMAX / 2))
 	     || (a > b && (a - b) < (SEQMAX / 2)))
-		return -1;
+		return 1;
 
-	return 1;
+	return -1;
 }
 
 

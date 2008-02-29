@@ -79,7 +79,6 @@ seghash_get (struct segwrap **hash_table, size_t table_size, seq_t key)
 			else
 				cur = getNext (cur);
 		} while (selected == NULL && cur != getHead (hash_table[i]));
-
 	}
 
 	return selected;

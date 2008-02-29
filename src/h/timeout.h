@@ -11,12 +11,20 @@ void
 add_timeout (timeout_t *to, int class);
 
 
+void
+add_nak_timeout (seq_t seq);
+
+
 double
 check_timeouts (void);
 
 
 void
 del_timeout (timeout_t *to, int class);
+
+
+void
+del_nak_timeout (seq_t seq);
 
 
 void
