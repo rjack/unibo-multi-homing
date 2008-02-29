@@ -139,7 +139,7 @@ rqueue_get_aval (rqueue_t *rq)
 	assert (rq != NULL);
 	cqaval = cqueue_get_aval (rq->rq_data);
 
-#if defined (NDEBUG)
+#ifndef NDEBUG
 	if (cqaval == rq->rq_data->cq_len) {
 		assert (isEmpty (rq->rq_sgmt));
 		assert (rq->rq_nbytes == 0);
@@ -165,7 +165,7 @@ rqueue_get_used (rqueue_t *rq)
 
 	cqused = cqueue_get_used (rq->rq_data);
 
-#if defined (NDEBUG)
+#ifndef NDEBUG
 	if (cqused == 0) {
 		assert (isEmpty (rq->rq_sgmt));
 		assert (rq->rq_nbytes == 0);

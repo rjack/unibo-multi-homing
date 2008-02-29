@@ -8,6 +8,7 @@
 
 #include <config.h>
 #include <assert.h>
+#include <stdio.h>
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next
@@ -61,6 +62,13 @@ handle_rcvd_segment (struct segwrap *rcvd)
 		handle_rcvd_ack (rcvd);
 		segwrap_destroy (rcvd);
 	} else {
+#ifndef NDEBUG
+		fprintf (stdout, "RCV %sSEG %d\n",
+				seg_is_critical (rcvd->sw_seg) ?
+					"CRITICAL " : "",
+				seg_seq (rcvd->sw_seg));
+		fflush (stdout);
+#endif /* NDEBUG */
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
 	}
@@ -228,14 +236,18 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 
 	/* Flags. */
 	sw->sw_seg[FLG] = 0 | PLDFLAG;
-	if (pldlen != PLDDEFLEN)
+	if (pldlen != PLDDEFLEN) {
 		sw->sw_seg[FLG] |= LENFLAG;
+	}
 	/* Seqnum. */
 	sw->sw_seg[SEQ] = seqnum;
 	/* Payload. */
 	pld = seg_pld (sw->sw_seg);
 	err = cqueue_remove (src, pld, pldlen);
 	assert (!err);
+	/* Seqlen. */
+	sw->sw_seglen = FLGLEN + SEQLEN
+		+ (pldlen == PLDDEFLEN ? 0 : LENLEN) + pldlen;
 }
 
 
@@ -345,6 +357,11 @@ handle_rcvd_ack (struct segwrap *ack)
 
 	assert (init_done);
 
+#ifndef NDEBUG
+	fprintf (stdout, "RCV ACK %d\n", seg_seq (ack->sw_seg));
+	fflush (stdout);
+#endif /* NDEBUG */
+
 	seghash_rm_acked (ht_sent, HT_SENT_SIZE, ack);
 	urgent_rm_acked (ack);
 	netsndbuf_rm_acked (ack);
@@ -358,6 +375,11 @@ handle_rcvd_nak (struct segwrap *nak)
 	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
 
 	struct segwrap *urg;
+
+#ifndef NDEBUG
+	fprintf (stdout, "RCV NAK %d\n", seg_seq (nak->sw_seg));
+	fflush (stdout);
+#endif /* NDEBUG */
 
 	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));
 	if (urg != NULL) {
