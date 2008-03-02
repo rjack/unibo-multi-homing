@@ -232,12 +232,14 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 	assert (sw != NULL);
 	assert (src != NULL);
 	assert (pldlen > 0);
-	assert (cqueue_get_used (src) > 0);
+	assert (cqueue_get_used (src) >= pldlen);
 
 	/* Flags. */
 	sw->sw_seg[FLG] = 0 | PLDFLAG;
 	if (pldlen != PLDDEFLEN) {
+		/* Payload non standard, flag e campo len. */
 		sw->sw_seg[FLG] |= LENFLAG;
+		sw->sw_seg[LEN] = pldlen;
 	}
 	/* Seqnum. */
 	sw->sw_seg[SEQ] = seqnum;

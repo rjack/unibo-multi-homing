@@ -208,6 +208,7 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 		while ((seglen = cqueue_seglen (rq->rq_data)) > 0) {
 			struct segwrap *sw;
 			sw = segwrap_create ();
+			sw->sw_seglen = seglen;
 			err = cqueue_remove (rq->rq_data, sw->sw_seg, seglen);
 			assert (!err);
 			handle_rcvd_segment (sw);

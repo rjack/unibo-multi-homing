@@ -193,8 +193,11 @@ cqueue_seglen (cqueue_t *cq)
 
 	assert (cq != NULL);
 
-	flgptr = &cq->cq_data[cq->cq_head];
 	used = cqueue_get_used (cq);
+	if (used == 0)
+		return 0;
+
+	flgptr = &cq->cq_data[cq->cq_head];
 
 	if (seg_is_nak (flgptr) && used >= NAKLEN)
 		return NAKLEN;
