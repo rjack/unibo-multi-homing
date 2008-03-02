@@ -371,9 +371,8 @@ channel_read (cd_t cd)
 	assert (channel_is_connected (cd));
 	assert (channel_can_read (cd));
 
-	if (cd == HOSTCD) {
+	if (cd == HOSTCD)
 		return cqueue_read (ch[cd].c_sockfd, host_rcvbuf);
-	}
 	return rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
 }
 
@@ -385,9 +384,8 @@ channel_write (cd_t cd)
 	assert (channel_is_connected (cd));
 	assert (channel_can_write (cd));
 
-	if (cd == HOSTCD) {
+	if (cd == HOSTCD)
 		return cqueue_write (ch[cd].c_sockfd, host_sndbuf);
-	}
 	return rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
 }
 
@@ -746,7 +744,9 @@ urgent_head (void)
 
 	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
 
-	return getHead (urgentq[i]);
+	if (i < URGNO)
+		return getHead (urgentq[i]);
+	return NULL;
 }
 
 
@@ -757,7 +757,9 @@ urgent_remove (void)
 
 	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
 
-	return qdequeue (&urgentq[i]);
+	if (i < URGNO)
+		return qdequeue (&urgentq[i]);
+	return NULL;
 }
 
 

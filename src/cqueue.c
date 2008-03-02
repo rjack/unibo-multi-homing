@@ -222,6 +222,7 @@ cqueue_seglen (cqueue_t *cq)
 	return 0;
 }
 
+
 int
 cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {

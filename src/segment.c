@@ -37,7 +37,6 @@ static bool init_done = FALSE;
 static int urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 static void handle_rcvd_ack (struct segwrap *ack);
 static void handle_rcvd_nak (struct segwrap *nak);
-static void handle_rcvd_data (struct segwrap *sw);
 
 
 /*******************************************************************************
