@@ -168,7 +168,7 @@ get_timeout (int class, int id)
 
 	switch (class) {
 	case TOACK :
-		return cur;
+		return head;
 
 	case TOACT :
 	case TONAK :

@@ -140,7 +140,6 @@ seg_pld (seg_t *seg)
 	assert (seg != NULL);
 	if (seg[FLG] & PLDFLAG)
 		return (seg[FLG] & LENFLAG ? &seg[LEN + 1] : &seg[LEN]);
-	assert (seg_pld_len (seg) == 0);
 	return NULL;
 }
 
