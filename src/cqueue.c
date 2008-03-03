@@ -38,6 +38,9 @@ static size_t cqueue_get_used_chunk (const cqueue_t *cq);
 int
 cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
+	/* Copia nbytes bytes da buf in coda a cq.
+	 * Ritorna 0 se riesce, -1 se cq non ha abbastanza spazio. */
+
 	size_t chunk_1;
 	size_t chunk_2;
 
@@ -62,7 +65,7 @@ cqueue_add (cqueue_t *cq, seg_t *buf, size_t nbytes)
 
 		if (chunk_2 > 0) {
 			memcpy (&cq->cq_data[cq->cq_tail], buf, chunk_2);
-			cq->cq_tail += chunk_2;
+			CINC (cq->cq_tail, chunk_2, cq->cq_len);
 		}
 		return 0;
 	}
@@ -78,9 +81,8 @@ cqueue_can_read (void *arg)
 	assert (arg != NULL);
 
 	cq = (cqueue_t *) arg;
-	if (cqueue_get_aval (cq) > 0) {
+	if (cqueue_get_aval (cq) > 0)
 		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -93,9 +95,8 @@ cqueue_can_write (void *arg)
 	assert (arg != NULL);
 
 	cq = (cqueue_t *) arg;
-	if (cqueue_get_used (cq) > 0) {
+	if (cqueue_get_used (cq) > 0)
 		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -131,32 +132,42 @@ cqueue_destroy (cqueue_t *cq)
 void
 cqueue_drop_head (cqueue_t *cq, size_t nbytes)
 {
+	/* Scart nbytes bytes dalla testa di cq. */
+
 	assert (cq != NULL);
 	assert (nbytes > 0);
 	assert (nbytes <= cqueue_get_used (cq));
 
 	CINC (cq->cq_head, nbytes, cq->cq_len);
-	if (cq->cq_head <= cq->cq_tail)
+	if (cq->cq_head <= cq->cq_tail) {
+		assert (cq->cq_wrap);
 		cq->cq_wrap = FALSE;
+	}
 }
 
 
 void
 cqueue_drop_tail (cqueue_t *cq, size_t nbytes)
 {
+	/* Scart nbytes bytes dalla coda di cq. */
+
 	assert (cq != NULL);
 	assert (nbytes > 0);
 	assert (nbytes <= cqueue_get_used (cq));
 
 	CDEC (cq->cq_tail, nbytes, cq->cq_len);
-	if (cq->cq_head <= cq->cq_tail)
+	if (cq->cq_head <= cq->cq_tail) {
+		assert (cq->cq_wrap);
 		cq->cq_wrap = FALSE;
+	}
 }
 
 
 size_t
 cqueue_get_aval (cqueue_t *cq)
 {
+	/* Ritorna il numero di byte disponibili in cq. */
+
 	size_t aval;
 
 	assert (cq != NULL);
@@ -175,6 +186,8 @@ cqueue_get_aval (cqueue_t *cq)
 size_t
 cqueue_get_used (cqueue_t *cq)
 {
+	/* Ritorna il numero di byte usati in cq. */
+
 	assert (cq != NULL);
 	return (cq->cq_len - cqueue_get_aval (cq));
 }
@@ -207,11 +220,16 @@ cqueue_seglen (cqueue_t *cq)
 
 	assert (*flgptr & PLDFLAG);
 
-	if (!(*flgptr & LENFLAG) && used >= FLGLEN + SEQLEN + PLDDEFLEN)
-		return (FLGLEN + SEQLEN + PLDDEFLEN);
+	/* Payload di lunghezza standard. */
+	if (!(*flgptr & LENFLAG)) {
+		if (used >= FLGLEN + SEQLEN + PLDDEFLEN)
+			return (FLGLEN + SEQLEN + PLDDEFLEN);
+		return 0;
+	}
 
 	/* Payload di lunghezza non standard, bisogna accedere al campo len,
 	 * se presente. */
+	assert (*flgptr & LENFLAG);
 	if (used > LEN) {
 		int i;
 		i = (cq->cq_head + LEN) % cq->cq_len;
@@ -226,6 +244,8 @@ cqueue_seglen (cqueue_t *cq)
 int
 cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
+	/* Copia nbytes byte da buf in testa a cq. */
+
 	size_t chunk_1;
 	size_t chunk_2;
 
@@ -280,7 +300,7 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	/* Questo ciclo viene eseguito al massimo due volte. */
 	nrcvd = 0;
 	do {
-		nread = read (fd, &cq->cq_data[cq->cq_tail], chunk);
+		nread = read (fd, &(cq->cq_data[cq->cq_tail]), chunk);
 		if (nread > 0) {
 			nrcvd += nread;
 			CINC (cq->cq_tail, nread, cq->cq_len);
@@ -306,6 +326,8 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 int
 cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 {
+	/* Copia nbytes byte dalla testa di cq in buf rimuovendoli da cq. */
+
 	size_t chunk_1;
 	size_t chunk_2;
 
@@ -319,7 +341,7 @@ cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		chunk_1 = MIN (cqueue_get_used_chunk (cq), nbytes);
 		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
 
-		memcpy (buf, &cq->cq_data[cq->cq_head], chunk_1);
+		memcpy (buf, &(cq->cq_data[cq->cq_head]), chunk_1);
 		CINC (cq->cq_head, chunk_1, cq->cq_len);
 		buf += chunk_1;
 		if (cq->cq_head == 0) {
@@ -328,8 +350,8 @@ cqueue_remove (cqueue_t *cq, seg_t *buf, size_t nbytes)
 		}
 
 		if (chunk_2 > 0) {
-			memcpy (buf, &cq->cq_data[cq->cq_head], chunk_2);
-			cq->cq_head += chunk_2;
+			memcpy (buf, &(cq->cq_data[cq->cq_head]), chunk_2);
+			CINC (cq->cq_head, chunk_2, cq->cq_len);
 		}
 		return 0;
 	}
@@ -363,7 +385,7 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	 * buffer alla coda. */
 	nsent = 0;
 	do {
-		nwrite = send (fd, &cq->cq_data[cq->cq_head], chunk,
+		nwrite = send (fd, &(cq->cq_data[cq->cq_head]), chunk,
 				MSG_NOSIGNAL);
 		assert (nwrite != 0);
 		if (nwrite > 0) {
