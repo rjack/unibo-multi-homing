@@ -397,7 +397,7 @@ feed_download (void)
 	struct segwrap *head;
 
 	while ((head = getHead (joinq)) != NULL
-	       && seg_seq (head->sw_seg) == last_sent + 1
+	       && seqcmp (seg_seq (head->sw_seg), last_sent + 1) == 0
 	       && seg_pld_len (head->sw_seg) <= cqueue_get_aval (host_sndbuf))
 	{
 		head = qdequeue (&joinq);
