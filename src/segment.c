@@ -75,10 +75,8 @@ handle_rcvd_segment (struct segwrap *rcvd)
 		handle_rcvd_nak (rcvd);
 		rcvd->sw_seg[SEQ]--;
 		handle_rcvd_ack (rcvd);
-		segwrap_destroy (rcvd);
 	} else if (seg_is_ack (rcvd->sw_seg)) {
 		handle_rcvd_ack (rcvd);
-		segwrap_destroy (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
@@ -386,16 +384,17 @@ handle_rcvd_ack (struct segwrap *ack)
 	/* Rimuove e dealloca tutti i segmenti con seqnum minore o uguale ad
 	 * ack da tutte le strutture dati del proxy. */
 
-	assert (init_done);
+	struct segwrap *old_ack;
 
-#ifndef NDEBUG
-	fprintf (stdout, "RCV ACK %d\n", seg_seq (ack->sw_seg));
-	fflush (stdout);
-#endif /* NDEBUG */
+	assert (init_done);
 
 	seghash_rm_acked (ht_sent, HT_SENT_SIZE, ack);
 	urgent_rm_acked (ack);
-	netsndbuf_rm_acked (ack);
+	old_ack = set_last_ack_rcvd (ack);
+	if (old_ack != NULL)
+		segwrap_destroy (old_ack);
+	else
+		segwrap_destroy (ack);
 }
 
 
@@ -406,11 +405,6 @@ handle_rcvd_nak (struct segwrap *nak)
 	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
 
 	struct segwrap *urg;
-
-#ifndef NDEBUG
-	fprintf (stdout, "RCV NAK %d\n", seg_seq (nak->sw_seg));
-	fflush (stdout);
-#endif /* NDEBUG */
 
 	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));
 	if (urg != NULL) {

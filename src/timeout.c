@@ -148,10 +148,11 @@ del_nak_timeout (seq_t seq)
 	assert (init_done);
 
 	nakto = get_timeout (TONAK, seq);
-	assert (nakto != NULL);
 
-	del_timeout (nakto, TONAK);
-	timeout_destroy (nakto);
+	if (nakto != NULL) {
+		del_timeout (nakto, TONAK);
+		timeout_destroy (nakto);
+	}
 }
 
 

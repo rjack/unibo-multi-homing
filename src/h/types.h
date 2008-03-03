@@ -123,7 +123,7 @@ typedef uint8_t seg_t;
  * XXX PLDMAXLEN invece e' un limite reale. */
 #define     PLDMINLEN     (HDRMAXLEN * 2)
 #define     PLDMAXLEN     UINT8_MAX
-#define     PLDDEFLEN     (PLDMAXLEN - (PLDMINLEN - 1))  /* TODO da tarare */
+#define     PLDDEFLEN     PLDMAXLEN
 
 #define     SEGMINLEN     (PLDMINLEN + HDRMAXLEN)
 #define     SEGMAXLEN     (PLDMAXLEN + HDRMAXLEN)

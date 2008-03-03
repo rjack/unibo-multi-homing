@@ -57,6 +57,9 @@ static seq_t outseq;
 /* Ultimo seqnum inviato all'host. */
 static seq_t last_sent;
 
+static struct segwrap *last_ack_rcvd;
+static bool ack_handled;
+
 
 /*******************************************************************************
 				    Macro
@@ -74,6 +77,7 @@ static int listen_noblock (cd_t cd);
 static void host2net (void);
 static void net2urg (void);
 static void urg2net (void);
+static void netsndbuf_rm_acked (struct segwrap *ack);
 static void idle_handler (cd_t cd);
 
 
@@ -414,6 +418,10 @@ feed_download (void)
 void
 feed_upload (void)
 {
+	if (last_ack_rcvd != NULL && !ack_handled) {
+		netsndbuf_rm_acked (last_ack_rcvd);
+		ack_handled = TRUE;
+	}
 	urg2net ();
 	host2net ();
 }
@@ -518,6 +526,10 @@ proxy_init (port_t hostlistport,
 
 	/* Indice round robin per routing. */
 	rrcd = NETCD;
+
+	/* Gestione ack ricevuti. */
+	last_ack_rcvd = NULL;
+	ack_handled = TRUE;
 
 #if !HAVE_MSG_NOSIGNAL
 	/* Ignora SIGPIPE nei sistemi che non hanno MSG_NOSIGNAL. */
@@ -664,17 +676,6 @@ finalize_connection (cd_t cd)
 }
 
 
-void
-netsndbuf_rm_acked (struct segwrap *ack)
-{
-	cd_t cd;
-
-	for (cd = NETCD; cd < NETCHANNELS; cd++)
-		if (channel_is_connected (cd))
-			rqueue_rm_acked (net_sndbuf[cd], ack);
-}
-
-
 fd_t
 set_file_descriptors (fd_set *rdset, fd_set *wrset)
 {
@@ -709,6 +710,23 @@ set_file_descriptors (fd_set *rdset, fd_set *wrset)
 		}
 	}
 	return max;
+}
+
+
+struct segwrap *
+set_last_ack_rcvd (struct segwrap *ack)
+{
+	struct segwrap *old_ack;
+
+	if (last_ack_rcvd == NULL
+	    || segwrap_seqcmp (last_ack_rcvd, ack) < 0) {
+		old_ack = last_ack_rcvd;
+		last_ack_rcvd = ack;
+		ack_handled = FALSE;
+	} else
+		old_ack = NULL;
+
+	return old_ack;
 }
 
 
@@ -965,7 +983,8 @@ urg2net (void)
 	 * rqueue bisogna inserirlo in mezzo: si travasa la rqueue nella
 	 * urgentq e si ririempe successivamente in ordine di urgenza. */
 	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
-		if (rqueue_get_used (net_sndbuf[cd]) > 0
+		if (channel_is_connected (cd)
+		    && rqueue_get_used (net_sndbuf[cd]) > 0
 		    && segwrap_urgcmp (net_sndbuf[cd]->rq_sgmt, most_urg) > 0)
 		{
 			struct segwrap *unsentq;
@@ -989,6 +1008,17 @@ transfer:
 			needmask &= ~(0x1 << rrcd);
 		ROTATE_RRCD;
 	}
+}
+
+
+static void
+netsndbuf_rm_acked (struct segwrap *ack)
+{
+	cd_t cd;
+
+	for (cd = NETCD; cd < NETCHANNELS; cd++)
+		if (channel_is_connected (cd))
+			rqueue_rm_acked (net_sndbuf[cd], ack);
 }
 
 

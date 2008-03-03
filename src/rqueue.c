@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <errno.h>
 #include <config.h>
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next
@@ -204,6 +207,11 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 
 	if (nread > 0) {
 		size_t seglen;
+#ifndef NDEBUG
+		fprintf (stdout, "rqueue_read %d bytes\n", nread);
+		fflush (stdout);
+#endif
+
 		while ((seglen = cqueue_seglen (rq->rq_data)) > 0) {
 			struct segwrap *sw;
 			sw = segwrap_create ();

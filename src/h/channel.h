@@ -107,12 +107,12 @@ int
 finalize_connection (cd_t cd);
 
 
-void
-netsndbuf_rm_acked (struct segwrap *ack);
-
-
 fd_t
 set_file_descriptors (fd_set *rdset, fd_set *wrset);
+
+
+struct segwrap *
+set_last_ack_rcvd (struct segwrap *ack);
 
 
 void

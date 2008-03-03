@@ -6,6 +6,9 @@
 #include <config.h>
 #include <assert.h>
 #include <errno.h>
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -208,31 +211,62 @@ cqueue_seglen (cqueue_t *cq)
 
 	flgptr = &cq->cq_data[cq->cq_head];
 
-	if (seg_is_nak (flgptr) && used >= NAKLEN)
+	if (seg_is_nak (flgptr) && used >= NAKLEN) {
+#ifndef NDEBUG
+		fprintf (stdout, "cqueue_seglen NAK\n");
+		fflush (stdout);
+#endif
 		return NAKLEN;
+	}
 
-	if (seg_is_ack (flgptr) && used >= ACKLEN)
+	if (seg_is_ack (flgptr) && used >= ACKLEN) {
+#ifndef NDEBUG
+		fprintf (stdout, "cqueue_seglen ACK\n");
+		fflush (stdout);
+#endif
 		return ACKLEN;
+	}
 
 	assert (*flgptr & PLDFLAG);
 
 	/* Payload di lunghezza standard. */
 	if (!(*flgptr & LENFLAG)) {
-		if (used >= FLGLEN + SEQLEN + PLDDEFLEN)
+#ifndef NDEBUG
+		fprintf (stdout, "cqueue_seglen NO LENFLAG...");
+		fflush (stdout);
+#endif
+		if (used >= FLGLEN + SEQLEN + PLDDEFLEN) {
+#ifndef NDEBUG
+			fprintf (stdout, "OK\n");
+			fflush (stdout);
+#endif
 			return (FLGLEN + SEQLEN + PLDDEFLEN);
-		return 0;
+		}
 	}
-
 	/* Payload di lunghezza non standard, bisogna accedere al campo len,
 	 * se presente. */
-	assert (*flgptr & LENFLAG);
-	if (used > LEN) {
-		int i;
-		i = (cq->cq_head + LEN) % cq->cq_len;
-		if (used >= FLGLEN + SEQLEN + LENLEN + cq->cq_data[i])
-			return (FLGLEN + SEQLEN + LENLEN + cq->cq_data[i]);
+	else {
+#ifndef NDEBUG
+		fprintf (stdout, "cqueue_seglen LENFLAG...");
+		fflush (stdout);
+#endif
+		if (used > LEN) {
+			int i;
+			i = (cq->cq_head + LEN) % cq->cq_len;
+			if (used >= FLGLEN + SEQLEN + LENLEN + cq->cq_data[i]) {
+#ifndef NDEBUG
+				fprintf (stdout, "OK\n");
+				fflush (stdout);
+#endif
+				return (FLGLEN + SEQLEN + LENLEN + cq->cq_data[i]);
+			}
+		}
 	}
 
+#ifndef NDEBUG
+	fprintf (stdout, "BHO!\n");
+	fflush (stdout);
+#endif
 	return 0;
 }
 
