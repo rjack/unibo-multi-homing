@@ -52,6 +52,25 @@ handle_rcvd_segment (struct segwrap *rcvd)
 
 	seq = seg_seq (rcvd->sw_seg);
 
+#ifndef NDEBUG
+	{
+		char *type;
+		if (seg_is_nak (rcvd->sw_seg))
+			type = "NAK";
+		else if (seg_is_ack (rcvd->sw_seg))
+			type = "ACK";
+		else {
+			assert (seg_pld (rcvd->sw_seg) != NULL);
+			type = (seg_is_critical (rcvd->sw_seg) ?
+					"CRITICAL SEG" : "SEG");
+		}
+		fprintf (stdout, "RCV %s %d, seglen = %d, pld = %d\n",
+				type, seg_seq (rcvd->sw_seg), rcvd->sw_seglen,
+				seg_pld_len (rcvd->sw_seg));
+		fflush (stdout);
+	}
+#endif /* NDEBUG */
+
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
 		rcvd->sw_seg[SEQ]--;
@@ -61,13 +80,6 @@ handle_rcvd_segment (struct segwrap *rcvd)
 		handle_rcvd_ack (rcvd);
 		segwrap_destroy (rcvd);
 	} else {
-#ifndef NDEBUG
-		fprintf (stdout, "RCV %sSEG %d\n",
-				seg_is_critical (rcvd->sw_seg) ?
-					"CRITICAL " : "",
-				seg_seq (rcvd->sw_seg));
-		fflush (stdout);
-#endif /* NDEBUG */
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
 	}
@@ -78,6 +90,25 @@ void
 handle_sent_segment (struct segwrap *sent)
 {
 	assert (sent != NULL);
+
+#ifndef NDEBUG
+	{
+		char *type;
+		if (seg_is_nak (sent->sw_seg))
+			type = "NAK";
+		else if (seg_is_ack (sent->sw_seg))
+			type = "ACK";
+		else {
+			assert (seg_pld (sent->sw_seg) != NULL);
+			type = (seg_is_critical (sent->sw_seg) ?
+					"CRITICAL SEG" : "SEG");
+		}
+		fprintf (stdout, "SND %s %d, seglen = %d, pld = %d\n",
+				type, seg_seq (sent->sw_seg), sent->sw_seglen,
+				seg_pld_len (sent->sw_seg));
+		fflush (stdout);
+	}
+#endif /* NDEBUG */
 
 	if (seg_pld (sent->sw_seg) == NULL)
 		segwrap_destroy (sent);
