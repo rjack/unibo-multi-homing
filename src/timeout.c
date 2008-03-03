@@ -165,6 +165,8 @@ get_timeout (int class, int id)
 	assert (init_done);
 
 	head = getHead (tqueue[class]);
+	if (head == NULL)
+		return NULL;
 
 	switch (class) {
 	case TOACK :
