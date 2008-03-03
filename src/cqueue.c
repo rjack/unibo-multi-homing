@@ -139,10 +139,8 @@ cqueue_drop_head (cqueue_t *cq, size_t nbytes)
 	assert (nbytes <= cqueue_get_used (cq));
 
 	CINC (cq->cq_head, nbytes, cq->cq_len);
-	if (cq->cq_head <= cq->cq_tail) {
-		assert (cq->cq_wrap);
+	if (cq->cq_head <= cq->cq_tail)
 		cq->cq_wrap = FALSE;
-	}
 }
 
 
@@ -156,10 +154,8 @@ cqueue_drop_tail (cqueue_t *cq, size_t nbytes)
 	assert (nbytes <= cqueue_get_used (cq));
 
 	CDEC (cq->cq_tail, nbytes, cq->cq_len);
-	if (cq->cq_head <= cq->cq_tail) {
-		assert (cq->cq_wrap);
+	if (cq->cq_head <= cq->cq_tail)
 		cq->cq_wrap = FALSE;
-	}
 }
 
 

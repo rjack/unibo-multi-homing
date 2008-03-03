@@ -112,11 +112,10 @@ rqueue_cut_unsent (rqueue_t *rq)
 	rmvdq = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
 	head = getHead (rmvdq);
-	if (head->sw_seglen < rq->rq_nbytes) {
+	if (head->sw_seglen < rq->rq_nbytes)
 		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
-	} else
+	else
 		rq->rq_nbytes = 0;
-
 
 	consolidate (rq);
 	return rmvdq;
@@ -327,14 +326,14 @@ consolidate (rqueue_t *rq)
 
 	assert (rq != NULL);
 
-	if (rqueue_get_used (rq) == 0)
+	todrop = cqueue_get_used (rq->rq_data);
+	if (todrop == 0)
 		return;
 
-	todrop = cqueue_get_used (rq->rq_data);
 	tmp = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
 	head = getHead (tmp);
-	if (head->sw_seglen > rq->rq_nbytes) {
+	if (head != NULL && head->sw_seglen > rq->rq_nbytes) {
 		qenqueue (&rq->rq_sgmt, qdequeue (&tmp));
 		todrop -= rq->rq_nbytes;
 	} else
@@ -343,4 +342,5 @@ consolidate (rqueue_t *rq)
 
 	while (!isEmpty (tmp))
 		rqueue_add (rq, qdequeue (&tmp));
+
 }
