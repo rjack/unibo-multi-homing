@@ -72,6 +72,10 @@ int
 segwrap_prio (struct segwrap *sw);
 
 
+void
+segwrap_print (struct segwrap *sw);
+
+
 int
 segwrap_seqcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 

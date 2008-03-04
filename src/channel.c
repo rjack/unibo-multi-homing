@@ -971,6 +971,7 @@ urg2net (void)
 	int err;
 	int needmask;
 	cd_t cd;
+	bool do_reorg;
 	struct segwrap *sw;
 	struct segwrap *most_urg;
 
@@ -980,18 +981,28 @@ urg2net (void)
 
 	/* I net_sndbuf contengono i segmenti in ordine di urgenza. Se il piu'
 	 * urgente della urgentq e' piu' urgente dell'ultimo segmento di una
-	 * rqueue bisogna inserirlo in mezzo: si travasa la rqueue nella
-	 * urgentq e si ririempe successivamente in ordine di urgenza. */
-	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+	 * qualsiasi rqueue bisogna inserirlo in mezzo: si travasano tutte le
+	 * rqueue nella urgentq. */
+	for (do_reorg = FALSE, cd = NETCD;
+	     cd < NETCD + NETCHANNELS && !do_reorg;
+	     cd++)
 		if (channel_is_connected (cd)
 		    && rqueue_get_used (net_sndbuf[cd]) > 0
 		    && segwrap_urgcmp (net_sndbuf[cd]->rq_sgmt, most_urg) > 0)
-		{
+			do_reorg = TRUE;
+
+	if (!do_reorg)
+		goto transfer;
+
+	/* Riorganizzazione buffer. */
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+		if (channel_is_connected (cd)
+		    && rqueue_get_used (net_sndbuf[cd]) > 0) {
 			struct segwrap *unsentq;
 			/* Taglio e travaso. */
 			unsentq = rqueue_cut_unsent (net_sndbuf[cd]);
 			while ((sw = qdequeue (&unsentq)) != NULL)
-				qenqueue (&urgentq[segwrap_prio (sw)], sw);
+				urgent_add (sw);
 		}
 
 	/* Riempimento net_sndbuf. */

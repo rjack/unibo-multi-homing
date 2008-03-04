@@ -23,6 +23,7 @@
 *******************************************************************************/
 
 static void consolidate (rqueue_t *rq);
+static bool is_first_partially_sent (rqueue_t *rq);
 
 
 /*******************************************************************************
@@ -45,7 +46,9 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_prev == NULL);
 	assert (sw->sw_seglen > 0);
 	assert (sw->sw_seglen <= cqueue_get_aval (rq->rq_data));
-	assert (rq->rq_sgmt == NULL || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
+	assert (isEmpty (rq->rq_sgmt)
+	        || is_first_partially_sent (rq)
+	        || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
 
 	if (rqueue_get_used (rq) == 0)
 		rq->rq_nbytes = sw->sw_seglen;
@@ -103,19 +106,19 @@ rqueue_cut_unsent (rqueue_t *rq)
 
 	assert (rq != NULL);
 
-	rmvdq = newQueue ();
 	head = getHead (rq->rq_sgmt);
 
 	if (head == NULL) {
 		assert (rqueue_get_used (rq) == 0);
-		return rmvdq;
+		return newQueue ();
 	}
 	assert (rqueue_get_used (rq) > 0);
 
 	rmvdq = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
 	head = getHead (rmvdq);
-	if (head->sw_seglen < rq->rq_nbytes)
+	assert (rq->rq_nbytes > 0);
+	if (rq->rq_nbytes < head->sw_seglen)
 		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
 	else
 		rq->rq_nbytes = 0;
@@ -346,9 +349,28 @@ consolidate (rqueue_t *rq)
 		todrop -= rq->rq_nbytes;
 	} else
 		rq->rq_nbytes = 0;
-	cqueue_drop_tail (rq->rq_data, todrop);
+
+	if (todrop)
+		cqueue_drop_tail (rq->rq_data, todrop);
 
 	while (!isEmpty (tmp))
 		rqueue_add (rq, qdequeue (&tmp));
 
+}
+
+
+static bool
+is_first_partially_sent (rqueue_t * rq)
+{
+	struct segwrap *head;
+
+	assert (rq != NULL);
+
+	head = getHead (rq->rq_sgmt);
+	if (head != NULL) {
+		assert (rq->rq_nbytes > 0);
+		if (rq->rq_nbytes < head->sw_seglen)
+			return TRUE;
+	}
+	return FALSE;
 }

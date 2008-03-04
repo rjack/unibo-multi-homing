@@ -185,6 +185,7 @@ get_timeout (int class, int id)
 
 	default :
 		assert (FALSE);
+		return NULL;
 	}
 }
 

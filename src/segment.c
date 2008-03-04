@@ -9,6 +9,7 @@
 #include <config.h>
 #include <assert.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next
@@ -53,23 +54,8 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	seq = seg_seq (rcvd->sw_seg);
 
 #ifndef NDEBUG
-	{
-		char *type;
-		if (seg_is_nak (rcvd->sw_seg))
-			type = "NAK";
-		else if (seg_is_ack (rcvd->sw_seg))
-			type = "ACK";
-		else {
-			assert (seg_pld (rcvd->sw_seg) != NULL);
-			type = (seg_is_critical (rcvd->sw_seg) ?
-					"CRITICAL SEG" : "SEG");
-		}
-		fprintf (stdout, "RCV %s %d, seglen = %d, pld = %d\n",
-				type, seg_seq (rcvd->sw_seg), rcvd->sw_seglen,
-				seg_pld_len (rcvd->sw_seg));
-		fflush (stdout);
-	}
-#endif /* NDEBUG */
+	segwrap_print (rcvd);
+#endif
 
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
@@ -90,23 +76,8 @@ handle_sent_segment (struct segwrap *sent)
 	assert (sent != NULL);
 
 #ifndef NDEBUG
-	{
-		char *type;
-		if (seg_is_nak (sent->sw_seg))
-			type = "NAK";
-		else if (seg_is_ack (sent->sw_seg))
-			type = "ACK";
-		else {
-			assert (seg_pld (sent->sw_seg) != NULL);
-			type = (seg_is_critical (sent->sw_seg) ?
-					"CRITICAL SEG" : "SEG");
-		}
-		fprintf (stdout, "SND %s %d, seglen = %d, pld = %d\n",
-				type, seg_seq (sent->sw_seg), sent->sw_seglen,
-				seg_pld_len (sent->sw_seg));
-		fflush (stdout);
-	}
-#endif /* NDEBUG */
+	segwrap_print (sent);
+#endif
 
 	if (seg_pld (sent->sw_seg) == NULL)
 		segwrap_destroy (sent);
@@ -319,6 +290,27 @@ segwrap_prio (struct segwrap *sw)
 	if (seg_is_critical (sw->sw_seg))
 		return 1;
 	return 3;
+}
+
+
+void
+segwrap_print (struct segwrap *sw)
+{
+	int i;
+	seg_t *pld;
+	len_t pldlen;
+
+	pld = seg_pld (sw->sw_seg);
+	pldlen = seg_pld_len (sw->sw_seg);
+
+	/* Flag, seqnum, pldlen e seglen. */
+	printf ("%u,%d,%d/%d ", sw->sw_seg[FLG], seg_seq (sw->sw_seg),
+			pldlen, sw->sw_seglen);
+
+	if (pld != NULL) for (i = 0; i < pldlen; i++) {
+		putchar (pld[i]);
+	}
+	putchar ('\n');
 }
 
 
