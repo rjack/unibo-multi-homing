@@ -125,8 +125,6 @@ core (void)
 					nr = channel_read (cd);
 					/* FIXME controllo errore decente! */
 					/* FIXME controllo EOF! */
-					/* TODO se nr > 0 */
-						/* TODO reset attiv. tmout */
 				}
 
 				/* Dati da scrivere. */
@@ -135,8 +133,6 @@ core (void)
 					ssize_t nw;
 					nw = channel_write (cd);
 					/* FIXME controllo errore decente! */
-					/* TODO se nw > 0 */
-						/* TODO reset attiv. tmout */
 				}
 			}
 		}

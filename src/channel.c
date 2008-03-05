@@ -166,10 +166,31 @@ error:
 void
 channel_invalidate (cd_t cd)
 {
-	/* TODO deallocare tutte le strutture dati associate al canale. */
-	/* TODO impostare il canale in modo che activate_channels non lo
-	 * TODO riattivi. */
-	assert (FALSE);
+	/* Dealloca tutte le strutture dati associate al canale. */
+
+	rqueue_destroy (net_sndbuf[cd]);
+	net_sndbuf[cd] = NULL;
+
+	/* Chiusura socket. */
+	if (ch[cd].c_listfd >= 0)
+		tcp_close (&ch[cd].c_listfd);
+	if (ch[cd].c_sockfd >= 0)
+		tcp_close (&ch[cd].c_sockfd);
+
+	/* Timeout attivita'. */
+	if (ch[cd].c_activity != NULL) {
+		del_timeout (ch[cd].c_activity, TOACT);
+		timeout_destroy (ch[cd].c_activity);
+	}
+
+	/* Reinizializzazione campi. */
+	memset (&ch[cd].c_laddr, 0, sizeof(ch[cd].c_laddr));
+	memset (&ch[cd].c_raddr, 0, sizeof(ch[cd].c_raddr));
+
+	ch[cd].c_tcp_rcvbuf_len = -1;
+	ch[cd].c_tcp_sndbuf_len = -1;
+
+	ch[cd].c_activity = NULL;
 }
 
 
@@ -377,6 +398,7 @@ channel_read (cd_t cd)
 
 	if (cd == HOSTCD)
 		return cqueue_read (ch[cd].c_sockfd, host_rcvbuf);
+	timeout_reset (ch[cd].c_activity);
 	return rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
 }
 
@@ -1036,6 +1058,16 @@ netsndbuf_rm_acked (struct segwrap *ack)
 static void
 idle_handler (cd_t cd)
 {
-	assert (FALSE);
-	/* TODO idle_handler */
+	/* Rimuove tutti i segwrap dalla rqueue di upload, li travasa nella
+	 * urgentq e invalida il canale. */
+
+#ifndef NDEBUG
+	fprintf (stdout, "!!! Canale %d INATTIVO, chiusura.\n", cd);
+	fflush (stdout);
+#endif
+
+	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
+		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
+
+	channel_invalidate (cd);
 }

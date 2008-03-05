@@ -131,8 +131,11 @@ rqueue_cut_unsent (rqueue_t *rq)
 void
 rqueue_destroy (rqueue_t *rq)
 {
-	/* TODO rqueue_destroy */
-	assert (FALSE);
+	assert (rq != NULL);
+	assert (isEmpty (rq->rq_sgmt));
+
+	cqueue_destroy (rq->rq_data);
+	xfree (rq);
 }
 
 
