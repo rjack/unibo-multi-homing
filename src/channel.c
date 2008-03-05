@@ -412,6 +412,7 @@ channel_write (cd_t cd)
 
 	if (cd == HOSTCD)
 		return cqueue_write (ch[cd].c_sockfd, host_sndbuf);
+	timeout_reset (ch[cd].c_activity);
 	return rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
 }
 
