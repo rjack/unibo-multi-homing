@@ -123,8 +123,8 @@ core (void)
 				    && FD_ISSET (sockfd, &rdset)) {
 					ssize_t nr;
 					nr = channel_read (cd);
-					/* FIXME controllo errore decente! */
-					/* FIXME controllo EOF! */
+					if (errno != 0)
+						channel_invalidate (cd);
 				}
 
 				/* Dati da scrivere. */
@@ -132,7 +132,8 @@ core (void)
 				    && FD_ISSET (sockfd, &wrset)) {
 					ssize_t nw;
 					nw = channel_write (cd);
-					/* FIXME controllo errore decente! */
+					if (errno != 0)
+						channel_invalidate (cd);
 				}
 			}
 		}

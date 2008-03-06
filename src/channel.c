@@ -78,7 +78,6 @@ static void host2net (void);
 static void net2urg (void);
 static void urg2net (void);
 static void netsndbuf_rm_acked (struct segwrap *ack);
-static void idle_handler (cd_t cd);
 
 
 /*******************************************************************************
@@ -104,6 +103,24 @@ channel_can_write (cd_t cd)
 	if (cd == HOSTCD)
 		return cqueue_can_write (host_sndbuf);
 	return rqueue_can_write (net_sndbuf[cd]);
+}
+
+
+void
+channel_close (cd_t cd)
+{
+	/* Rimuove tutti i segwrap dalla rqueue di upload, li travasa nella
+	 * urgentq e invalida il canale. */
+
+#ifndef NDEBUG
+	fprintf (stdout, "Canale %d CHIUSO\n", cd);
+	fflush (stdout);
+#endif
+
+	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
+		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
+
+	channel_invalidate (cd);
 }
 
 
@@ -153,7 +170,7 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport)
 	ch[cd].c_activity = NULL;
 	if (cd != HOSTCD) {
 		ch[cd].c_tcp_sndbuf_len = TCP_MIN_SNDBUF_SIZE;
-		ch[cd].c_activity = timeout_create (TOACT_VAL, idle_handler,
+		ch[cd].c_activity = timeout_create (TOACT_VAL, channel_close,
 				cd, FALSE);
 	}
 	return 0;
@@ -1053,22 +1070,4 @@ netsndbuf_rm_acked (struct segwrap *ack)
 	for (cd = NETCD; cd < NETCHANNELS; cd++)
 		if (channel_is_connected (cd))
 			rqueue_rm_acked (net_sndbuf[cd], ack);
-}
-
-
-static void
-idle_handler (cd_t cd)
-{
-	/* Rimuove tutti i segwrap dalla rqueue di upload, li travasa nella
-	 * urgentq e invalida il canale. */
-
-#ifndef NDEBUG
-	fprintf (stdout, "!!! Canale %d INATTIVO, chiusura.\n", cd);
-	fflush (stdout);
-#endif
-
-	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
-		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
-
-	channel_invalidate (cd);
 }

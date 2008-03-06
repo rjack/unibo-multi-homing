@@ -16,6 +16,10 @@ bool
 channel_can_write (cd_t cd);
 
 
+void
+channel_close (cd_t cd);
+
+
 fd_t
 channel_get_listfd (cd_t cd);
 

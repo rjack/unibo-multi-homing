@@ -310,7 +310,7 @@ cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
 size_t
 cqueue_read (fd_t fd, cqueue_t *cq)
 {
-	/* Legge piu' byte possibili da fd dentro a cq.
+	/* Legge piu' byte possibili da fd e li salva in cq.
 	 * Ritorna il numero di byte letti (0 o piu').
 	 * In caso di errore imposta errno come quello di read, altrimenti a
 	 * zero; se la read legge l'EOF imposta errno a EREOF. */
