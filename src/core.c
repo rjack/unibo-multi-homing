@@ -94,7 +94,7 @@ core (void)
 			    && FD_ISSET (sockfd, &wrset)) {
 				err = finalize_connection (cd);
 				if (err) {
-					channel_invalidate (cd);
+					channel_close (cd);
 				} else {
 					channel_prepare_io (cd);
 					printf ("Canale %s connesso.\n",
@@ -107,7 +107,7 @@ core (void)
 			         && FD_ISSET (listfd, &rdset)) {
 				err = accept_connection (cd);
 				if (err) {
-					channel_invalidate (cd);
+					channel_close (cd);
 				} else {
 					channel_prepare_io (cd);
 					printf ("Canale %s, connessione "
@@ -123,8 +123,10 @@ core (void)
 				    && FD_ISSET (sockfd, &rdset)) {
 					ssize_t nr;
 					nr = channel_read (cd);
-					if (errno != 0)
-						channel_invalidate (cd);
+					if (errno != 0) {
+						perror ("errore channel_read");
+						channel_close (cd);
+					}
 				}
 
 				/* Dati da scrivere. */
@@ -132,8 +134,10 @@ core (void)
 				    && FD_ISSET (sockfd, &wrset)) {
 					ssize_t nw;
 					nw = channel_write (cd);
-					if (errno != 0)
-						channel_invalidate (cd);
+					if (errno != 0) {
+						perror ("errore channel_write");
+						channel_close (cd);
+					}
 				}
 			}
 		}

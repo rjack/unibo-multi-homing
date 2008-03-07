@@ -112,10 +112,7 @@ channel_close (cd_t cd)
 	/* Rimuove tutti i segwrap dalla rqueue di upload, li travasa nella
 	 * urgentq e invalida il canale. */
 
-#ifndef NDEBUG
-	fprintf (stdout, "Canale %d CHIUSO\n", cd);
-	fflush (stdout);
-#endif
+	fprintf (stderr, "Canale %d CHIUSO\n", cd);
 
 	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
 		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
@@ -405,6 +402,7 @@ channel_prepare_io (cd_t cd)
 		add_timeout (ch[cd].c_activity, TOACT);
 	}
 }
+
 
 int
 channel_read (cd_t cd)

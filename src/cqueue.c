@@ -432,7 +432,8 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	          || (nwrite == -1 && errno == EINTR));
 
 	/* Pulisce il valore di errno se tutto e' andato liscio. */
-	if (nwrite > 0)
+	if (nwrite > 0
+	    || (nwrite == -1 && errno == EAGAIN))
 		errno = 0;
 
 	return nsent;

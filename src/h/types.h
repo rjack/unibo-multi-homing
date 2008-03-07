@@ -83,7 +83,7 @@ typedef uint8_t seg_t;
 /*
  * Tipo e durata dei timeout in secondi.
  */
-/* PER PERMETTERE DEBUG #define     TOACT_VAL     100000000.0 */
+/* #define     TOACT_VAL     100000000.0 */
 #define     TOACT_VAL     0.250
 #define     TONAK_VAL     0.130
 #define     TOACK_VAL     2

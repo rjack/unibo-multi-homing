@@ -54,7 +54,7 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	seq = seg_seq (rcvd->sw_seg);
 
 #ifndef NDEBUG
-	segwrap_print (rcvd);
+	/* segwrap_print (rcvd); */
 #endif
 
 	if (seg_is_nak (rcvd->sw_seg)) {
@@ -76,7 +76,7 @@ handle_sent_segment (struct segwrap *sent)
 	assert (sent != NULL);
 
 #ifndef NDEBUG
-	segwrap_print (sent);
+	/* segwrap_print (sent); */
 #endif
 
 	if (seg_pld (sent->sw_seg) == NULL)
