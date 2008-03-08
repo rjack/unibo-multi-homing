@@ -69,6 +69,8 @@ static bool ack_handled;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
+static bool check_read_activity (cd_t cd, int nread);
+static bool check_write_activity (cd_t cd, int nwrite);
 static int connect_noblock (cd_t cd);
 static int listen_noblock (cd_t cd);
 static void host2net (void);
@@ -404,28 +406,45 @@ channel_prepare_io (cd_t cd)
 int
 channel_read (cd_t cd)
 {
+	int errno_s;
+	int nread;
+
 	assert (VALID_CD (cd));
 	assert (channel_is_connected (cd));
 	assert (channel_can_read (cd));
 
 	if (cd == HOSTCD)
 		return cqueue_read (ch[cd].c_sockfd, host_rcvbuf);
-	timeout_reset (ch[cd].c_activity);
-	return rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
+
+	nread = rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
+	errno_s = errno;
+
+	if (check_read_activity (ch[cd].c_sockfd, SO_RCVBUF))
+		timeout_reset (ch[cd].c_activity);
+	errno = errno_s;
+	return nread;
 }
 
 
 int
 channel_write (cd_t cd)
 {
+	int errno_s;
+	int nwrite;
+
 	assert (VALID_CD (cd));
 	assert (channel_is_connected (cd));
 	assert (channel_can_write (cd));
 
 	if (cd == HOSTCD)
 		return cqueue_write (ch[cd].c_sockfd, host_sndbuf);
-	timeout_reset (ch[cd].c_activity);
-	return rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
+
+	nwrite = rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
+	errno_s = errno;
+	if (check_write_activity (cd, nwrite))
+		timeout_reset (ch[cd].c_activity);
+	errno = errno_s;
+	return nwrite;
 }
 
 
@@ -833,6 +852,49 @@ urgent_rm_acked (struct segwrap *ack)
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
+
+
+static bool
+check_read_activity (cd_t cd, int nread)
+{
+	static int prev_used[NETCHANNELS];
+	int now_used;
+	bool is_active;
+
+	assert (nread >= 0);
+
+	is_active = FALSE;
+	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_RCVBUF);
+	assert (now_used >= 0);
+
+	if (now_used + nread > prev_used[cd])
+		is_active = TRUE;
+	prev_used[cd] = now_used;
+
+	return is_active;
+}
+
+
+static bool
+check_write_activity (cd_t cd, int nwrite)
+{
+	static int prev_used[NETCHANNELS];
+	int now_used;
+	bool is_active;
+
+	assert (nwrite >= 0);
+
+	is_active = FALSE;
+	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_SNDBUF);
+	assert (now_used >= 0);
+
+	if (now_used - nwrite < prev_used[cd])
+		is_active = TRUE;
+	prev_used[cd] = now_used;
+
+	return is_active;
+}
+
 
 static int
 connect_noblock (cd_t cd)

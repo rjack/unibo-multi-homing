@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #include <string.h>
+#include <sys/ioctl.h>
 
 
 /*******************************************************************************
@@ -186,6 +187,22 @@ tcp_get_buffer_size (fd_t sockfd, int bufname)
 	optval = optval / 2;
 #endif
 	return optval;
+}
+
+
+int
+tcp_get_used_space (fd_t fd, int buf)
+{
+	int amount;
+	int err;
+
+	assert (fd >= 0);
+	assert (buf == SO_RCVBUF || buf == SO_SNDBUF);
+
+	err = ioctl (fd, buf == SO_SNDBUF ? TIOCOUTQ : FIONREAD, &amount);
+	if (!err)
+		return amount;
+	return err;
 }
 
 

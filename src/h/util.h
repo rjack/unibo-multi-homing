@@ -83,6 +83,10 @@ tcp_get_buffer_size (fd_t sockfd, int bufname);
 
 
 int
+tcp_get_used_space (fd_t fd, int buf);
+
+
+int
 tcp_set_block (fd_t fd, bool must_block);
 
 
