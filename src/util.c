@@ -4,6 +4,7 @@
 
 #include <config.h>
 #include <fcntl.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -199,7 +200,7 @@ tcp_get_used_space (fd_t fd, int buf)
 	assert (fd >= 0);
 	assert (buf == SO_RCVBUF || buf == SO_SNDBUF);
 
-	err = ioctl (fd, buf == SO_SNDBUF ? TIOCOUTQ : FIONREAD, &amount);
+	err = ioctl (fd, buf == SO_SNDBUF ? TIOCOUTQ : TIOCINQ, &amount);
 	if (!err)
 		return amount;
 	return err;
