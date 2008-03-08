@@ -7,9 +7,6 @@
 #include "h/util.h"
 
 #include <config.h>
-#include <assert.h>
-#include <stdio.h>
-#include <unistd.h>
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next

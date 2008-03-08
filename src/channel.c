@@ -8,9 +8,6 @@
 #include "h/util.h"
 
 #include <config.h>
-#include <assert.h>
-#include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #if !HAVE_MSG_NOSIGNAL
 #include <signal.h>

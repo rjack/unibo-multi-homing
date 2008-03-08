@@ -6,13 +6,8 @@
 #include "h/util.h"
 
 #include <config.h>
-#include <assert.h>
-#include <errno.h>
 #include <string.h>
 #include <sys/select.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 
 
 /*******************************************************************************

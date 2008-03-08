@@ -4,12 +4,8 @@
 #include "h/types.h"
 #include "h/util.h"
 
-#include <assert.h>
-#include <errno.h>
 #include <config.h>
-#ifndef NDEBUG
-#include <stdio.h>
-#endif
+
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next

@@ -3,17 +3,9 @@
 #include "h/segment.h"
 
 #include <config.h>
-#include <assert.h>
-#include <errno.h>
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/tcp.h>
-#include <netinet/in.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 
 /*******************************************************************************

@@ -4,14 +4,8 @@
 #include "h/util.h"
 
 #include <config.h>
-#include <assert.h>
-#include <errno.h>
-#ifndef NDEBUG
-#include <stdio.h>
-#endif
 #include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
+
 
 /*******************************************************************************
 				    Macro
