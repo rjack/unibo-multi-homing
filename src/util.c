@@ -4,7 +4,6 @@
 
 #include <config.h>
 #include <fcntl.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <string.h>
 #include <sys/ioctl.h>

@@ -406,45 +406,26 @@ channel_prepare_io (cd_t cd)
 int
 channel_read (cd_t cd)
 {
-	int errno_s;
-	int nread;
-
 	assert (VALID_CD (cd));
 	assert (channel_is_connected (cd));
 	assert (channel_can_read (cd));
 
 	if (cd == HOSTCD)
 		return cqueue_read (ch[cd].c_sockfd, host_rcvbuf);
-
-	nread = rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
-	errno_s = errno;
-
-	if (check_read_activity (ch[cd].c_sockfd, SO_RCVBUF))
-		timeout_reset (ch[cd].c_activity);
-	errno = errno_s;
-	return nread;
+	return  rqueue_read (ch[cd].c_sockfd, net_rcvbuf[cd]);
 }
 
 
 int
 channel_write (cd_t cd)
 {
-	int errno_s;
-	int nwrite;
-
 	assert (VALID_CD (cd));
 	assert (channel_is_connected (cd));
 	assert (channel_can_write (cd));
 
 	if (cd == HOSTCD)
 		return cqueue_write (ch[cd].c_sockfd, host_sndbuf);
-
-	nwrite = rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
-	errno_s = errno;
-	if (check_write_activity (cd, nwrite))
-		timeout_reset (ch[cd].c_activity);
-	errno = errno_s;
-	return nwrite;
+	return rqueue_write (ch[cd].c_sockfd, net_sndbuf[cd]);
 }
 
 
@@ -867,6 +848,8 @@ check_read_activity (cd_t cd, int nread)
 	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_RCVBUF);
 	assert (now_used >= 0);
 
+	fprintf (stderr, "check_READ_activity: now_used = %d, nwrite = %d, prev_used = %d\n", now_used, nread, prev_used[cd]);
+
 	if (now_used + nread > prev_used[cd])
 		is_active = TRUE;
 	prev_used[cd] = now_used;
@@ -887,6 +870,8 @@ check_write_activity (cd_t cd, int nwrite)
 	is_active = FALSE;
 	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_SNDBUF);
 	assert (now_used >= 0);
+
+	fprintf (stderr, "check_WRITE_activity: now_used = %d, nwrite = %d, prev_used = %d\n", now_used, nwrite, prev_used[cd]);
 
 	if (now_used - nwrite < prev_used[cd])
 		is_active = TRUE;
