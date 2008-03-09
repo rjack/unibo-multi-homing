@@ -75,7 +75,7 @@ typedef uint8_t seg_t;
  * essere riciclati per scopi piu' utili.
  */
 
-/* Read end-of-file, usato da cqueue_read. */
+/* Errore EISDIR ritutilizzato come read end-of-file, usato da cqueue_read. */
 #define     EREOF     EISDIR
 
 /* Numero di canali di rete. */
@@ -147,6 +147,10 @@ typedef uint8_t seg_t;
 #define     NAKFLAG     0x8
 #define     ACKFLAG     0x10
 
+
+/* Tipi degli elementi da usare in get_cd_from */
+#define     ELRQUEUE     0
+#define     ELCQUEUE     1
 
 /*******************************************************************************
 				  Strutture

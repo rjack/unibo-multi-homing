@@ -83,6 +83,14 @@ static void netsndbuf_rm_acked (struct segwrap *ack);
 			      Funzioni pubbliche
 *******************************************************************************/
 
+void
+channel_activity_notice (cd_t cd)
+{
+	assert (VALID_CD (cd));
+	timeout_reset (ch[cd].c_activity);
+}
+
+
 bool
 channel_can_read (cd_t cd)
 {
@@ -459,6 +467,29 @@ feed_upload (void)
 	}
 	urg2net ();
 	host2net ();
+}
+
+
+cd_t
+get_cd_from (void *element, int type)
+{
+	cd_t cd;
+	cd_t retcd;
+
+	assert (element != NULL);
+
+	retcd = -1;
+	switch (type) {
+	case ELRQUEUE :
+		for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+			if (net_rcvbuf[cd] == (rqueue_t *)element
+			    || net_sndbuf[cd] == (rqueue_t *)element)
+				retcd = cd;
+		break;
+	default:
+		assert (FALSE);
+	}
+	return retcd;
 }
 
 

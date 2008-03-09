@@ -8,6 +8,10 @@
 				  Prototipi
 *******************************************************************************/
 
+void
+channel_activity_notice (cd_t cd);
+
+
 bool
 channel_can_read (cd_t cd);
 
@@ -86,6 +90,10 @@ feed_download (void);
 
 void
 feed_upload (void);
+
+
+cd_t
+get_cd_from (void *element, int type);
 
 
 void

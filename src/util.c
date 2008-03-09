@@ -199,7 +199,7 @@ tcp_get_used_space (fd_t fd, int buf)
 	assert (fd >= 0);
 	assert (buf == SO_RCVBUF || buf == SO_SNDBUF);
 
-	err = ioctl (fd, buf == SO_SNDBUF ? TIOCOUTQ : TIOCINQ, &amount);
+	err = ioctl (fd, buf == SO_SNDBUF ? TIOCOUTQ : FIONREAD, &amount);
 	if (!err)
 		return amount;
 	return err;

@@ -1,5 +1,6 @@
 #include "h/rqueue.h"
 #include "h/cqueue.h"
+#include "h/channel.h"
 #include "h/segment.h"
 #include "h/types.h"
 #include "h/util.h"
@@ -209,11 +210,13 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 
 	if (nread > 0) {
 		size_t seglen;
+		bool full_segment;
 #ifndef NDEBUG
 		fprintf (stdout, "rqueue_read %d bytes\n", nread);
 		fflush (stdout);
 #endif
 
+		full_segment = FALSE;
 		while ((seglen = cqueue_seglen (rq->rq_data)) > 0) {
 			struct segwrap *sw;
 			sw = segwrap_create ();
@@ -221,8 +224,11 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 			err = cqueue_remove (rq->rq_data, sw->sw_seg, seglen);
 			assert (!err);
 			handle_rcvd_segment (sw);
+			full_segment = TRUE;
 		}
-	}
+		if (full_segment)
+			channel_activity_notice (get_cd_from (rq, ELRQUEUE));
+}
 
 	errno = errno_s;
 	return nread;
@@ -279,6 +285,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	int errno_s;
 	size_t nsent;
 	size_t retval;
+	bool full_segment;
 
 	assert (fd >= 0);
 	assert (rq != NULL);
@@ -288,6 +295,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	retval = nsent = cqueue_write (fd, rq->rq_data);
 	errno_s = errno;
 
+	full_segment = FALSE;
 	while (nsent > 0) {
 		size_t min;
 
@@ -304,6 +312,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 			assert (head != NULL);
 
 			handle_sent_segment (head);
+			full_segment = TRUE;
 
 			/* Ricalcola rq_nbytes. */
 			head = getHead (rq->rq_sgmt);
@@ -313,6 +322,8 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 				assert (nsent == 0);
 		}
 	}
+	if (full_segment)
+		channel_activity_notice (get_cd_from (rq, ELRQUEUE));
 
 	errno = errno_s;
 	return retval;
