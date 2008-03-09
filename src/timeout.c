@@ -1,5 +1,6 @@
 #include "h/types.h"
 #include "h/util.h"
+#include "h/channel.h"
 #include "h/crono.h"
 #include "h/segment.h"
 #include "h/timeout.h"
@@ -83,9 +84,8 @@ add_nak_timeout (seq_t seq)
 
 	assert (init_done);
 
-	/* XXX Non e' oneshot perche' i nak non vengono spediti duplicati,
-	 * XXX quindi tocca insistere. */
-	to = timeout_create (TONAK_VAL, nak_handler, seq, FALSE);
+	/* Crea un timeout oneshot per attesa spedizione nak. */
+	to = timeout_create (TONAK_VAL, nak_handler, seq, TRUE);
 	timeout_reset (to);
 	add_timeout (to, TONAK);
 }

@@ -131,16 +131,12 @@ void
 urgent_add (struct segwrap *sw);
 
 
-bool
-urgent_empty (void);
+struct segwrap *
+urgent_head (cd_t cd);
 
 
 struct segwrap *
-urgent_head (void);
-
-
-struct segwrap *
-urgent_remove (void);
+urgent_remove (cd_t cd);
 
 
 void

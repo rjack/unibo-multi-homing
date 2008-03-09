@@ -338,7 +338,8 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	} while ((nread > 0 && cq->cq_tail == 0 && chunk > 0)
 	          || (nread == -1 && errno == EINTR));
 
-	if (nread > 0)
+	if (nread > 0
+	    || (nread == -1 && errno == EAGAIN))
 		errno = 0;
 	else if (nread == 0)
 		errno = EREOF;

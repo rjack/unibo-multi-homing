@@ -45,6 +45,10 @@ seg_seq (seg_t *seg);
 
 
 struct segwrap *
+segwrap_clone (struct segwrap *sw);
+
+
+struct segwrap *
 segwrap_create (void);
 
 
@@ -65,7 +69,15 @@ segwrap_flush_cache (void);
 
 
 bool
+segwrap_is_assigned (struct segwrap *sw);
+
+
+bool
 segwrap_is_acked (struct segwrap *sw, struct segwrap *ack);
+
+
+bool
+segwrap_is_clonable (struct segwrap *sw);
 
 
 int
@@ -86,21 +98,5 @@ segwrap_urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 
 int
 seqcmp (seq_t a, seq_t b);
-
-
-void
-urgent_add (struct segwrap *sw);
-
-
-bool
-urgent_empty (void);
-
-
-struct segwrap *
-urgent_head (void);
-
-
-struct segwrap *
-urgent_remove (void);
 
 #endif /* SEGMENT_H */

@@ -7,6 +7,7 @@
 #include "h/util.h"
 
 #include <config.h>
+#include <string.h>
 
 #define     TYPE     struct segwrap
 #define     NEXT     sw_next
@@ -166,6 +167,19 @@ seg_seq (seg_t *seg)
 
 
 struct segwrap *
+segwrap_clone (struct segwrap *sw)
+{
+	struct segwrap *clone;
+
+	assert (sw != NULL);
+
+	clone = segwrap_create ();
+	memcpy (clone, sw, sizeof (struct segwrap));
+	return clone;
+}
+
+
+struct segwrap *
 segwrap_create (void)
 {
 	/* Ritorna un nuovo segwrap, recuperandolo dalla cache di quelli
@@ -183,6 +197,8 @@ segwrap_create (void)
 		newsw->sw_next = NULL;
 	} else
 		newsw = qdequeue (&swcache);
+
+	newsw->sw_assigned = -1;
 
 	/* Timestamp. */
 	gettime (&now);
@@ -263,7 +279,34 @@ segwrap_flush_cache (void)
 bool
 segwrap_is_acked (struct segwrap *sw, struct segwrap *ack)
 {
+	assert (sw != NULL);
+	assert (ack != NULL);
+
 	if (segwrap_seqcmp (sw, ack) <= 0)
+		return TRUE;
+	return FALSE;
+}
+
+
+bool
+segwrap_is_assigned (struct segwrap *sw)
+{
+	assert (sw != NULL);
+
+	if (sw->sw_assigned < 0)
+		return FALSE;
+	return TRUE;
+}
+
+
+bool
+segwrap_is_clonable (struct segwrap *sw)
+{
+	assert (sw != NULL);
+
+	if (seg_is_ack (sw->sw_seg)
+	    || seg_is_nak (sw->sw_seg)
+	    || seg_is_critical (sw->sw_seg))
 		return TRUE;
 	return FALSE;
 }
@@ -393,11 +436,14 @@ handle_rcvd_nak (struct segwrap *nak)
 	/* Recupera il segmento con il seqnum indicato dal nak e lo
 	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
 
+
 	struct segwrap *urg;
 
 	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));
 	if (urg != NULL) {
 		urg->sw_seg[FLG] |= CRTFLAG;
+		/* TODO se c'e' da frammentare il segmento da rispedire, si fa
+		 * TODO qui. */
 		urgent_add (urg);
 	}
 }

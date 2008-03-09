@@ -38,13 +38,10 @@ static rqueue_t *net_rcvbuf[NETCHANNELS];
 static rqueue_t *net_sndbuf[NETCHANNELS];
 
 /* Code dei segmenti urgenti. */
-#define     URGNO     4
-static struct segwrap *urgentq[URGNO];
-/* Relativi indici: il loro ordine deve essere coerente con segwrap_urgcmp. */
-#define     NAKQ     0
-#define     CRTQ     1
-#define     ACKQ     2
-#define     DATQ     3
+static struct segwrap *urgentq;
+/* Code urgenti dedicate ai canali con il ritardatore, contiente CRIT, ACK e
+ * NAK. */
+static struct segwrap *urgentq_priv[NETCHANNELS];
 
 /* Coda dei segmenti ricevuti dal ritardatore. */
 static struct segwrap *joinq;
@@ -177,6 +174,7 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport)
 		ch[cd].c_activity = timeout_create (TOACT_VAL, channel_close,
 				cd, FALSE);
 	}
+
 	return 0;
 
 error:
@@ -558,7 +556,6 @@ proxy_init (port_t hostlistport,
 	/* Inizializza le strutture dati del proxy. */
 
 	int err;
-	int i;
 	cd_t cd;
 
 	/* Canale con l'host e relativi buffer applicazione. */
@@ -568,7 +565,8 @@ proxy_init (port_t hostlistport,
 	host_rcvbuf = NULL;
 	host_sndbuf = NULL;
 
-	/* Canali con il ritardatore e relativi buffer applicazione. */
+	/* Canali con il ritardatore, relativi buffer applicazione e code
+	 * urgenti. */
 	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
 		port_t listport = (netlistport ? netlistport[cd] : 0);
 		port_t connport = (netconnport ? netconnport[cd] : 0);
@@ -579,6 +577,7 @@ proxy_init (port_t hostlistport,
 			goto error;
 		net_rcvbuf[cd] = NULL;
 		net_sndbuf[cd] = NULL;
+		urgentq_priv[cd] = newQueue ();
 	}
 
 	/* Contatori numeri di sequenza. */
@@ -587,8 +586,7 @@ proxy_init (port_t hostlistport,
 
 	/* Code di segmenti. */
 	joinq = newQueue ();
-	for (i = 0; i < URGNO; i++)
-		urgentq[i] = newQueue ();
+	urgentq = newQueue ();
 
 	/* Indice round robin per routing. */
 	rrcd = NETCD;
@@ -799,65 +797,90 @@ set_last_ack_rcvd (struct segwrap *ack)
 void
 urgent_add (struct segwrap *sw)
 {
-	int i;
+	cd_t destcd;
 
 	assert (sw != NULL);
 
-	i = segwrap_prio (sw);
-	qinorder_insert (&urgentq[i], sw, &segwrap_urgcmp);
-}
-
-
-bool
-urgent_empty (void)
-{
-	int i;
-
-	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
-
-	if (i < URGNO)
-		return TRUE;
-	return FALSE;
+	/* Segmento duplicato, gia' assegnato a un canale. */
+	if (segwrap_is_assigned (sw)) {
+		assert (VALID_CD (sw->sw_assigned));
+		destcd = sw->sw_assigned;
+		if (channel_is_connected (destcd))
+			qinorder_insert (&urgentq_priv[destcd], sw,
+					&segwrap_urgcmp);
+		else
+			segwrap_destroy (sw);
+	}
+	/* Segmento da clonare e assegnare a ogni coda urgente dei canali con
+	 * il ritardatore. */
+	else if (segwrap_is_clonable (sw)) {
+		for (destcd = NETCD; destcd < NETCD + NETCHANNELS; destcd++)
+			if (channel_is_connected (destcd)) {
+				sw->sw_assigned = destcd;
+				qinorder_insert (&urgentq_priv[destcd],
+						segwrap_clone (sw),
+						&segwrap_urgcmp);
+			}
+		segwrap_destroy (sw);
+	}
+	/* Segmento standard, da accodare alla coda urgente generica. */
+	else
+		qinorder_insert (&urgentq, sw, segwrap_urgcmp);
 }
 
 
 struct segwrap *
-urgent_head (void)
+urgent_head (cd_t cd)
 {
-	int i;
+	/* Ritorna un puntatore al segmento piu' urgente presente nelle code:
+	 * prima controlla quella assegnata al canale specificato, se vuota
+	 * controlla quella generica.
+	 * Ritorna NULL se sono tutte vuote. */
 
-	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
+	struct segwrap *head;
 
-	if (i < URGNO)
-		return getHead (urgentq[i]);
-	return NULL;
+	assert (VALID_CD (cd));
+
+	head = getHead (urgentq_priv[cd]);
+	if (head == NULL)
+		head = getHead (urgentq);
+	return head;
 }
 
 
 struct segwrap *
-urgent_remove (void)
+urgent_remove (cd_t cd)
 {
-	int i;
+	/* Come urgent_head, in piu' rimuove il segwrap dalla coda che lo
+	 * conteneva. */
 
-	for (i = 0; i < URGNO && isEmpty (urgentq[i]); i++);
+	struct segwrap *rmvd;
 
-	if (i < URGNO)
-		return qdequeue (&urgentq[i]);
-	return NULL;
+	assert (VALID_CD (cd));
+
+	rmvd = qdequeue (&urgentq_priv[cd]);
+	if (rmvd == NULL)
+		rmvd = qdequeue (&urgentq);
+	return rmvd;
 }
 
 
 void
 urgent_rm_acked (struct segwrap *ack)
 {
-	int i;
+	int cd;
 	struct segwrap *rmvdq;
 
-	for (i = 0; i < URGNO; i++) {
-		rmvdq = qremove_all_that (&urgentq[i], &segwrap_is_acked, ack);
+	assert (ack != NULL);
+
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
+		rmvdq = qremove_all_that (&urgentq_priv[cd], &segwrap_is_acked, ack);
 		while (!isEmpty (rmvdq))
 			segwrap_destroy (qdequeue (&rmvdq));
 	}
+	rmvdq = qremove_all_that (&urgentq, &segwrap_is_acked, ack);
+	while (!isEmpty (rmvdq))
+		segwrap_destroy (qdequeue (&rmvdq));
 }
 
 
@@ -1086,22 +1109,19 @@ urg2net (void)
 	cd_t cd;
 	bool do_reorg;
 	struct segwrap *sw;
-	struct segwrap *most_urg;
-
-	most_urg = urgent_head ();
-	if (most_urg == NULL)
-		goto transfer;
 
 	/* I net_sndbuf contengono i segmenti in ordine di urgenza. Se il piu'
-	 * urgente della urgentq e' piu' urgente dell'ultimo segmento di una
-	 * qualsiasi rqueue bisogna inserirlo in mezzo: si travasano tutte le
-	 * rqueue nella urgentq. */
+	 * urgente della urgentq_priv e' piu' urgente dell'ultimo segmento di
+	 * una qualsiasi rqueue bisogna inserirlo in mezzo: si travasano tutte
+	 * le rqueue nelle code urgenti. */
 	for (do_reorg = FALSE, cd = NETCD;
 	     cd < NETCD + NETCHANNELS && !do_reorg;
 	     cd++)
 		if (channel_is_connected (cd)
 		    && rqueue_get_used (net_sndbuf[cd]) > 0
-		    && segwrap_urgcmp (net_sndbuf[cd]->rq_sgmt, most_urg) > 0)
+		    && urgent_head (cd) != NULL
+		    && segwrap_urgcmp (net_sndbuf[cd]->rq_sgmt,
+			    urgent_head (cd)) > 0)
 			do_reorg = TRUE;
 
 	if (!do_reorg)
@@ -1121,10 +1141,10 @@ urg2net (void)
 	/* Riempimento net_sndbuf. */
 transfer:
 	needmask = 0x7;
-	while ((sw = urgent_head ()) != NULL  && needmask != 0x0) {
+	while ((sw = urgent_head (rrcd)) != NULL  && needmask != 0x0) {
 		if (channel_is_connected (rrcd)
 		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
-			sw = urgent_remove ();
+			sw = urgent_remove (rrcd);
 			assert (sw != NULL);
 			err = rqueue_add (net_sndbuf[rrcd], sw);
 			assert (!err);
