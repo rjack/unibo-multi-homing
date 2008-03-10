@@ -118,6 +118,13 @@ channel_close (cd_t cd)
 
 	fprintf (stderr, "Canale %d CHIUSO\n", cd);
 
+	/* Chiusura socket. */
+	if (ch[cd].c_listfd >= 0)
+		tcp_close (&ch[cd].c_listfd);
+	if (ch[cd].c_sockfd >= 0)
+		tcp_close (&ch[cd].c_sockfd);
+
+	/* Svuotamento segmenti. */
 	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
 		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
 
@@ -189,12 +196,6 @@ channel_invalidate (cd_t cd)
 
 	rqueue_destroy (net_sndbuf[cd]);
 	net_sndbuf[cd] = NULL;
-
-	/* Chiusura socket. */
-	if (ch[cd].c_listfd >= 0)
-		tcp_close (&ch[cd].c_listfd);
-	if (ch[cd].c_sockfd >= 0)
-		tcp_close (&ch[cd].c_sockfd);
 
 	/* Timeout attivita'. */
 	if (ch[cd].c_activity != NULL) {

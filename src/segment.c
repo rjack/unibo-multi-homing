@@ -436,7 +436,6 @@ handle_rcvd_nak (struct segwrap *nak)
 	/* Recupera il segmento con il seqnum indicato dal nak e lo
 	 * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */
 
-
 	struct segwrap *urg;
 
 	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));

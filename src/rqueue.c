@@ -44,7 +44,7 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen > 0);
 	assert (sw->sw_seglen <= cqueue_get_aval (rq->rq_data));
 	assert (isEmpty (rq->rq_sgmt)
-	        || is_first_partially_sent (rq)
+	        || (isLast (rq->rq_sgmt, rq->rq_sgmt) && is_first_partially_sent (rq))
 	        || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
 
 	if (rqueue_get_used (rq) == 0)
@@ -113,7 +113,7 @@ rqueue_cut_unsent (rqueue_t *rq)
 
 	rmvdq = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
-	head = getHead (rmvdq);
+	assert (head == getHead (rmvdq));
 	assert (rq->rq_nbytes > 0);
 	if (rq->rq_nbytes < head->sw_seglen)
 		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
