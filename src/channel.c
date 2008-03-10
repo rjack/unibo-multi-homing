@@ -69,7 +69,6 @@ static bool ack_handled;
 static int connect_noblock (cd_t cd);
 static int listen_noblock (cd_t cd);
 static void host2net (void);
-static void net2urg (void);
 static void urg2net (void);
 static void netsndbuf_rm_acked (struct segwrap *ack);
 
@@ -563,7 +562,9 @@ ok_to_send_ack (seq_t *ack)
 	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
 		if (channel_is_connected (cd)
 		    && (urgent_head (cd) != NULL
-		        || rqueue_get_used (net_sndbuf[cd]) > 0))
+		        || rqueue_get_used (net_sndbuf[cd]) > 0
+		        || host_rcvbuf == NULL
+			|| cqueue_get_used (host_rcvbuf) > 0))
 			return FALSE;
 
 	*ack = last_sent;

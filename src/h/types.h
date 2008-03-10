@@ -92,15 +92,15 @@ typedef uint8_t seg_t;
  * Tipo e durata dei timeout in secondi.
  */
 /* #define     TOACT_VAL     100000000.0 */
-#define     TOACT_VAL     0.900
+#define     TOACT_VAL     0.400
 #define     TONAK_VAL     0.200
-#define     TOACK_VAL     0.200
+#define     TOPNG_VAL     0.200
 /* Numero di tipi di timeout. */
 #define     TMOUTS      3
 /* Indici */
-#define     TONAK       0
-#define     TOACT       1
-#define     TOACK       2
+#define     TOPNG       0
+#define     TONAK       1
+#define     TOACT       2
 
 
 /* Valore minimo del buffer tcp di spedizione.
@@ -138,14 +138,14 @@ typedef uint8_t seg_t;
 #define     SEGMAXLEN     (PLDMAXLEN + HDRMAXLEN)
 
 #define     NAKLEN        FLGLEN + SEQLEN
-#define     ACKLEN        NAKLEN
+#define     PNGLEN        FLGLEN
 
 /* Bit del campo flag */
 #define     CRTFLAG     0x1
 #define     PLDFLAG     0x2
 #define     LENFLAG     0x4
 #define     NAKFLAG     0x8
-#define     ACKFLAG     0x10
+#define     PNGFLAG     0x10
 
 
 /* Tipi degli elementi da usare in get_cd_from */

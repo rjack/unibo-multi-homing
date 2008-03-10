@@ -1,6 +1,7 @@
 #include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"
+#include "h/timeout.h"
 #include "h/util.h"
 #include "h/types.h"
 
@@ -56,6 +57,8 @@ main (int argc, char **argv)
 			netlistport, hostconnaddr, hostconnport);
 	if (err)
 		goto error;
+
+	enable_ping_timeout ();
 
 	/* Stampa informazioni. */
 	for (cd = NETCD; cd < NETCHANNELS; cd++) {

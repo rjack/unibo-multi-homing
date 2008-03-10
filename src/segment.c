@@ -33,7 +33,6 @@ static bool init_done = FALSE;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static int urgcmp (struct segwrap *sw_1, struct segwrap *sw_2);
 static void handle_rcvd_ack (struct segwrap *ack);
 static void handle_rcvd_nak (struct segwrap *nak);
 
@@ -55,11 +54,10 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	/* segwrap_print (rcvd); */
 #endif
 
+	assert (!seg_is_ping (rcvd->sw_seg));
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
 		rcvd->sw_seg[SEQ]--;
-		handle_rcvd_ack (rcvd);
-	} else if (seg_is_ack (rcvd->sw_seg)) {
 		handle_rcvd_ack (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
@@ -106,10 +104,10 @@ init_segment_module (void)
 
 
 bool
-seg_is_ack (seg_t *seg)
+seg_is_ping (seg_t *seg)
 {
 	assert (seg != NULL);
-	return (seg[FLG] & ACKFLAG ? TRUE : FALSE);
+	return (seg[FLG] & PNGFLAG ? TRUE : FALSE);
 }
 
 
@@ -209,16 +207,15 @@ segwrap_create (void)
 
 
 struct segwrap *
-segwrap_ack_create (seq_t ackseq)
+segwrap_ping_create (void)
 {
-	struct segwrap *ack;
+	struct segwrap *ping;
 
-	ack = segwrap_create ();
-	ack->sw_seg[FLG] = 0 | ACKFLAG;
-	ack->sw_seg[SEQ] = ackseq;
-	ack->sw_seglen = ACKLEN;
+	ping = segwrap_create ();
+	ping->sw_seg[FLG] = 0 | PNGFLAG;
+	ping->sw_seglen = PNGLEN;
 
-	return ack;
+	return ping;
 }
 
 struct segwrap *
@@ -295,7 +292,8 @@ segwrap_is_acked (struct segwrap *sw, struct segwrap *ack)
 	assert (sw != NULL);
 	assert (ack != NULL);
 
-	if (segwrap_seqcmp (sw, ack) <= 0)
+	if (!seg_is_ping (sw->sw_seg)
+	    && segwrap_seqcmp (sw, ack) <= 0)
 		return TRUE;
 	return FALSE;
 }
@@ -317,7 +315,7 @@ segwrap_is_clonable (struct segwrap *sw)
 {
 	assert (sw != NULL);
 
-	if (seg_is_ack (sw->sw_seg)
+	if (seg_is_ping (sw->sw_seg)
 	    || seg_is_nak (sw->sw_seg)
 	    || seg_is_critical (sw->sw_seg))
 		return TRUE;
@@ -336,7 +334,7 @@ segwrap_prio (struct segwrap *sw)
 
 	if (seg_is_nak (sw->sw_seg))
 		return 0;
-	if (seg_is_ack (sw->sw_seg))
+	if (seg_is_ping (sw->sw_seg))
 		return 2;
 
 	assert (seg_pld (sw->sw_seg) != NULL);

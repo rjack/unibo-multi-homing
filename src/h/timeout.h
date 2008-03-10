@@ -27,6 +27,10 @@ void
 del_nak_timeout (seq_t seq);
 
 
+void
+enable_ping_timeout (void);
+
+
 timeout_t *
 get_timeout (int class, int id);
 

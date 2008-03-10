@@ -24,7 +24,7 @@
 #define     HUGE_TIMEOUT     1000000000
 
 #define     VALID_CLASS(cn)                             \
-	((cn) == TOACK || (cn) == TOACT || (cn) == TONAK)
+	((cn) == TOPNG || (cn) == TOACT || (cn) == TONAK)
 
 
 /*******************************************************************************
@@ -36,17 +36,20 @@
 static timeout_t *tqueue[TMOUTS];
 
 /* Intervallo spedizione ACK. */
-static timeout_t ack_timeout;
+static timeout_t ping_timeout;
 
 /* Controllo paranoia. */
 static bool init_done = FALSE;
+
+/* Abilitato solo dal proxy recv */
+static bool ping_on = FALSE;
 
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static void ack_handler (int seq);
+static void ping_handler (int discard);
 static void nak_handler (int seq);
 static double timeout_check (timeout_t *to);
 
@@ -153,6 +156,14 @@ del_nak_timeout (seq_t seq)
 }
 
 
+void
+enable_ping_timeout (void)
+{
+	assert (!init_done);
+	ping_on = TRUE;
+}
+
+
 timeout_t *
 get_timeout (int class, int id)
 {
@@ -167,7 +178,7 @@ get_timeout (int class, int id)
 		return NULL;
 
 	switch (class) {
-	case TOACK :
+	case TOPNG :
 		return head;
 
 	case TOACT :
@@ -200,11 +211,13 @@ init_timeout_module (void)
 	for (i = 0; i < TMOUTS; i++)
 		tqueue[i] = newQueue ();
 
-	timeout_init (&ack_timeout, TOACK_VAL, ack_handler, 0, FALSE);
-	timeout_reset (&ack_timeout);
-	add_timeout (&ack_timeout, TOACK);
-
 	init_done = TRUE;
+
+	if (ping_on) {
+		timeout_init (&ping_timeout, TOPNG_VAL, ping_handler, 0, FALSE);
+		add_timeout (&ping_timeout, TOPNG);
+		timeout_reset (&ping_timeout);
+	}
 }
 
 
@@ -273,15 +286,13 @@ timeout_reset (timeout_t *to)
 *******************************************************************************/
 
 static void
-ack_handler (int seq)
+ping_handler (int discard)
 {
-	seq_t ack;
+	struct segwrap *ping;
 
-	if (ok_to_send_ack (&ack)) {
-		struct segwrap *swack;
-		swack = segwrap_ack_create (ack);
-		urgent_add (swack);
-	}
+	fprintf (stderr, "Ping!\n");
+	ping = segwrap_ping_create ();
+	urgent_add (ping);
 }
 
 

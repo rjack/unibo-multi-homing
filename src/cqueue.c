@@ -212,8 +212,8 @@ cqueue_seglen (cqueue_t *cq)
 	if (seg_is_nak (flgptr) && used >= NAKLEN)
 		return NAKLEN;
 
-	if (seg_is_ack (flgptr) && used >= ACKLEN)
-		return ACKLEN;
+	if (seg_is_ping (flgptr) && used >= PNGLEN)
+		return PNGLEN;
 
 	assert (*flgptr & PLDFLAG);
 
