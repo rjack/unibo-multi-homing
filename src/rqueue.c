@@ -47,8 +47,10 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	        || (isLast (rq->rq_sgmt, rq->rq_sgmt) && is_first_partially_sent (rq))
 	        || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
 
-	if (rqueue_get_used (rq) == 0)
+	if (rqueue_get_used (rq) == 0) {
+		assert (rq->rq_nbytes == 0);
 		rq->rq_nbytes = sw->sw_seglen;
+	}
 
 	qenqueue (&rq->rq_sgmt, sw);
 	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
@@ -114,10 +116,10 @@ rqueue_cut_unsent (rqueue_t *rq)
 	rmvdq = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
 	assert (head == getHead (rmvdq));
-	assert (rq->rq_nbytes > 0);
-	if (rq->rq_nbytes < head->sw_seglen)
+	if (rq->rq_nbytes < head->sw_seglen) {
 		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
-	else
+		assert (isLast (rq->rq_sgmt, rq->rq_sgmt));
+	} else
 		rq->rq_nbytes = 0;
 
 	consolidate (rq);
@@ -245,8 +247,10 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	if (head == NULL)
 		return;
 
+	assert (rqueue_get_used (rq) > 0);
+
 	/* Se il primo e' stato spedito parzialmente lo salva a parte e lo
-	 * ripristina successivamente. */
+	 * ripristina successivamente alla pulizia. */
 	if (rq->rq_nbytes < head->sw_seglen)
 		head = qdequeue (&rq->rq_sgmt);
 	else
@@ -258,6 +262,8 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	/* Ripristino primo segmento parziale. */
 	if (head != NULL)
 		qpush (&rq->rq_sgmt, head);
+	else if (isEmpty (rq->rq_sgmt))
+		rq->rq_nbytes = 0;
 
 	/* Se sono stati rimossi dei segmenti, la coda va riportata in uno
 	 * stato coerente. */
@@ -344,6 +350,12 @@ consolidate (rqueue_t *rq)
 	tmp = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
 	head = getHead (tmp);
+#ifndef NDEBUG
+	if (head == NULL)
+		assert (rq->rq_nbytes == 0);
+	else
+		assert (rq->rq_nbytes > 0);
+#endif
 	if (head != NULL && head->sw_seglen > rq->rq_nbytes) {
 		qenqueue (&rq->rq_sgmt, qdequeue (&tmp));
 		todrop -= rq->rq_nbytes;

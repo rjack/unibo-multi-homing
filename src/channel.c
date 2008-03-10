@@ -125,8 +125,9 @@ channel_close (cd_t cd)
 		tcp_close (&ch[cd].c_sockfd);
 
 	/* Svuotamento segmenti. */
-	while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
-		urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
+	if (cd != HOSTCD)
+		while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
+			urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
 
 	channel_invalidate (cd);
 }
@@ -194,8 +195,15 @@ channel_invalidate (cd_t cd)
 {
 	/* Dealloca tutte le strutture dati associate al canale. */
 
-	rqueue_destroy (net_sndbuf[cd]);
-	net_sndbuf[cd] = NULL;
+	if (cd == HOSTCD) {
+		cqueue_destroy (host_rcvbuf);
+		cqueue_destroy (host_sndbuf);
+	} else {
+		rqueue_destroy (net_rcvbuf[cd]);
+		rqueue_destroy (net_sndbuf[cd]);
+		net_rcvbuf[cd] = NULL;
+		net_sndbuf[cd] = NULL;
+	}
 
 	/* Timeout attivita'. */
 	if (ch[cd].c_activity != NULL) {
