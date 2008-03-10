@@ -91,10 +91,10 @@ typedef uint8_t seg_t;
 /*
  * Tipo e durata dei timeout in secondi.
  */
-#define     TOACT_VAL     100000000.0
-/* #define     TOACT_VAL     0.250 */
+/* #define     TOACT_VAL     100000000.0 */
+#define     TOACT_VAL     0.900
 #define     TONAK_VAL     0.200
-#define     TOACK_VAL     2
+#define     TOACK_VAL     0.200
 /* Numero di tipi di timeout. */
 #define     TMOUTS      3
 /* Indici */

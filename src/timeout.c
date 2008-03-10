@@ -35,10 +35,7 @@
  * Per ogni coda l'ordine dei timeout e' indifferente. */
 static timeout_t *tqueue[TMOUTS];
 
-/* Intervallo spedizione ACK.
- * XXX per ora viene solo inizializzato da init_timeout_module, quindi non
- * XXX viene controllato da check_timeouts.
- * XXX Sara' passato ad add_timeout alla ricezione del primo segmento. */
+/* Intervallo spedizione ACK. */
 static timeout_t ack_timeout;
 
 /* Controllo paranoia. */
@@ -203,7 +200,9 @@ init_timeout_module (void)
 	for (i = 0; i < TMOUTS; i++)
 		tqueue[i] = newQueue ();
 
-	timeout_init (&ack_timeout, TOACK, ack_handler, 0, FALSE);
+	timeout_init (&ack_timeout, TOACK_VAL, ack_handler, 0, FALSE);
+	timeout_reset (&ack_timeout);
+	add_timeout (&ack_timeout, TOACK);
 
 	init_done = TRUE;
 }
@@ -276,8 +275,13 @@ timeout_reset (timeout_t *to)
 static void
 ack_handler (int seq)
 {
-	/* TODO manda ack */
-	fprintf (stderr, "ACK!\n");
+	seq_t ack;
+
+	if (ok_to_send_ack (&ack)) {
+		struct segwrap *swack;
+		swack = segwrap_ack_create (ack);
+		urgent_add (swack);
+	}
 }
 
 

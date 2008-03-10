@@ -100,6 +100,10 @@ void
 join_add (struct segwrap *sw);
 
 
+bool
+ok_to_send_ack (seq_t *ack);
+
+
 int
 proxy_init (port_t hostlistport,
 		char *netconnaddr[NETCHANNELS],

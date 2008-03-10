@@ -209,6 +209,19 @@ segwrap_create (void)
 
 
 struct segwrap *
+segwrap_ack_create (seq_t ackseq)
+{
+	struct segwrap *ack;
+
+	ack = segwrap_create ();
+	ack->sw_seg[FLG] = 0 | ACKFLAG;
+	ack->sw_seg[SEQ] = ackseq;
+	ack->sw_seglen = ACKLEN;
+
+	return ack;
+}
+
+struct segwrap *
 segwrap_nak_create (seq_t nakseq)
 {
 	struct segwrap *nak;

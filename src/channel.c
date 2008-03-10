@@ -66,8 +66,6 @@ static bool ack_handled;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static bool check_read_activity (cd_t cd, int nread);
-static bool check_write_activity (cd_t cd, int nwrite);
 static int connect_noblock (cd_t cd);
 static int listen_noblock (cd_t cd);
 static void host2net (void);
@@ -557,6 +555,22 @@ join_add (struct segwrap *sw)
 }
 
 
+bool
+ok_to_send_ack (seq_t *ack)
+{
+	cd_t cd;
+
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+		if (channel_is_connected (cd)
+		    && (urgent_head (cd) != NULL
+		        || rqueue_get_used (net_sndbuf[cd]) > 0))
+			return FALSE;
+
+	*ack = last_sent;
+	return TRUE;
+}
+
+
 int
 proxy_init (port_t hostlistport,
 		char *netconnaddr[NETCHANNELS],
@@ -899,53 +913,6 @@ urgent_rm_acked (struct segwrap *ack)
 /*******************************************************************************
 			       Funzioni locali
 *******************************************************************************/
-
-
-static bool
-check_read_activity (cd_t cd, int nread)
-{
-	static int prev_used[NETCHANNELS];
-	int now_used;
-	bool is_active;
-
-	assert (nread >= 0);
-
-	is_active = FALSE;
-	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_RCVBUF);
-	assert (now_used >= 0);
-
-	fprintf (stderr, "check_READ_activity: now_used = %d, nwrite = %d, prev_used = %d\n", now_used, nread, prev_used[cd]);
-
-	if (now_used + nread > prev_used[cd])
-		is_active = TRUE;
-	prev_used[cd] = now_used;
-
-	return is_active;
-}
-
-
-static bool
-check_write_activity (cd_t cd, int nwrite)
-{
-	static int prev_used[NETCHANNELS];
-	int now_used;
-	bool is_active;
-
-	assert (nwrite >= 0);
-
-	is_active = FALSE;
-	now_used = tcp_get_used_space (ch[cd].c_sockfd, SO_SNDBUF);
-	assert (now_used >= 0);
-
-	fprintf (stderr, "check_WRITE_activity: now_used = %d, nwrite = %d, prev_used = %d\n", now_used, nwrite, prev_used[cd]);
-
-	if (now_used - nwrite < prev_used[cd])
-		is_active = TRUE;
-	prev_used[cd] = now_used;
-
-	return is_active;
-}
-
 
 static int
 connect_noblock (cd_t cd)
