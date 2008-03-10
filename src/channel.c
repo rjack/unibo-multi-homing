@@ -505,16 +505,16 @@ join_add (struct segwrap *sw)
 	/* Segmento vecchio, scartato. */
 	if (seqcmp (seqsw, last_sent) <= 0) {
 		segwrap_destroy (sw);
-		return;
 	}
-
-	head = getHead (joinq);
-	if (head == NULL) {
+	/* Coda joinq vuota. */
+	else if ((head = getHead (joinq)) == NULL) {
 		if (seqcmp (seqsw, last_sent + 1) != 0)
 			for (s = last_sent + 1; seqcmp (s, seqsw) < 0; s++)
 				add_nak_timeout (s);
 		qenqueue (&joinq, sw);
-	} else {
+	}
+	/* Coda joinq non vuota. */
+	else {
 		seq_t seqhd;
 		seq_t seqtl;
 		seqhd = seg_seq (head->sw_seg);
@@ -539,8 +539,10 @@ join_add (struct segwrap *sw)
 			qinorder_insert (&joinq, sw, segwrap_seqcmp);
 			/* Annulla inserimento se duplicato. */
 			if (seg_seq (sw->sw_next->sw_seg) == seqsw
-			    || seg_seq (sw->sw_prev->sw_seg) == seqsw)
+			    || seg_seq (sw->sw_prev->sw_seg) == seqsw) {
 				qremove (&joinq, sw);
+				segwrap_destroy (sw);
+			}
 		}
 	}
 }
