@@ -409,7 +409,7 @@ channel_prepare_io (cd_t cd)
 			+ SEGMAXLEN;
 		net_rcvbuf[cd] = rqueue_create (buflen);
 
-		buflen = tcp_get_buffer_size (ch[cd].c_sockfd, SO_SNDBUF);
+		buflen = SEGMAXLEN;
 		net_sndbuf[cd] = rqueue_create (buflen);
 
 		timeout_reset (ch[cd].c_activity);
@@ -885,7 +885,8 @@ urgent_rm_acked (struct segwrap *ack)
 	assert (ack != NULL);
 
 	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
-		rmvdq = qremove_all_that (&urgentq_priv[cd], &segwrap_is_acked, ack);
+		rmvdq = qremove_all_that (&urgentq_priv[cd],
+				&segwrap_is_acked, ack);
 		while (!isEmpty (rmvdq))
 			segwrap_destroy (qdequeue (&rmvdq));
 	}
@@ -1089,6 +1090,7 @@ host2net (void)
 	pldlen = MIN (host_nbytes, PLDDEFLEN);
 	while (needmask != 0x0 && host_nbytes > 0) {
 		if (channel_is_connected (rrcd)
+		    && urgent_head (rrcd) == NULL
 		    && rqueue_get_aval (net_sndbuf[rrcd]) >= (HDRMAXLEN
 		                                              + pldlen)) {
 			struct segwrap *newsw;

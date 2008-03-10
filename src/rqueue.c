@@ -21,6 +21,7 @@
 
 static void consolidate (rqueue_t *rq);
 static bool is_first_partially_sent (rqueue_t *rq);
+bool is_consistent (rqueue_t *rq);
 
 
 /*******************************************************************************
@@ -44,18 +45,20 @@ rqueue_add (rqueue_t *rq, struct segwrap *sw)
 	assert (sw->sw_seglen > 0);
 	assert (sw->sw_seglen <= cqueue_get_aval (rq->rq_data));
 	assert (isEmpty (rq->rq_sgmt)
-	        || (isLast (rq->rq_sgmt, rq->rq_sgmt) && is_first_partially_sent (rq))
+	        || (isLast (rq->rq_sgmt, rq->rq_sgmt) 
+		    && is_first_partially_sent (rq))
 	        || segwrap_urgcmp (rq->rq_sgmt, sw) < 0);
 
-	if (rqueue_get_used (rq) == 0) {
-		assert (rq->rq_nbytes == 0);
+	assert (is_consistent (rq));
+
+	if (rqueue_get_used (rq) == 0)
 		rq->rq_nbytes = sw->sw_seglen;
-	}
 
 	qenqueue (&rq->rq_sgmt, sw);
 	err = cqueue_add (rq->rq_data, sw->sw_seg, sw->sw_seglen);
 	assert (!err);
 
+	assert (is_consistent (rq));
 	return 0;
 }
 
@@ -72,6 +75,7 @@ bool
 rqueue_can_write (rqueue_t *rq)
 {
 	assert (rq != NULL);
+	assert (is_consistent (rq));
 	return cqueue_can_write ((void *)rq->rq_data);
 }
 
@@ -87,6 +91,8 @@ rqueue_create (size_t len)
 	newrq->rq_data = cqueue_create (len);
 	newrq->rq_sgmt = newQueue ();
 	newrq->rq_nbytes = 0;
+
+	assert (is_consistent (newrq));
 
 	return newrq;
 }
@@ -104,6 +110,7 @@ rqueue_cut_unsent (rqueue_t *rq)
 	struct segwrap *rmvdq;
 
 	assert (rq != NULL);
+	assert (is_consistent (rq));
 
 	head = getHead (rq->rq_sgmt);
 
@@ -115,7 +122,6 @@ rqueue_cut_unsent (rqueue_t *rq)
 
 	rmvdq = rq->rq_sgmt;
 	rq->rq_sgmt = newQueue ();
-	assert (head == getHead (rmvdq));
 	if (rq->rq_nbytes < head->sw_seglen) {
 		qenqueue (&rq->rq_sgmt, qdequeue (&rmvdq));
 		assert (isLast (rq->rq_sgmt, rq->rq_sgmt));
@@ -123,6 +129,8 @@ rqueue_cut_unsent (rqueue_t *rq)
 		rq->rq_nbytes = 0;
 
 	consolidate (rq);
+	assert (is_consistent (rq));
+
 	return rmvdq;
 }
 
@@ -212,7 +220,7 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 
 	if (nread > 0) {
 		size_t seglen;
-#ifndef NDEBUG
+#ifdef VERBOSE
 		fprintf (stdout, "rqueue_read %d bytes\n", nread);
 		fflush (stdout);
 #endif
@@ -243,6 +251,10 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	struct segwrap *head;
 	struct segwrap *rmvdq;
 
+	assert (rq != NULL);
+	assert (ack != NULL);
+	assert (is_consistent (rq));
+
 	head = getHead (rq->rq_sgmt);
 	if (head == NULL)
 		return;
@@ -259,11 +271,12 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	/* Rimozione acked. */
 	rmvdq = qremove_all_that (&rq->rq_sgmt, &segwrap_is_acked, ack);
 
-	/* Ripristino primo segmento parziale. */
 	if (head != NULL)
 		qpush (&rq->rq_sgmt, head);
-	else if (isEmpty (rq->rq_sgmt))
+	else if ((head = getHead (rq->rq_sgmt)) == NULL)
 		rq->rq_nbytes = 0;
+	else
+		rq->rq_nbytes = head->sw_seglen;
 
 	/* Se sono stati rimossi dei segmenti, la coda va riportata in uno
 	 * stato coerente. */
@@ -273,6 +286,8 @@ rqueue_rm_acked (rqueue_t *rq, struct segwrap *ack)
 	/* Deallocazione rimossi. */
 	while (!isEmpty (rmvdq))
 		segwrap_destroy (qdequeue (&rmvdq));
+
+	assert (is_consistent (rq));
 }
 
 
@@ -291,6 +306,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 	assert (rq != NULL);
 	assert (rqueue_can_write (rq));
 	assert (rq->rq_nbytes > 0);
+	assert (is_consistent (rq));
 
 	retval = nsent = cqueue_write (fd, rq->rq_data);
 	errno_s = errno;
@@ -320,6 +336,8 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 				assert (nsent == 0);
 		}
 	}
+
+	assert (is_consistent (rq));
 
 	errno = errno_s;
 	return retval;
@@ -362,7 +380,8 @@ consolidate (rqueue_t *rq)
 	} else
 		rq->rq_nbytes = 0;
 
-	if (todrop)
+	assert (todrop >= 0);
+	if (todrop > 0)
 		cqueue_drop_tail (rq->rq_data, todrop);
 
 	while (!isEmpty (tmp))
@@ -385,4 +404,31 @@ is_first_partially_sent (rqueue_t * rq)
 			return TRUE;
 	}
 	return FALSE;
+}
+
+
+bool
+is_consistent (rqueue_t *rq)
+{
+	size_t sgmt_tot;
+	size_t data_tot;
+	struct segwrap *cur;
+	struct segwrap *head;
+
+	data_tot = rqueue_get_used (rq);
+	sgmt_tot = 0;
+	cur = head = getHead (rq->rq_sgmt);
+	if (cur == NULL)
+		return (data_tot == 0 ? TRUE : FALSE);
+
+	/* cur e head != NULL */
+	do {
+		sgmt_tot += cur->sw_seglen;
+		cur = getNext (cur);
+	} while (cur != head);
+
+	if (head->sw_seglen != rq->rq_nbytes)
+		sgmt_tot -= (head->sw_seglen - rq->rq_nbytes);
+
+	return (data_tot == sgmt_tot ? TRUE : FALSE);
 }

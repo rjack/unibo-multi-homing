@@ -93,7 +93,7 @@ typedef uint8_t seg_t;
  */
 #define     TOACT_VAL     100000000.0
 /* #define     TOACT_VAL     0.250 */
-#define     TONAK_VAL     0.130
+#define     TONAK_VAL     0.200
 #define     TOACK_VAL     2
 /* Numero di tipi di timeout. */
 #define     TMOUTS      3
@@ -223,8 +223,8 @@ typedef struct {
 	size_t cq_len;
 
 	/* Testa e coda. */
-	size_t cq_head;
-	size_t cq_tail;
+	int cq_head;
+	int cq_tail;
 } cqueue_t;
 
 

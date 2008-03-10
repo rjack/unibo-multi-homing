@@ -13,7 +13,6 @@
 
 /* Incremento e decremento circolare. */
 #define     CINC(x,inc,len)     ((x) = ((x) + (inc)) % (len))
-#define     CDEC(x,dec,len)     ((x) = ((x) - (dec)) % (len))
 
 #if !HAVE_MSG_NOSIGNAL
 #define     MSG_NOSIGNAL     0
@@ -144,13 +143,18 @@ cqueue_drop_head (cqueue_t *cq, size_t nbytes)
 void
 cqueue_drop_tail (cqueue_t *cq, size_t nbytes)
 {
-	/* Scart nbytes bytes dalla coda di cq. */
+	/* Scarta nbytes bytes dalla coda di cq. */
 
 	assert (cq != NULL);
 	assert (nbytes > 0);
 	assert (nbytes <= cqueue_get_used (cq));
 
-	CDEC (cq->cq_tail, nbytes, cq->cq_len);
+	if (nbytes > cq->cq_tail) {
+		nbytes -= cq->cq_tail;
+		cq->cq_tail = cq->cq_len;
+	}
+	cq->cq_tail -= nbytes;
+
 	if (cq->cq_head <= cq->cq_tail)
 		cq->cq_wrap = FALSE;
 }
@@ -227,42 +231,6 @@ cqueue_seglen (cqueue_t *cq)
 			return (FLGLEN + SEQLEN + LENLEN + cq->cq_data[i]);
 	}
 	return 0;
-}
-
-
-int
-cqueue_push (cqueue_t *cq, seg_t *buf, size_t nbytes)
-{
-	/* Copia nbytes byte da buf in testa a cq. */
-
-	size_t chunk_1;
-	size_t chunk_2;
-
-	if (cqueue_get_aval (cq) >= nbytes) {
-		assert (cq->cq_wrap || cq->cq_tail >= cq->cq_head);
-		assert (!cq->cq_wrap || cq->cq_tail < cq->cq_head);
-
-		chunk_1 = cq->cq_head - (cq->cq_wrap ? cq->cq_tail : 0);
-		chunk_2 = (nbytes > chunk_1 ? nbytes - chunk_1 : 0);
-
-		if (chunk_1 > 0) {
-			CDEC (cq->cq_head, chunk_1, cq->cq_len);
-			memcpy (&cq->cq_data[cq->cq_head], buf, chunk_1);
-			buf += chunk_1;
-		}
-		if (cq->cq_head + chunk_1 > cq->cq_len) {
-			assert (!cq->cq_wrap);
-			cq->cq_wrap = TRUE;
-		}
-		if (chunk_2 > 0) {
-			memcpy (&cq->cq_data[cq->cq_head], buf, chunk_2);
-			cq->cq_head -= chunk_2;
-			assert (cq->cq_head >= 0);
-			assert (cq->cq_head >= cq->cq_tail);
-		}
-		return 0;
-	}
-	return -1;
 }
 
 
