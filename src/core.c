@@ -32,12 +32,6 @@ core (void)
 		        "\nOCCHIO!!!\nTIMEOUT ATTIVITA' = %f\n\n",
 		        TOACT_VAL);
 
-	/*
-	 * Inizializzazione moduli.
-	 */
-	init_timeout_module ();
-	init_segment_module ();
-
 	for (;;) {
 		activate_channels ();
 

@@ -230,13 +230,10 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 			sw->sw_seglen = seglen;
 			err = cqueue_remove (rq->rq_data, sw->sw_seg, seglen);
 			assert (!err);
-			if (seg_is_ack (sw->sw_seg)
-			    || seg_is_nak (sw->sw_seg))
-				channel_activity_notice (get_cd_from (rq,
-							ELRQUEUE));
+			channel_activity_notice (get_cd_from (rq, ELRQUEUE));
 			handle_rcvd_segment (sw);
 		}
-}
+	}
 
 	errno = errno_s;
 	return nread;

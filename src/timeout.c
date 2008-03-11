@@ -41,6 +41,8 @@ static timeout_t ack_timeout;
 /* Controllo paranoia. */
 static bool init_done = FALSE;
 
+/* Abilitato solo dal proxy receiver. */
+static bool ack_on = FALSE;
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
@@ -155,6 +157,14 @@ del_nak_timeout (seq_t seq)
 }
 
 
+void
+enable_ack_timeout (void)
+{
+	assert (!init_done);
+	ack_on = TRUE;
+}
+
+
 timeout_t *
 get_timeout (int class, int id)
 {
@@ -204,9 +214,11 @@ init_timeout_module (void)
 
 	init_done = TRUE;
 
-	timeout_init (&ack_timeout, TOACK_VAL, ack_handler, 0, FALSE);
-	add_timeout (&ack_timeout, TOACK);
-	timeout_reset (&ack_timeout);
+	if (ack_on) {
+		timeout_init (&ack_timeout, TOACK_VAL, ack_handler, 0, FALSE);
+		add_timeout (&ack_timeout, TOACK);
+		timeout_reset (&ack_timeout);
+	}
 }
 
 
@@ -279,13 +291,10 @@ ack_handler (int discard)
 {
 	struct segwrap *ack;
 	seq_t ackseq;
-	static seq_t last_ack = SEQMAX;
 
 	ackseq = get_last_sent_to_host ();
-	if (ackseq != last_ack) {
-		ack = segwrap_ack_create ();
-		urgent_add (ack);
-	}
+	ack = segwrap_ack_create (ackseq);
+	urgent_add (ack);
 }
 
 

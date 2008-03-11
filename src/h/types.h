@@ -54,7 +54,7 @@ typedef int (*io_performer_t)(fd_t fd, void *args);
  * Campi dei segmenti.
  */
 /* Numeri di sequenza. */
-typedef uint16_t seq_t;
+typedef uint8_t seq_t;
 /* Lunghezza del segmento. */
 typedef uint8_t len_t;
 /* Dati. */
@@ -91,9 +91,9 @@ typedef uint8_t seg_t;
  * Tipo e durata dei timeout in secondi.
  */
 /* #define     TOACT_VAL     100000000.0 */
-#define     TOACT_VAL     0.300
-#define     TONAK_VAL     0.200
-#define     TOACK_VAL     0.200
+#define     TOACT_VAL     0.200
+#define     TONAK_VAL     0.100
+#define     TOACK_VAL     0.100
 /* Numero di tipi di timeout. */
 #define     TMOUTS      3
 /* Indici */
@@ -113,7 +113,7 @@ typedef uint8_t seg_t;
 /* Indici dei campi. */
 #define     FLG     0
 #define     SEQ     1
-#define     LEN     3
+#define     LEN     2
 
 /* Dimensione campi, in byte. */
 #define     SEQLEN     sizeof(seq_t)
@@ -121,7 +121,7 @@ typedef uint8_t seg_t;
 #define     FLGLEN     sizeof(flag_t)
 
 /* Massimo numero di sequenza. */
-#define     SEQMAX     UINT16_MAX
+#define     SEQMAX     UINT8_MAX
 
 /* Limiti dei segmenti, in byte. */
 #define     HDRMINLEN     (FLGLEN + SEQLEN)

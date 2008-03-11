@@ -157,12 +157,8 @@ seq_t
 seg_seq (seg_t *seg)
 {
 	/* Ritorna il numero di sequenza di seg. */
-	seq_t seq;
-
 	assert (seg != NULL);
-
-	memcpy (&seq, &seg[SEQ], sizeof (seq_t));
-	return seq;
+	return seg[SEQ];
 }
 
 
@@ -209,12 +205,13 @@ segwrap_create (void)
 
 
 struct segwrap *
-segwrap_ack_create (void)
+segwrap_ack_create (seq_t ackseq)
 {
 	struct segwrap *ack;
 
 	ack = segwrap_create ();
 	ack->sw_seg[FLG] = 0 | ACKFLAG;
+	ack->sw_seg[SEQ] = ackseq;
 	ack->sw_seglen = ACKLEN;
 
 	return ack;
@@ -227,7 +224,7 @@ segwrap_nak_create (seq_t nakseq)
 
 	nak = segwrap_create ();
 	nak->sw_seg[FLG] = 0 | NAKFLAG;
-	memcpy (&(nak->sw_seg[SEQ]), &nakseq, sizeof(seq_t));
+	nak->sw_seg[SEQ] = nakseq;
 	nak->sw_seglen = NAKLEN;
 
 	return nak;
@@ -265,7 +262,7 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 		sw->sw_seg[LEN] = pldlen;
 	}
 	/* Seqnum. */
-	memcpy (&(sw->sw_seg[SEQ]), &seqnum, sizeof(seq_t));
+	sw->sw_seg[SEQ] = seqnum;
 	/* Payload. */
 	pld = seg_pld (sw->sw_seg);
 	err = cqueue_remove (src, pld, pldlen);
@@ -294,8 +291,7 @@ segwrap_is_acked (struct segwrap *sw, struct segwrap *ack)
 	assert (sw != NULL);
 	assert (ack != NULL);
 
-	if (!seg_is_ack (sw->sw_seg)
-	    && segwrap_seqcmp (sw, ack) <= 0)
+	if (segwrap_seqcmp (sw, ack) <= 0)
 		return TRUE;
 	return FALSE;
 }
@@ -435,12 +431,12 @@ handle_rcvd_ack (struct segwrap *ack)
 
 	assert (init_done);
 
-	seghash_rm_acked (ht_sent, HT_SENT_SIZE, ack);
-	urgent_rm_acked (ack);
 	old_ack = set_last_ack_rcvd (ack);
-	if (old_ack != NULL)
+	if (old_ack != NULL) {
+		seghash_rm_acked (ht_sent, HT_SENT_SIZE, ack);
+		urgent_rm_acked (ack);
 		segwrap_destroy (old_ack);
-	else
+	} else
 		segwrap_destroy (ack);
 }
 

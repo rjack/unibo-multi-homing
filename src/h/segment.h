@@ -53,7 +53,7 @@ segwrap_create (void);
 
 
 struct segwrap *
-segwrap_ack_create (void);
+segwrap_ack_create (seq_t ackseq);
 
 
 struct segwrap *

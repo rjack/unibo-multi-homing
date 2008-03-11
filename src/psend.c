@@ -1,6 +1,8 @@
 #include "h/core.h"
 #include "h/channel.h"
 #include "h/getargs.h"
+#include "h/segment.h"
+#include "h/timeout.h"
 #include "h/util.h"
 #include "h/types.h"
 
@@ -59,6 +61,9 @@ main (int argc, char **argv)
 			&hostlistport, netconnaddr, netconnport);
 	if (err)
 		goto error;
+
+	init_timeout_module ();
+	init_segment_module ();
 
 	err = proxy_init (hostlistport, netconnaddr, netconnport,
 			NULL, NULL, 0);

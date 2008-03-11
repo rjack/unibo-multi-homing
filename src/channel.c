@@ -412,7 +412,7 @@ channel_prepare_io (cd_t cd)
 			+ SEGMAXLEN;
 		net_rcvbuf[cd] = rqueue_create (buflen);
 
-		buflen = 2 * SEGMAXLEN;
+		buflen = SEGMAXLEN;
 		net_sndbuf[cd] = rqueue_create (buflen);
 
 		timeout_reset (ch[cd].c_activity);
@@ -475,7 +475,9 @@ feed_download (void)
 void
 feed_upload (void)
 {
-	if (last_ack_rcvd != NULL && !ack_handled) {
+	assert (last_ack_rcvd != NULL);
+	if (!ack_handled) {
+		assert (seg_is_ack (last_ack_rcvd->sw_seg));
 		netsndbuf_rm_acked (last_ack_rcvd);
 		ack_handled = TRUE;
 	}
@@ -634,7 +636,7 @@ proxy_init (port_t hostlistport,
 	rrcd = NETCD;
 
 	/* Gestione ack ricevuti. */
-	last_ack_rcvd = NULL;
+	last_ack_rcvd = segwrap_ack_create (SEQMAX);
 	ack_handled = TRUE;
 
 #if !HAVE_MSG_NOSIGNAL
@@ -824,8 +826,8 @@ set_last_ack_rcvd (struct segwrap *ack)
 {
 	struct segwrap *old_ack;
 
-	if (last_ack_rcvd == NULL
-	    || segwrap_seqcmp (last_ack_rcvd, ack) < 0) {
+	assert (last_ack_rcvd != NULL);
+	if (segwrap_seqcmp (last_ack_rcvd, ack) < 0) {
 		old_ack = last_ack_rcvd;
 		last_ack_rcvd = ack;
 		ack_handled = FALSE;
