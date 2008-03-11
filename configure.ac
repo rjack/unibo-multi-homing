@@ -12,9 +12,9 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CC
 
-#AC_SUBST(CFLAGS, ["-O3 -fomit-frame-pointer"])
-AC_SUBST(CFLAGS, ["-g"])
-AC_SUBST(CPPFLAGS, ["-Wall -Werror -Wno-unused-function -ansi -pedantic"])
+AC_SUBST(CFLAGS, ["-O3 -fomit-frame-pointer"])
+#AC_SUBST(CFLAGS, ["-g"])
+AC_SUBST(CPPFLAGS, ["-Wall -Werror -Wno-unused-function -ansi -pedantic -DVERBOSE"])
 
 # Checks for libraries.
 

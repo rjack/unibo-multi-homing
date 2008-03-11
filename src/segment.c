@@ -50,8 +50,8 @@ handle_rcvd_segment (struct segwrap *rcvd)
 
 	seq = seg_seq (rcvd->sw_seg);
 
-#ifndef NDEBUG
-	/* segwrap_print (rcvd); */
+#ifdef VERBOSE
+	segwrap_print (rcvd);
 #endif
 
 	assert (!seg_is_ping (rcvd->sw_seg));
@@ -71,8 +71,8 @@ handle_sent_segment (struct segwrap *sent)
 {
 	assert (sent != NULL);
 
-#ifndef NDEBUG
-	/* segwrap_print (sent); */
+#ifdef VERBOSE
+	segwrap_print (sent);
 #endif
 
 	if (seg_pld (sent->sw_seg) == NULL)
@@ -347,7 +347,7 @@ segwrap_prio (struct segwrap *sw)
 void
 segwrap_print (struct segwrap *sw)
 {
-	int i;
+	/* int i; */
 	seg_t *pld;
 	len_t pldlen;
 
@@ -358,9 +358,11 @@ segwrap_print (struct segwrap *sw)
 	printf ("%u,%d,%d/%d ", sw->sw_seg[FLG], seg_seq (sw->sw_seg),
 			pldlen, sw->sw_seglen);
 
+	/*
 	if (pld != NULL) for (i = 0; i < pldlen; i++) {
 		putchar (pld[i]);
 	}
+	*/
 	putchar ('\n');
 }
 

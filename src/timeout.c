@@ -108,6 +108,8 @@ check_timeouts (void)
 	for (i = 0; i < TMOUTS; i++) {
 		cur = getHead (tqueue[i]);
 		while (!isEmpty (tqueue[i]) && cur != NULL) {
+			bool oneshot;
+			oneshot = cur->to_oneshot;
 			if (getNext (cur) == getHead (tqueue[i]))
 				nxt = NULL;
 			else
@@ -115,7 +117,7 @@ check_timeouts (void)
 			left = timeout_check (cur);
 			if (left > 0)
 				min = MIN (min, left);
-			else if (cur->to_oneshot == TRUE) {
+			else if (oneshot == TRUE) {
 				del_timeout (cur, i);
 				timeout_destroy (cur);
 			}
@@ -290,7 +292,6 @@ ping_handler (int discard)
 {
 	struct segwrap *ping;
 
-	fprintf (stderr, "Ping!\n");
 	ping = segwrap_ping_create ();
 	urgent_add (ping);
 }

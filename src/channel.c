@@ -122,9 +122,17 @@ channel_close (cd_t cd)
 		tcp_close (&ch[cd].c_sockfd);
 
 	/* Svuotamento segmenti. */
-	if (cd != HOSTCD)
-		while (!isEmpty (net_sndbuf[cd]->rq_sgmt))
-			urgent_add (qdequeue (&net_sndbuf[cd]->rq_sgmt));
+	if (cd != HOSTCD) {
+		while (!isEmpty (net_sndbuf[cd]->rq_sgmt)) {
+			struct segwrap *sw;
+			sw = qdequeue (&net_sndbuf[cd]->rq_sgmt);
+			if (seg_pld (sw->sw_seg) != NULL)
+				sw->sw_seg[FLG] |= CRTFLAG;
+			urgent_add (sw);
+		}
+		while (!isEmpty (urgentq_priv[cd]))
+			segwrap_destroy (qdequeue (&urgentq_priv[cd]));
+	}
 
 	channel_invalidate (cd);
 }
@@ -406,7 +414,7 @@ channel_prepare_io (cd_t cd)
 			+ SEGMAXLEN;
 		net_rcvbuf[cd] = rqueue_create (buflen);
 
-		buflen = SEGMAXLEN;
+		buflen = 2 * SEGMAXLEN;
 		net_sndbuf[cd] = rqueue_create (buflen);
 
 		timeout_reset (ch[cd].c_activity);
@@ -1122,8 +1130,9 @@ urg2net (void)
 	/* Riempimento net_sndbuf. */
 transfer:
 	needmask = 0x7;
-	while ((sw = urgent_head (rrcd)) != NULL  && needmask != 0x0) {
+	while (needmask != 0x0) {
 		if (channel_is_connected (rrcd)
+		    && (sw = urgent_head (rrcd)) != NULL
 		    && sw->sw_seglen <= rqueue_get_aval (net_sndbuf[rrcd])) {
 			sw = urgent_remove (rrcd);
 			assert (sw != NULL);

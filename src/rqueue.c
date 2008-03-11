@@ -221,8 +221,7 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 	if (nread > 0) {
 		size_t seglen;
 #ifdef VERBOSE
-		fprintf (stdout, "rqueue_read %d bytes\n", nread);
-		fflush (stdout);
+		/* printf ("rqueue_read %d bytes\n", nread); */
 #endif
 
 		while ((seglen = cqueue_seglen (rq->rq_data)) > 0) {

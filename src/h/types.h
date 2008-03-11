@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 /*******************************************************************************
 			     Definizioni di tipo
 *******************************************************************************/
@@ -92,7 +91,7 @@ typedef uint8_t seg_t;
  * Tipo e durata dei timeout in secondi.
  */
 /* #define     TOACT_VAL     100000000.0 */
-#define     TOACT_VAL     0.400
+#define     TOACT_VAL     0.300
 #define     TONAK_VAL     0.200
 #define     TOPNG_VAL     0.200
 /* Numero di tipi di timeout. */
