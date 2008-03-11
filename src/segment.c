@@ -51,14 +51,12 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	seq = seg_seq (rcvd->sw_seg);
 
 #ifdef VERBOSE
-	segwrap_print (rcvd);
+	segwrap_print ("RCV", rcvd);
 #endif
 
 	assert (!seg_is_ping (rcvd->sw_seg));
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
-		rcvd->sw_seg[SEQ]--;
-		handle_rcvd_ack (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
@@ -72,7 +70,7 @@ handle_sent_segment (struct segwrap *sent)
 	assert (sent != NULL);
 
 #ifdef VERBOSE
-	segwrap_print (sent);
+	segwrap_print ("SND", sent);
 #endif
 
 	if (seg_pld (sent->sw_seg) == NULL)
@@ -158,9 +156,12 @@ seq_t
 seg_seq (seg_t *seg)
 {
 	/* Ritorna il numero di sequenza di seg. */
+	seq_t seq;
 
 	assert (seg != NULL);
-	return seg[SEQ];
+
+	memcpy (&seq, &seg[SEQ], sizeof (seq_t));
+	return seq;
 }
 
 
@@ -225,7 +226,7 @@ segwrap_nak_create (seq_t nakseq)
 
 	nak = segwrap_create ();
 	nak->sw_seg[FLG] = 0 | NAKFLAG;
-	nak->sw_seg[SEQ] = nakseq;
+	memcpy (&(nak->sw_seg[SEQ]), &nakseq, sizeof(seq_t));
 	nak->sw_seglen = NAKLEN;
 
 	return nak;
@@ -263,7 +264,7 @@ segwrap_fill (struct segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum)
 		sw->sw_seg[LEN] = pldlen;
 	}
 	/* Seqnum. */
-	sw->sw_seg[SEQ] = seqnum;
+	memcpy (&(sw->sw_seg[SEQ]), &seqnum, sizeof(seq_t));
 	/* Payload. */
 	pld = seg_pld (sw->sw_seg);
 	err = cqueue_remove (src, pld, pldlen);
@@ -329,7 +330,7 @@ segwrap_prio (struct segwrap *sw)
 	/* Ritorna
 	 * 0 se sw e' un NAK
 	 * 1 se sw e' un segmento dati da rispedire
-	 * 2 se sw e' un ACK
+	 * 2 se sw e' un PING
 	 * 3 se sw e' un segmento dati. */
 
 	if (seg_is_nak (sw->sw_seg))
@@ -345,7 +346,7 @@ segwrap_prio (struct segwrap *sw)
 
 
 void
-segwrap_print (struct segwrap *sw)
+segwrap_print (char *tag, struct segwrap *sw)
 {
 	/* int i; */
 	seg_t *pld;
@@ -355,7 +356,7 @@ segwrap_print (struct segwrap *sw)
 	pldlen = seg_pld_len (sw->sw_seg);
 
 	/* Flag, seqnum, pldlen e seglen. */
-	printf ("%u,%d,%d/%d ", sw->sw_seg[FLG], seg_seq (sw->sw_seg),
+	printf ("%s %u,%d,%d/%d ", tag, sw->sw_seg[FLG], seg_seq (sw->sw_seg),
 			pldlen, sw->sw_seglen);
 
 	/*
@@ -454,8 +455,6 @@ handle_rcvd_nak (struct segwrap *nak)
 	urg = seghash_remove (ht_sent, HT_SENT_SIZE, seg_seq (nak->sw_seg));
 	if (urg != NULL) {
 		urg->sw_seg[FLG] |= CRTFLAG;
-		/* TODO se c'e' da frammentare il segmento da rispedire, si fa
-		 * TODO qui. */
 		urgent_add (urg);
 	}
 }

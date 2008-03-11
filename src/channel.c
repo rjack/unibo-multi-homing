@@ -126,8 +126,6 @@ channel_close (cd_t cd)
 		while (!isEmpty (net_sndbuf[cd]->rq_sgmt)) {
 			struct segwrap *sw;
 			sw = qdequeue (&net_sndbuf[cd]->rq_sgmt);
-			if (seg_pld (sw->sw_seg) != NULL)
-				sw->sw_seg[FLG] |= CRTFLAG;
 			urgent_add (sw);
 		}
 		while (!isEmpty (urgentq_priv[cd]))
@@ -465,6 +463,10 @@ feed_download (void)
 				seg_pld_len (head->sw_seg));
 		assert (!err);
 		last_sent = seg_seq (head->sw_seg);
+#ifdef VERBOSE
+		printf ("last sent = %d\n", last_sent);
+		segwrap_print ("feed_download", head);
+#endif
 		segwrap_destroy (head);
 	}
 }
@@ -478,7 +480,8 @@ feed_upload (void)
 		ack_handled = TRUE;
 	}
 	urg2net ();
-	host2net ();
+	if (urgent_empty ())
+		host2net ();
 }
 
 
@@ -518,6 +521,10 @@ join_add (struct segwrap *sw)
 
 	/* Segmento vecchio, scartato. */
 	if (seqcmp (seqsw, last_sent) <= 0) {
+#ifdef VERBOSE
+		printf ("last sent = %d\n", last_sent);
+		segwrap_print ("join_add scarta vecchio", sw);
+#endif
 		segwrap_destroy (sw);
 	}
 	/* Coda joinq vuota. */
@@ -563,19 +570,14 @@ join_add (struct segwrap *sw)
 
 
 bool
-ok_to_send_ack (seq_t *ack)
+urgent_empty (void)
 {
 	cd_t cd;
 
 	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
 		if (channel_is_connected (cd)
-		    && (urgent_head (cd) != NULL
-		        || rqueue_get_used (net_sndbuf[cd]) > 0
-		        || host_rcvbuf == NULL
-			|| cqueue_get_used (host_rcvbuf) > 0))
+		    && (urgent_head (cd) != NULL))
 			return FALSE;
-
-	*ack = last_sent;
 	return TRUE;
 }
 

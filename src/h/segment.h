@@ -89,7 +89,7 @@ segwrap_prio (struct segwrap *sw);
 
 
 void
-segwrap_print (struct segwrap *sw);
+segwrap_print (char *tag, struct segwrap *sw);
 
 
 int

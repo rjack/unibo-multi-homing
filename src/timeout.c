@@ -303,6 +303,9 @@ nak_handler (int seq)
 	struct segwrap *nak;
 
 	nak = segwrap_nak_create (seq);
+#ifdef VERBOSE
+	segwrap_print ("nak_handler", nak);
+#endif
 	urgent_add (nak);
 }
 

@@ -54,7 +54,7 @@ typedef int (*io_performer_t)(fd_t fd, void *args);
  * Campi dei segmenti.
  */
 /* Numeri di sequenza. */
-typedef uint8_t seq_t;
+typedef uint16_t seq_t;
 /* Lunghezza del segmento. */
 typedef uint8_t len_t;
 /* Dati. */
@@ -113,7 +113,7 @@ typedef uint8_t seg_t;
 /* Indici dei campi. */
 #define     FLG     0
 #define     SEQ     1
-#define     LEN     2
+#define     LEN     3
 
 /* Dimensione campi, in byte. */
 #define     SEQLEN     sizeof(seq_t)
@@ -121,7 +121,7 @@ typedef uint8_t seg_t;
 #define     FLGLEN     sizeof(flag_t)
 
 /* Massimo numero di sequenza. */
-#define     SEQMAX     UINT8_MAX
+#define     SEQMAX     UINT16_MAX
 
 /* Limiti dei segmenti, in byte. */
 #define     HDRMINLEN     (FLGLEN + SEQLEN)
