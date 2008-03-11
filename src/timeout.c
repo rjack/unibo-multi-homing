@@ -24,7 +24,7 @@
 #define     HUGE_TIMEOUT     1000000000
 
 #define     VALID_CLASS(cn)                             \
-	((cn) == TOPNG || (cn) == TOACT || (cn) == TONAK)
+	((cn) == TOACK || (cn) == TOACT || (cn) == TONAK)
 
 
 /*******************************************************************************
@@ -36,20 +36,17 @@
 static timeout_t *tqueue[TMOUTS];
 
 /* Intervallo spedizione ACK. */
-static timeout_t ping_timeout;
+static timeout_t ack_timeout;
 
 /* Controllo paranoia. */
 static bool init_done = FALSE;
-
-/* Abilitato solo dal proxy recv */
-static bool ping_on = FALSE;
 
 
 /*******************************************************************************
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static void ping_handler (int discard);
+static void ack_handler (int discard);
 static void nak_handler (int seq);
 static double timeout_check (timeout_t *to);
 
@@ -158,14 +155,6 @@ del_nak_timeout (seq_t seq)
 }
 
 
-void
-enable_ping_timeout (void)
-{
-	assert (!init_done);
-	ping_on = TRUE;
-}
-
-
 timeout_t *
 get_timeout (int class, int id)
 {
@@ -180,7 +169,7 @@ get_timeout (int class, int id)
 		return NULL;
 
 	switch (class) {
-	case TOPNG :
+	case TOACK :
 		return head;
 
 	case TOACT :
@@ -215,11 +204,9 @@ init_timeout_module (void)
 
 	init_done = TRUE;
 
-	if (ping_on) {
-		timeout_init (&ping_timeout, TOPNG_VAL, ping_handler, 0, FALSE);
-		add_timeout (&ping_timeout, TOPNG);
-		timeout_reset (&ping_timeout);
-	}
+	timeout_init (&ack_timeout, TOACK_VAL, ack_handler, 0, FALSE);
+	add_timeout (&ack_timeout, TOACK);
+	timeout_reset (&ack_timeout);
 }
 
 
@@ -288,12 +275,17 @@ timeout_reset (timeout_t *to)
 *******************************************************************************/
 
 static void
-ping_handler (int discard)
+ack_handler (int discard)
 {
-	struct segwrap *ping;
+	struct segwrap *ack;
+	seq_t ackseq;
+	static seq_t last_ack = SEQMAX;
 
-	ping = segwrap_ping_create ();
-	urgent_add (ping);
+	ackseq = get_last_sent_to_host ();
+	if (ackseq != last_ack) {
+		ack = segwrap_ack_create ();
+		urgent_add (ack);
+	}
 }
 
 

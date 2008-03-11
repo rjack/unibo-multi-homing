@@ -230,12 +230,11 @@ rqueue_read (fd_t fd, rqueue_t *rq)
 			sw->sw_seglen = seglen;
 			err = cqueue_remove (rq->rq_data, sw->sw_seg, seglen);
 			assert (!err);
-			if (seg_is_ping (sw->sw_seg)) {
+			if (seg_is_ack (sw->sw_seg)
+			    || seg_is_nak (sw->sw_seg))
 				channel_activity_notice (get_cd_from (rq,
 							ELRQUEUE));
-				segwrap_destroy (sw);
-			} else
-				handle_rcvd_segment (sw);
+			handle_rcvd_segment (sw);
 		}
 }
 
@@ -330,7 +329,7 @@ rqueue_write (fd_t fd, rqueue_t *rq)
 			head = qdequeue (&rq->rq_sgmt);
 			assert (head != NULL);
 
-			if (seg_is_ping (head->sw_seg))
+			if (seg_is_ack (head->sw_seg))
 				channel_activity_notice (get_cd_from (rq,
 							ELRQUEUE));
 			handle_sent_segment (head);

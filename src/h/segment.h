@@ -21,7 +21,7 @@ init_segment_module (void);
 
 
 bool
-seg_is_ping (seg_t *seg);
+seg_is_ack (seg_t *seg);
 
 
 bool
@@ -53,7 +53,7 @@ segwrap_create (void);
 
 
 struct segwrap *
-segwrap_ping_create (void);
+segwrap_ack_create (void);
 
 
 struct segwrap *

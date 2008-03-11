@@ -54,9 +54,10 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	segwrap_print ("RCV", rcvd);
 #endif
 
-	assert (!seg_is_ping (rcvd->sw_seg));
 	if (seg_is_nak (rcvd->sw_seg)) {
 		handle_rcvd_nak (rcvd);
+	} else if (seg_is_ack (rcvd->sw_seg)) {
+		handle_rcvd_ack (rcvd);
 	} else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
@@ -102,10 +103,10 @@ init_segment_module (void)
 
 
 bool
-seg_is_ping (seg_t *seg)
+seg_is_ack (seg_t *seg)
 {
 	assert (seg != NULL);
-	return (seg[FLG] & PNGFLAG ? TRUE : FALSE);
+	return (seg[FLG] & ACKFLAG ? TRUE : FALSE);
 }
 
 
@@ -208,15 +209,15 @@ segwrap_create (void)
 
 
 struct segwrap *
-segwrap_ping_create (void)
+segwrap_ack_create (void)
 {
-	struct segwrap *ping;
+	struct segwrap *ack;
 
-	ping = segwrap_create ();
-	ping->sw_seg[FLG] = 0 | PNGFLAG;
-	ping->sw_seglen = PNGLEN;
+	ack = segwrap_create ();
+	ack->sw_seg[FLG] = 0 | ACKFLAG;
+	ack->sw_seglen = ACKLEN;
 
-	return ping;
+	return ack;
 }
 
 struct segwrap *
@@ -293,7 +294,7 @@ segwrap_is_acked (struct segwrap *sw, struct segwrap *ack)
 	assert (sw != NULL);
 	assert (ack != NULL);
 
-	if (!seg_is_ping (sw->sw_seg)
+	if (!seg_is_ack (sw->sw_seg)
 	    && segwrap_seqcmp (sw, ack) <= 0)
 		return TRUE;
 	return FALSE;
@@ -316,7 +317,7 @@ segwrap_is_clonable (struct segwrap *sw)
 {
 	assert (sw != NULL);
 
-	if (seg_is_ping (sw->sw_seg)
+	if (seg_is_ack (sw->sw_seg)
 	    || seg_is_nak (sw->sw_seg)
 	    || seg_is_critical (sw->sw_seg))
 		return TRUE;
@@ -335,7 +336,7 @@ segwrap_prio (struct segwrap *sw)
 
 	if (seg_is_nak (sw->sw_seg))
 		return 0;
-	if (seg_is_ping (sw->sw_seg))
+	if (seg_is_ack (sw->sw_seg))
 		return 2;
 
 	assert (seg_pld (sw->sw_seg) != NULL);
@@ -457,4 +458,5 @@ handle_rcvd_nak (struct segwrap *nak)
 		urg->sw_seg[FLG] |= CRTFLAG;
 		urgent_add (urg);
 	}
+	segwrap_destroy (nak);
 }

@@ -58,8 +58,6 @@ main (int argc, char **argv)
 	if (err)
 		goto error;
 
-	enable_ping_timeout ();
-
 	/* Stampa informazioni. */
 	for (cd = NETCD; cd < NETCHANNELS; cd++) {
 		printf ("Canale %d con il Ritardatore: %s\n",

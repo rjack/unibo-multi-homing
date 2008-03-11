@@ -96,6 +96,10 @@ cd_t
 get_cd_from (void *element, int type);
 
 
+seq_t
+get_last_sent_to_host (void);
+
+
 void
 join_add (struct segwrap *sw);
 
