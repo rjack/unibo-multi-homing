@@ -327,7 +327,7 @@ segwrap_prio (struct segwrap *sw)
 	/* Ritorna
 	 * 0 se sw e' un NAK
 	 * 1 se sw e' un segmento dati da rispedire
-	 * 2 se sw e' un PING
+	 * 2 se sw e' un ACK
 	 * 3 se sw e' un segmento dati. */
 
 	if (seg_is_nak (sw->sw_seg))

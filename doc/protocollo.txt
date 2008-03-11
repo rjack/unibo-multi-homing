@@ -4,144 +4,49 @@
 
 			   PROTOCOLLO APPLICAZIONE
 
-		    Giacomo Ritucci <ritucci@cs.unibo.it>
+  Formato segmento
+
+dati:	| FLG | SEQ | LEN* | PLD ...//.. |
+nak:	| FLG | SEQ |
+ack:	| FLG | SEQ |
+
+  * = opzionale
+
+Tutti i campi sono lunghi un byte.
+Il payload di default e' 255 byte. Se minore, la sua lunghezza e' specificata
+dal campo LEN e una bit in FLG indica che il payload non ha lunghezza
+standard.
 
 
-  Info necessarie nei segmenti
+  Algoritmo di routing
 
-- conformazione: 		flags
-- ordine ricostruzione: 	seqnum
+Il proxy sender forma i pacchetti e li instrada in maniera round-robin. A
+priori non c'e' controllo di efficienza dei canali ne' un algoritmo di scelta
+del canale migliore: un segmento per ogni canale connesso.
 
+Il proxy receiver attende i segmenti e li riordina, spedendo i consecutivi al
+Receiver.
+Ogni pacchetto che arriva fuori ordine genera uno o piu' nak che vengono
+inviati al Proxy Sender per chiedere la rispedizione di quelli mancanti. I nak
+non vengono spediti immediatamente; solo se allo scadere di TONAK_VAL timeout
+non e' arrivato il pacchetto mancante associato al timeout.
 
-  Info opzionali nei segmenti
+Alla ricezione di un nak, il Proxy Sender recupera il segmento dalla struttura
+ht_sent, lo marca come CRITICO e accoda alla struttura dei segmenti urgenti.
+I segmenti con il bit CRTFLAG vengono spediti su ogni canale per essere certi
+che non vengano ritardati.
 
-- lunghezza payload:		pldlen
+Le code di upload dei Proxy vengono mantenute ordinate sulla priorita' dei
+segmenti:
 
-
-Flags:
-- critico: un segmento con payload che e' stato spedito su tutti i canali
-- payload: il segmento ha il payload
-- lunghezza non standard: se acceso e' presente il capo pldlen, ignorato se
-  non c'e' il payload.
-- NAK: il segmento e' un NAK, quindi
-  - e' stato spedito su tutti i canali
-  - non ha il payload
-  - il seqnum rappresenta l'id del segmento di cui chiediamo la rispedizione.
-- ACK:
-  - no payload
-  - il campo seqnum viene usato al posto del campo aggiuntivo.
-
-
-Dati:
-
-	FLAGS	| SEQ	| (LEN)	| PLD
-
-ACK / NAK:
-
-	FLAGS	| SEQ
+	0. nak
+	1. dati da rispedire in risposta a un nak
+	2. ack
+	3. dati
 
 
-  Lettura dal Sender
+  Blocco dei canali
 
-quando:	c'e' spazio nel buffer
-quanto:	il massimo possibile
-dove:	in un buffer circolare grande come il buffer TCP
-poi:	i canali attivi devono fare dequeue sul buffer per prelevare i dati
-	con cui costruire i segmenti.
-note:	buffer TCP dimensione massima
-
-
-  Ricostruzione segmenti
-
-Solita joining queue di segmenti ordinati:
-
-   jq: | 5 | -> | 7 | -> | 12 |
-
-Un segmento e' nella jq <==> non ha il seqnum successivo a quello dell'ultimo
-segmento inviato all'host: mancano uno o piu' segmenti!
-
-Quindi... insert in jq -> manda NAK all'altro proxy per chiedere segmento
-mancante.
-
-Problema: se mando NAK subito appena inserisco segmento in jq sovraccarico
-canale e peggioro le cose, obbligando l'altro proxy a rispedire il segmento (e
-magari bastava aspettare un attimo)
-
-Ma se aspetto troppo sforo il tetto dei 500ms!
-Attesa invio NAK: 130-150ms?
-
-NAK delay da tarare bene! Timeout associato ai segmenti nella jq, quando scade
-mando il NAK.
-Se arriva il segmento prima dello scadere del timeout rimuovo il timer.
-Quando mando il NAK, rimuovo il timer.
-
-In ogni caso, i NAK vengono mandati una volta sola: il peer risponde al primo
-NAK che riceve e scarta quelli relativi allo stesso seqnum che arrivano dagli
-altri canali. La risposta e' l'invio del segmento richiesto su tutti i
-canali: di meglio non si puo' fare, quindi puo' rimuovere il pacchetto in
-questione dalla coda dei segmenti da rispedire, come se fosse stato ACKato.
-
-Quando tutti i segmenti sono in fila posso mandare un ACK in modo che il peer
-liberi memoria. Mando un ACK ogni tot secondi a partire dall'ultimo NAK e SOLO
-se non ci sono NAK timeout in corso (un NAK e' implicitamente un ACK).
-
-Tutti i segmenti consecutivi vengono accodati al buffer di spedizione per
-l'host e rimossi dalla joining queue.
-
-
-  Routing segmenti
-
-Condizione migliore (nessun ritardo) -> meglio un segmento per ogni canale,
-politica round robin.
-
-Condizione peggiore (congestioni frequenti) -> ridondanza per diminuire
-probabilita' che segmento incontri un ritardo. Non rischio di intasare tutto?!
-Sicuramente si' bisogna che solo i segmenti in ritardo vengano mandati in piu'
-copie, in modo da minimizzare gli sprechi.
-
-Traffico normale: ogni segmento inviato sul suo canale.
-Traffico critico: quando ricevo un NAK, il segmento richiesto lo rispedisco
-su tutti i canali, per essere sicuro che arrivi in tempo.
-
-Un canale con il ritardatore deve avere associato un timeout che viene
-ripristinato ogni volta che c'e' attivita'. Se scade il canale viene
-invalidato. ActivityTimeout: meta' del tempo massimo concesso (= 250ms)?
-
-Che si fa con i segmenti in coda per quel canale?
-- se sono critici si buttano, i duplicati sono gia' stati spediti sugli altri
-  canali e non ha senso ritrasmetterli,
-- se sono normali vanno messi in testa alle code degli altri canali,
-  distribuendoli uniformemente.
-
-
-  Gestione timeout
-
-Ogni timeout ha un'azione da compiere allo scadere: ptr a funzione.
-Argomento?
-
-ActivityTimeout: uno per ogni canale con il Ritardatore.
-- non periodico
-- invalida il canale
-- dirotta i segmenti in coda su quel canale sugli altri canali
-> serve struct proxy
-
-NAKTimeout: uno per ogni segmento nella joining queue.
-- non periodico
-- mette un NAK in testa alla coda di invio di ogni canale con il ritardatore
-> serve struct proxy
-
-ACKTimeout: uno solo, globale.
-- periodico
-- aggiunge un ACK a un canale, scelto a rotazione.
-> serve struct proxy
-
-Quindi funzioni trigger prendono come parametro una struct proxy.
-
-
-  Buffer canali di rete
-
-Ricezione: massimo possibile -> cqueue = al buffer TCP.
-
-Spedizione: minimo possibile -> cqueue = 2 * buffer TCP.
-
-XXX: sicuri che sia necessario 2 * buffer TCP? Forse basta = al buffer TCP!
+I proxy mantengono un timeout di attivita' per ogni canale di rete. Allo
+scadere il canale e' considerato inattivo, chiuso, invalidato e tutti i
+segmenti uscenti vengono reinseriti nella struttura dei segmenti urgenti.
