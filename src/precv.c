@@ -16,7 +16,7 @@
  * Valori di default.
  */
 
-/* Porte di ascolto per accettare connessioni da Ritardatore. */
+/* Porte di ascolto per connessioni dal Ritardatore. */
 static port_t netlistport[NETCHANNELS] = {
 	8001,
 	8002,
@@ -32,9 +32,9 @@ static port_t hostconnport = 9001;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static int
-get_precv_args (int argc, char **argv, port_t netlistport[NETCHANNELS],
-		char **hostconnaddr, port_t *hostconnport);
+static int get_precv_args (int argc, char **argv,
+		port_t netlistport[NETCHANNELS], char **hostconnaddr,
+		port_t *hostconnport);
 static void print_help (const char *);
 
 
@@ -48,8 +48,8 @@ main (int argc, char **argv)
 	int err;
 	cd_t cd;
 
-	err = get_precv_args (argc, argv,
-			netlistport, &hostconnaddr, &hostconnport);
+	err = get_precv_args (argc, argv, netlistport, &hostconnaddr,
+			&hostconnport);
 	if (err)
 		goto error;
 
@@ -57,15 +57,15 @@ main (int argc, char **argv)
 	init_timeout_module ();
 	init_segment_module ();
 
-	err = proxy_init (0, NULL, NULL,
-			netlistport, hostconnaddr, hostconnport);
+	err = proxy_init (0, NULL, NULL, netlistport, hostconnaddr,
+			hostconnport);
 	if (err)
 		goto error;
 
 	/* Stampa informazioni. */
-	for (cd = NETCD; cd < NETCHANNELS; cd++) {
-		printf ("Canale %d con il Ritardatore: %s\n",
-		         cd, channel_name (cd));
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
+		printf ("Canale %d con il Ritardatore: %s\n", cd,
+				channel_name (cd));
 	}
 	printf ("Canale con il Receiver: %s\n", channel_name (HOSTCD));
 
@@ -133,12 +133,10 @@ static void
 print_help (const char *program_name)
 {
 	printf (
-"%s [[[[[ porta_locale ] porta_locale ] porta_locale ] ip ] porta ]\n",
+"%s [ porta_locale  porta_locale  porta_locale ip  porta ]\n",
 	        program_name);
 	printf ("\n"
-"Attende una connessione dal Ritardatore su una delle porte locali e si\n"
-"connette al Receiver, che deve essere in ascolto sull'indirizzo ip:porta. Se\n"
-"un argomento non viene specificato oppure e' -, viene usato il valore\n"
-"predefinito.\n"
-		);
+"Attende una connessione dal Ritardatore su ognuna dell porte locali e si\n"
+"connette al Receiver, che deve essere in ascolto sull'indirizzo ip:porta.\n"
+"Per utilizzare il valore predefinito di un parametro, specificare '-'\n");
 }

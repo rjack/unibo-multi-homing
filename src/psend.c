@@ -38,11 +38,8 @@ static port_t hostlistport = 6001;
 		       Prototipi delle funzioni locali
 *******************************************************************************/
 
-static int
-get_psend_args (int argc, char **argv,
-		port_t *hostlistport,
-		char *netconnaddr[NETCHANNELS],
-		port_t netconnport[NETCHANNELS]);
+static int get_psend_args (int argc, char **argv, port_t *hostlistport, char
+		*netconnaddr[NETCHANNELS], port_t netconnport[NETCHANNELS]);
 static void print_help (const char *);
 
 
@@ -56,22 +53,22 @@ main (int argc, char **argv)
 	int err;
 	cd_t cd;
 
-	err = get_psend_args (argc, argv,
-			&hostlistport, netconnaddr, netconnport);
+	err = get_psend_args (argc, argv, &hostlistport, netconnaddr,
+			netconnport);
 	if (err)
 		goto error;
 
 	init_timeout_module ();
 	init_segment_module ();
 
-	err = proxy_init (hostlistport, netconnaddr, netconnport,
-			NULL, NULL, 0);
+	err = proxy_init (hostlistport, netconnaddr, netconnport, NULL, NULL,
+			0);
 	if (err)
 		goto error;
 
 	/* Stampa informazioni. */
 	printf ("Canale con il Sender: %s\n", channel_name (HOSTCD));
-	for (cd = NETCD; cd < NETCHANNELS; cd++) {
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++) {
 		printf ("Canale %d con il Ritardatore: %s\n", cd,
 				channel_name (cd));
 	}
@@ -89,8 +86,7 @@ error:
 *******************************************************************************/
 
 static int
-get_psend_args (int argc, char **argv,
-		port_t *hostlistport,
+get_psend_args (int argc, char **argv, port_t *hostlistport,
 		char *netconnaddr[NETCHANNELS],
 		port_t netconnport[NETCHANNELS])
 {
@@ -143,12 +139,10 @@ error:
 static void
 print_help (const char *program_name)
 {
-	printf ("%s [[[ porta_locale ] ip ] porta ] ...\n",
-	        program_name);
+	printf ("%s [ porta_locale ip porta ip porta ip porta ]\n",
+			program_name);
 	printf ("\n"
 "Attende la connessione dal Sender su porta_locale e si connette al\n"
-"Ritardatore, che deve essere in ascolto sugli indirizzi ip:porta. Se un\n"
-"un argomento non viene specificato oppure e' -, viene usato il valore\n"
-"predefinito.\n"
-		);
+"Ritardatore, che deve essere in ascolto sugli indirizzi ip:porta.\n"
+"Per utilizzare il valore predefinito di un parametro, specificare '-'\n");
 }

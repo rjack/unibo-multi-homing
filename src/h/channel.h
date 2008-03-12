@@ -38,7 +38,6 @@ channel_init (cd_t cd, port_t listport, char *connip, port_t connport);
 
 void
 channel_invalidate (cd_t cd);
-/* Rende il canale inutilizzabile. */
 
 
 bool

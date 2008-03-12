@@ -14,7 +14,7 @@
 *******************************************************************************/
 
 /*
- * Funzioni su struct sockaddr_in.
+ * Funzioni su struct sockaddr_in e porte.
  */
 
 bool
@@ -24,13 +24,12 @@ addr_is_set (struct sockaddr_in *addr)
 	 * altrimenti.
 	 *
 	 * XXX Non controlla tutta la struttura, si affida al valore di
-	 * sin_family. */
+	 * XXX sin_family. */
 
 	assert (addr != NULL);
 
-	if (addr->sin_family == AF_INET) {
+	if (addr->sin_family == AF_INET)
 		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -48,7 +47,7 @@ addrstr (struct sockaddr_in *addr, char *buf)
 
 	/* Copia dell'indirizzo ip. */
 	name = (char *) inet_ntop (AF_INET, &addr->sin_addr, buf,
-	                           INET_ADDRSTRLEN);
+			INET_ADDRSTRLEN);
 	assert (name != NULL);
 
 	/* Copia del numero di porta. */
@@ -76,12 +75,10 @@ set_addr (struct sockaddr_in *addr, char *ip, port_t port)
 	memset (addr, 0, sizeof (struct sockaddr_in));
 	addr->sin_family = AF_INET;
 
-	if (ip == NULL) {
+	if (ip == NULL)
 		addr->sin_addr.s_addr = htonl (INADDR_ANY);
-	} else if (inet_pton (AF_INET, ip, &addr->sin_addr) == 0) {
-		/* La stringa ip non ha un formato valido. */
+	else if (inet_pton (AF_INET, ip, &addr->sin_addr) == 0)
 		return -1;
-	}
 	addr->sin_port = htons (port);
 
 	return 0;
@@ -95,7 +92,7 @@ set_addr (struct sockaddr_in *addr, char *ip, port_t port)
 bool
 streq (char *str1, char *str2)
 {
-	/* Ritorna TRUE se due stringhe sono uguali. */
+	/* Ritorna TRUE se le due stringhe sono uguali. */
 
 	int cmp;
 
@@ -117,10 +114,8 @@ void
 xfree (void *ptr)
 {
 	/* Free sicura. */
-
-	if (ptr != NULL) {
+	if (ptr != NULL)
 		free (ptr);
-	}
 }
 
 
@@ -150,20 +145,21 @@ xmalloc (size_t size)
  */
 
 int
-tcp_close (fd_t *fd)
+tcp_close (fd_t *fdprt)
 {
-	/* Chiude il file descriptor puntato da fd e lo inizializza a -1. */
+	/* Chiude il file descriptor puntato da fdprt e lo inizializza a -1.
+	 * Ritorna il valore e l'errno di close. */
 
 	int err;
 
-	assert (fd != NULL);
-	assert (*fd >= 0);
+	assert (fdprt != NULL);
+	assert (*fdprt >= 0);
 
 	do {
-		err = close (*fd);
+		err = close (*fdprt);
 	} while (err == -1 && errno == EINTR);
 
-	*fd = -1;
+	*fdprt = -1;
 	return err;
 }
 

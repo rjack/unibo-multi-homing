@@ -33,14 +33,13 @@ static cd_t rrcd;
 /* Buffer applicazione. */
 static cqueue_t *host_rcvbuf;
 static cqueue_t *host_sndbuf;
-
 static rqueue_t *net_rcvbuf[NETCHANNELS];
 static rqueue_t *net_sndbuf[NETCHANNELS];
 
 /* Code dei segmenti urgenti. */
 static struct segwrap *urgentq;
-/* Code urgenti dedicate ai canali con il ritardatore, contiente CRIT, ACK e
- * NAK. */
+/* Code urgenti per i segmenti assegnati a un particolare canale con il con il
+ * ritardatore; contiente CRIT, ACK e NAK. */
 static struct segwrap *urgentq_priv[NETCHANNELS];
 
 /* Coda dei segmenti ricevuti dal ritardatore. */
@@ -51,6 +50,7 @@ static seq_t outseq;
 /* Ultimo seqnum inviato all'host. */
 static seq_t last_sent;
 
+/* Ultimo ack ricevuto dal Proxy Sender. */
 static struct segwrap *last_ack_rcvd;
 static bool ack_handled;
 
@@ -110,9 +110,6 @@ channel_can_write (cd_t cd)
 void
 channel_close (cd_t cd)
 {
-	/* Rimuove tutti i segwrap dalla rqueue di upload, li travasa nella
-	 * urgentq e invalida il canale. */
-
 	fprintf (stderr, "Canale %d CHIUSO\n", cd);
 
 	/* Chiusura socket. */
@@ -516,6 +513,7 @@ get_last_sent_to_host (void)
 	return last_sent;
 }
 
+
 void
 join_add (struct segwrap *sw)
 {
@@ -686,18 +684,16 @@ accept_connection (cd_t cd)
 	assert (!(ch[cd].c_sockfd < 0
 	          && (errno == EAGAIN || errno == EWOULDBLOCK)));
 
-	if (ch[cd].c_sockfd < 0) {
+	if (ch[cd].c_sockfd < 0)
 		fprintf (stderr, "Canale %s, accept fallita: %s\n",
 				channel_name (cd), strerror (errno));
-	}
 
 	/* A prescindere dall'esito dell'accept, chiusura del socket
 	 * listening. */
 	tcp_close (&ch[cd].c_listfd);
 
-	if (ch[cd].c_sockfd < 0) {
+	if (ch[cd].c_sockfd < 0)
 		return -1;
-	}
 
 	err = tcp_set_block (ch[cd].c_sockfd, FALSE);
 	assert (!err);
