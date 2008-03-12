@@ -73,3 +73,12 @@ struttura, ma la inserisce in una coda di strutture riutilizzabili. Tutte le
 allocazioni del programma vengono eseguite attraverso la funzione xmalloc,
 che, se fallisce una prima volta, svuota la cache dei pacchetti non utilizzati
 e riprova la malloc.
+
+  Test effettuati
+
+  Il sistema e' stato provato con varie percentuali di errore e si e'
+dimostrato accettabile finche' il valore e' minore o uguale a 0.006. Valori
+piu' alti provocano ritardi ingestibili.
+Il blocco di un canale e' sopportato bene con valori minori o uguali a 0.003.
+Il blocco di due canali e' sopportato bene con valori minori o uguali a 0.001.
+Tutti i test sono stati effettuati con la stessa configurazione dei programmi.
