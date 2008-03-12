@@ -1,6 +1,5 @@
 #include "h/core.h"
 #include "h/channel.h"
-#include "h/getargs.h"
 #include "h/segment.h"
 #include "h/timeout.h"
 #include "h/util.h"
@@ -86,8 +85,47 @@ static int
 get_precv_args (int argc, char **argv, port_t netlistport[NETCHANNELS],
 		char **hostconnaddr, port_t *hostconnport)
 {
-	/* TODO get_precv_args */
+	int i;
+	int j;	/* Itera su argv. */
+	char *errmsg;
+
+	/* Errore e default. */
+	if (argc != 1 && argc != 6) {
+		errmsg = "Numero di argomenti errato.";
+		goto error;
+	}
+	if (argc == 1)
+		goto success;
+
+	/* Porte di ascolto connessioni Ritardatore. */
+	for (i = 0, j = 1; i < NETCHANNELS; i++, j++)
+		if (!streq (argv[j], "-")) {
+			char *end;
+			netlistport[i] = strtol (argv[j], &end, 10);
+			if (errno != 0 || argv[j] == end || *end!= '\0') {
+				errmsg = "Porta non valida.";
+				goto error;
+			}
+		}
+
+	/* Indirizzo connessione Receiver. */
+	if (!streq (argv[j], "-"))
+		*hostconnaddr = argv[j];
+	j++;
+	if (!streq (argv[j], "-")) {
+		char *end;
+		*hostconnport = strtol (argv[j], &end, 10);
+		if (errno != 0 || argv[j] == end || *end!= '\0') {
+			errmsg = "Porta non valida.";
+			goto error;
+		}
+	}
+
+success:
 	return 0;
+error:
+	fprintf (stderr, "%s\n", errmsg);
+	return -1;
 }
 
 

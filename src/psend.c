@@ -1,6 +1,5 @@
 #include "h/core.h"
 #include "h/channel.h"
-#include "h/getargs.h"
 #include "h/segment.h"
 #include "h/timeout.h"
 #include "h/util.h"
@@ -95,8 +94,49 @@ get_psend_args (int argc, char **argv,
 		char *netconnaddr[NETCHANNELS],
 		port_t netconnport[NETCHANNELS])
 {
-	/* TODO get_psend_args */
+	int i;
+	int j;	/* Itera su argv. */
+	char *errmsg;
+
+	/* Errore e default. */
+	if (argc != 1 && argc != 8) {
+		errmsg = "Numero di argomenti errato.";
+		goto error;
+	}
+	if (argc == 1)
+		goto success;
+
+	/* Porta di ascolto connessione Sender. */
+	if (!streq (argv[1], "-")) {
+		char *end;
+		*hostlistport = strtol (argv[1], &end, 10);
+		if (errno != 0 || argv[1] == end || *end!= '\0') {
+			errmsg = "Porta non valida.";
+			goto error;
+		}
+	}
+
+	/* Porte e ip connessioni Ritardatore. */
+	for (i = 0, j = 2; i < NETCHANNELS; i++, j++) {
+		if (!streq (argv[j], "-"))
+			netconnaddr[i] = argv[j];
+		j++;
+		if (!streq (argv[j], "-")) {
+			char *end;
+			netconnport[i] = strtol (argv[j], &end, 10);
+			if (errno != 0 || argv[j] == end || *end!= '\0') {
+				errmsg = "Porta non valida.";
+				goto error;
+			}
+		}
+	}
+
+
+success:
 	return 0;
+error:
+	fprintf (stderr, "%s\n", errmsg);
+	return -1;
 }
 
 
