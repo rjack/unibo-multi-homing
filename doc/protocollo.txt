@@ -4,39 +4,43 @@
 
 			   PROTOCOLLO APPLICAZIONE
 
-  Formato segmento
+  Formato segmenti
 
-dati:	| FLG | SEQ | LEN* | PLD ...//.. |
+dati:	| FLG | SEQ | *LEN | PLD ...//... |
 nak:	| FLG | SEQ |
 ack:	| FLG | SEQ |
 
   * = opzionale
 
-Tutti i campi sono lunghi un byte.
+  Tutti i campi sono lunghi un byte.
 Il payload di default e' 255 byte. Se minore, la sua lunghezza e' specificata
-dal campo LEN e una bit in FLG indica che il payload non ha lunghezza
-standard.
+dal campo LEN e un bit in FLG indica che il payload non ha lunghezza standard.
 
 
   Algoritmo di routing
 
-Il proxy sender forma i pacchetti e li instrada in maniera round-robin. A
-priori non c'e' controllo di efficienza dei canali ne' un algoritmo di scelta
-del canale migliore: un segmento per ogni canale connesso.
+  Il Proxy Sender legge di dati dal Sender e li salva in un buffer da cui
+forma i segmenti e li instrada in maniera round-robin alle connessioni con il
+Ritardatore. A priori non c'e' alcun controllo di efficienza dei canali ne' un
+algoritmo di scelta del canale migliore: semplicemente, ad ogni ciclo, si
+assegna un segmento per ogni canale connesso, fino ad esaurimento pacchetti o
+esaurimento spazio nel buffer di upload del canale con il Ritardatore.
 
-Il proxy receiver attende i segmenti e li riordina, spedendo i consecutivi al
-Receiver.
-Ogni pacchetto che arriva fuori ordine genera uno o piu' nak che vengono
-inviati al Proxy Sender per chiedere la rispedizione di quelli mancanti. I nak
-non vengono spediti immediatamente; solo se allo scadere di TONAK_VAL timeout
-non e' arrivato il pacchetto mancante associato al timeout.
+  Il Proxy Receiver attende i segmenti e li riordina, riassemblando i
+consecutivi che vengono inviati al Receiver. Ogni segmento che arriva fuori
+ordine genera uno o piu' nak che vengono inviati al Proxy Sender per chiedere
+la rispedizione dei segmenti mancanti.
+I nak non vengono spediti immediatamente per evitare di inviare richieste
+superflue; ogni nak ha associato un timeout TONAK, allo scadere del quale il
+nak viene effettivamente spedito. Se il segmento atteso arriva prima dello
+scadere, il nak viene eliminato prima di essere inviato.
 
-Alla ricezione di un nak, il Proxy Sender recupera il segmento dalla struttura
-ht_sent, lo marca come CRITICO e accoda alla struttura dei segmenti urgenti.
-I segmenti con il bit CRTFLAG vengono spediti su ogni canale per essere certi
-che non vengano ritardati.
+  Alla ricezione di un nak, il Proxy Sender recupera il segmento dalla
+struttura ht_sent, lo marca come critico e lo inserisce nella struttura dei
+segmenti urgenti. I segmenti con il bit CRTFLAG, insieme agli ack e ai nak,
+vengono spediti su ogni canale per essere certi che non vengano ritardati. 
 
-Le code di upload dei Proxy vengono mantenute ordinate sulla priorita' dei
+  Le code di upload dei Proxy vengono mantenute ordinate sulla priorita' dei
 segmenti:
 
 	0. nak
@@ -47,6 +51,25 @@ segmenti:
 
   Blocco dei canali
 
-I proxy mantengono un timeout di attivita' per ogni canale di rete. Allo
-scadere il canale e' considerato inattivo, chiuso, invalidato e tutti i
-segmenti uscenti vengono reinseriti nella struttura dei segmenti urgenti.
+  I proxy mantengono un timeout di attivita', TOACT, per ogni canale di
+rete. Allo scadere il canale e' considerato inattivo, chiuso, invalidato e
+tutti i segmenti uscenti vengono reinseriti nella struttura dei segmenti
+urgenti.
+
+  I segmenti ack vengono spediti solo dal Proxy Receiver e hanno il duplice
+scopo di conferma e di ping. Il Proxy Sender alla ricezione di un ack resetta
+in timeout di attivita' ed elimina da tutte le strutture dati di upload i
+segmenti con numero di sequenza minore o uguale a quello confermato.
+
+
+  Gestione della memoria
+
+  Per evitare spostamenti di dati e riallocazioni, i buffer applicazione di
+ogni canale sono code circolari implementate con array di dimensione fissa.
+
+  Per evitare continue allocazioni e deallocazioni dovute alla creazione ed
+eliminazione dei segmenti, la funzione segwrap_destroy non dealloca la
+struttura, ma la inserisce in una coda di strutture riutilizzabili. Tutte le
+allocazioni del programma vengono eseguite attraverso la funzione xmalloc,
+che, se fallisce una prima volta, svuota la cache dei pacchetti non utilizzati
+e riprova la malloc.
