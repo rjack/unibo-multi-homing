@@ -23,6 +23,7 @@ core (void)
 	fd_t maxfd;
 	fd_set rdset;
 	fd_set wrset;
+	bool first_iteration;
 	double min_timeout;
 	struct timeval tv_timeout;
 
@@ -32,10 +33,19 @@ core (void)
 		        "\nOCCHIO!!!\nTIMEOUT ATTIVITA' = %f\n\n",
 		        TOACT_VAL);
 
+	first_iteration = TRUE;
 	do {
 		activate_channels ();
 
+		/* Occhio! Puo' chiudere canali. */
 		min_timeout = check_timeouts ();
+
+		if (!proxy_is_running ()) {
+			if (first_iteration)
+				first_iteration = FALSE;
+			else
+				goto shutdown;
+		}
 
 		/* Lo stato dei canali p_net e' controllato dalle funzioni. */
 		if (channel_is_connected (HOSTCD)) {
@@ -131,5 +141,14 @@ core (void)
 			}
 		}
 	} while (proxy_is_running ());
+
+
+	/* Saluti e baci. */
+shutdown:
+	for (cd = 0; cd < CHANNELS; cd++)
+		if (channel_is_connected (cd))
+			channel_close (cd);
+
+	printf ("Bye\n");
 	return 0;
 }

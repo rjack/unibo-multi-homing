@@ -382,6 +382,8 @@ channel_name (cd_t cd)
 void
 channel_prepare_io (cd_t cd)
 {
+	int err;
+
 	assert (VALID_CD (cd));
 
 	if (cd == HOSTCD) {
@@ -414,6 +416,13 @@ channel_prepare_io (cd_t cd)
 
 		timeout_reset (ch[cd].c_activity);
 		add_timeout (ch[cd].c_activity, TOACT);
+	}
+
+	/* Disabilita Nagle. */
+	err = tcp_set_nagle (ch[cd].c_sockfd, FALSE);
+	if (err) {
+		perror ("tcp_set_nagle");
+		fprintf (stderr, "!!! Canale %d TCP_NODELAY fallito!\n", cd);
 	}
 }
 
@@ -673,6 +682,7 @@ proxy_is_running (void)
 		    || channel_is_listening (cd)
 		    || channel_is_connecting (cd))
 			return TRUE;
+
 	return FALSE;
 }
 
@@ -974,10 +984,6 @@ connect_noblock (cd_t cd)
 	err = tcp_set_block (chptr->c_sockfd, FALSE);
 	if (err)
 		goto error;
-
-	/*
-	 * FIXME dove disabilitare Nagle?
-	 */
 
 	if (chptr->c_tcp_rcvbuf_len > 0) {
 		err = tcp_set_buffer_size (chptr->c_sockfd, SO_RCVBUF,

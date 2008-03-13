@@ -47,8 +47,6 @@ typedef int cd_t;     /* canali */
  * Puntatori a funzione.
  */
 typedef void (*timeout_handler_t)(int args);
-typedef bool (*condition_checker_t)(void *args);
-typedef int (*io_performer_t)(fd_t fd, void *args);
 
 /*
  * Campi dei segmenti.
@@ -127,13 +125,9 @@ typedef uint8_t seg_t;
 #define     HDRMINLEN     (FLGLEN + SEQLEN)
 #define     HDRMAXLEN     (FLGLEN + SEQLEN + LENLEN)
 
-/* XXX sono possibili payload minori di PLDMINLEN, e' solo indicativo.
- * XXX PLDMAXLEN invece e' un limite reale. */
-#define     PLDMINLEN     (HDRMAXLEN * 2)
 #define     PLDMAXLEN     UINT8_MAX
 #define     PLDDEFLEN     PLDMAXLEN
 
-#define     SEGMINLEN     (PLDMINLEN + HDRMAXLEN)
 #define     SEGMAXLEN     (PLDMAXLEN + HDRMAXLEN)
 
 #define     NAKLEN        FLGLEN + SEQLEN
