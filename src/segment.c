@@ -54,11 +54,11 @@ handle_rcvd_segment (struct segwrap *rcvd)
 	segwrap_print ("RCV", rcvd);
 #endif
 
-	if (seg_is_nak (rcvd->sw_seg)) {
+	if (seg_is_nak (rcvd->sw_seg))
 		handle_rcvd_nak (rcvd);
-	} else if (seg_is_ack (rcvd->sw_seg)) {
+	else if (seg_is_ack (rcvd->sw_seg))
 		handle_rcvd_ack (rcvd);
-	} else {
+	else {
 		assert (seg_pld (rcvd->sw_seg) != NULL);
 		join_add (rcvd);
 	}
@@ -356,11 +356,6 @@ segwrap_print (char *tag, struct segwrap *sw)
 	printf ("%s %u,%d,%d/%d ", tag, sw->sw_seg[FLG], seg_seq (sw->sw_seg),
 			pldlen, sw->sw_seglen);
 
-	/*
-	if (pld != NULL) for (i = 0; i < pldlen; i++) {
-		putchar (pld[i]);
-	}
-	*/
 	putchar ('\n');
 }
 

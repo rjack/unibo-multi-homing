@@ -101,9 +101,8 @@ tv2d (struct timeval *tv, bool must_free)
 
 	result = tv->tv_sec + (double)tv->tv_usec / (double)ONE_MILLION;
 
-	if (must_free) {
+	if (must_free)
 		xfree (tv);
-	}
 
 	return result;
 }

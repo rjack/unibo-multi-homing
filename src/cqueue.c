@@ -249,7 +249,6 @@ cqueue_read (fd_t fd, cqueue_t *cq)
 	assert (fd > 0);
 	assert (cq != NULL);
 	assert (cqueue_get_aval (cq) > 0);
-	/* TODO assert (NONBLOCK); */
 
 	chunk = cqueue_get_aval_chunk (cq);
 	assert (chunk > 0);
@@ -332,7 +331,6 @@ cqueue_write (fd_t fd, cqueue_t *cq)
 	assert (fd > 0);
 	assert (cq != NULL);
 	assert (cqueue_get_used (cq) > 0);
-	/* TODO assert (NONBLOCK); */
 
 	chunk = cqueue_get_used_chunk (cq);
 	assert (chunk > 0);
