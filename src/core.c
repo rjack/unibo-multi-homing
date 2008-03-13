@@ -32,7 +32,7 @@ core (void)
 		        "\nOCCHIO!!!\nTIMEOUT ATTIVITA' = %f\n\n",
 		        TOACT_VAL);
 
-	for (;;) {
+	do {
 		activate_channels ();
 
 		min_timeout = check_timeouts ();
@@ -130,6 +130,6 @@ core (void)
 				}
 			}
 		}
-	}
+	} while (proxy_is_running ());
 	return 0;
 }

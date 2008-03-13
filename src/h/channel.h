@@ -110,6 +110,11 @@ proxy_init (port_t hostlistport,
 		port_t netlistport[NETCHANNELS],
 		char *hostconnaddr, port_t hostconnport);
 
+
+bool
+proxy_is_running (void);
+
+
 int
 accept_connection (cd_t cd);
 

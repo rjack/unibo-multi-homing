@@ -662,6 +662,21 @@ error:
 }
 
 
+bool
+proxy_is_running (void)
+{
+	cd_t cd;
+
+	for (cd = NETCD; cd < NETCD + NETCHANNELS; cd++)
+		if (channel_is_connected (cd) 
+		    || channel_is_activable (cd)
+		    || channel_is_listening (cd)
+		    || channel_is_connecting (cd))
+			return TRUE;
+	return FALSE;
+}
+
+
 int
 accept_connection (cd_t cd)
 {
@@ -712,7 +727,11 @@ activate_channels (void)
 
 		if (channel_must_connect (i)) {
 			err = connect_noblock (i);
-			assert (!err); /* FIXME controllo errore decente. */
+			if (err) {
+				perror ("connect_noblock");
+				channel_close (i);
+				continue;
+			}
 
 			/* Connect gia' conclusa, recupera nome del socket. */
 			if (errno != EINPROGRESS) {
@@ -726,14 +745,15 @@ activate_channels (void)
 		}
 		else if (channel_must_listen (i)) {
 			err = listen_noblock (i);
-			assert (!err); /* FIXME controllo errore decente. */
-
-			printf ("Canale %s in ascolto.\n",
-					channel_name (i));
+			if (err) {
+				perror ("listen_noblock");
+				channel_close (i);
+				continue;
+			}
+			printf ("Canale %s in ascolto.\n", channel_name (i));
 		}
-		else {
+		else
 			assert (FALSE);
-		}
 	}
 }
 
