@@ -1,0 +1,4727 @@
+%!PS-Adobe-3.0
+%%Title: src/channel.c
+%%For: jack
+%%Creator: VIM - Vi IMproved 7.1 (2007 May 12)
+%%CreationDate: Fri Mar 14 13:23:25 2008
+%%DocumentData: Clean8Bit
+%%Orientation: Portrait
+%%Pages: (atend)
+%%PageOrder: Ascend
+%%BoundingBox: 59 49 564 800
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%DocumentSuppliedResources: procset VIM-Prolog 1.4 1
+%%+ encoding VIM-latin1 1.0 0
+%%Requirements: duplex collate color
+%%EndComments
+%%BeginDefaults
+%%PageResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%PageMedia: A4
+%%EndDefaults
+%%BeginProlog
+%%BeginResource: procset VIM-Prolog
+%%BeginDocument: /usr/share/vim/vim71/print/prolog.ps
+%!PS-Adobe-3.0 Resource-ProcSet
+%%Title: VIM-Prolog
+%%Version: 1.4 1
+%%EndComments
+% Editing of this file is NOT RECOMMENDED.  You run a very good risk of causing
+% all PostScript printing from VIM failing if you do.  PostScript is not called
+% a write-only language for nothing!
+/packedarray where not{userdict begin/setpacking/pop load def/currentpacking
+false def end}{pop}ifelse/CP currentpacking def true setpacking
+/bd{bind def}bind def/ld{load def}bd/ed{exch def}bd/d/def ld
+/db{dict begin}bd/cde{currentdict end}bd
+/T true d/F false d
+/SO null d/sv{/SO save d}bd/re{SO restore}bd
+/L2 systemdict/languagelevel 2 copy known{get exec}{pop pop 1}ifelse 2 ge d
+/m/moveto ld/s/show ld /ms{m s}bd /g/setgray ld/r/setrgbcolor ld/sp{showpage}bd
+/gs/gsave ld/gr/grestore ld/cp/currentpoint ld
+/ul{gs UW setlinewidth cp UO add 2 copy newpath m 3 1 roll add exch lineto
+stroke gr}bd
+/bg{gs r cp BO add 4 -2 roll rectfill gr}bd
+/sl{90 rotate 0 exch translate}bd
+L2{
+/sspd{mark exch{setpagedevice}stopped cleartomark}bd
+/nc{1 db/NumCopies ed cde sspd}bd
+/sps{3 db/Orientation ed[3 1 roll]/PageSize ed/ImagingBBox null d cde sspd}bd
+/dt{2 db/Tumble ed/Duplex ed cde sspd}bd
+/c{1 db/Collate ed cde sspd}bd
+}{
+/nc{/#copies ed}bd
+/sps{statusdict/setpage get exec}bd
+/dt{statusdict/settumble 2 copy known{get exec}{pop pop pop}ifelse
+statusdict/setduplexmode 2 copy known{get exec}{pop pop pop}ifelse}bd
+/c{pop}bd
+}ifelse
+/ffs{findfont exch scalefont d}bd/sf{setfont}bd
+/ref{1 db findfont dup maxlength dict/NFD ed{exch dup/FID ne{exch NFD 3 1 roll
+put}{pop pop}ifelse}forall/Encoding findresource dup length 256 eq{NFD/Encoding
+3 -1 roll put}{pop}ifelse NFD dup/FontType get 3 ne{/CharStrings}{/CharProcs}
+ifelse 2 copy known{2 copy get dup maxlength dict copy[/questiondown/space]{2
+copy known{2 copy get 2 index/.notdef 3 -1 roll put pop exit}if pop}forall put
+}{pop pop}ifelse dup NFD/FontName 3 -1 roll put NFD definefont pop end}bd
+CP setpacking
+(\004)cvn{}bd
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%BeginResource: encoding VIM-latin1
+%%BeginDocument: /usr/share/vim/vim71/print/latin1.ps
+%!PS-Adobe-3.0 Resource-Encoding
+%%Title: VIM-latin1
+%%Version: 1.0 0
+%%EndComments
+/VIM-latin1[
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash
+/zero /one /two /three /four /five /six /seven
+/eight /nine /colon /semicolon /less /equal /greater /question
+/at /A /B /C /D /E /F /G
+/H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+/grave /a /b /c /d /e /f /g
+/h /i /j /k /l /m /n /o
+/p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis]
+/Encoding defineresource pop
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%EndProlog
+%%BeginSetup
+595 842 0 sps
+1 nc
+T F dt
+T c
+%%IncludeResource: font Courier
+/_F0 /VIM-latin1 /Courier ref
+/F0 10 /_F0 ffs
+%%IncludeResource: font Courier-Bold
+/_F1 /VIM-latin1 /Courier-Bold ref
+/F1 10 /_F1 ffs
+%%IncludeResource: font Courier-Oblique
+/_F2 /VIM-latin1 /Courier-Oblique ref
+/F2 10 /_F2 ffs
+%%IncludeResource: font Courier-BoldOblique
+/_F3 /VIM-latin1 /Courier-BoldOblique ref
+/F3 10 /_F3 ffs
+/UO -1 d
+/UW 0.5 d
+/BO -2.5 d
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 1)59.5 792.4 ms
+0 0 0.498 r
+(#include )59.5 772.4 ms
+0.498 0 0.498 r
+("h/channel.h")s
+0 0 0.498 r
+(#include )59.5 762.4 ms
+0.498 0 0.498 r
+("h/cqueue.h")s
+0 0 0.498 r
+(#include )59.5 752.4 ms
+0.498 0 0.498 r
+("h/rqueue.h")s
+0 0 0.498 r
+(#include )59.5 742.4 ms
+0.498 0 0.498 r
+("h/segment.h")s
+0 0 0.498 r
+(#include )59.5 732.4 ms
+0.498 0 0.498 r
+("h/seghash.h")s
+0 0 0.498 r
+(#include )59.5 722.4 ms
+0.498 0 0.498 r
+("h/timeout.h")s
+0 0 0.498 r
+(#include )59.5 712.4 ms
+0.498 0 0.498 r
+("h/types.h")s
+0 0 0.498 r
+(#include )59.5 702.4 ms
+0.498 0 0.498 r
+("h/util.h")s
+0 0 0.498 r
+(#include )59.5 682.4 ms
+0.498 0 0.498 r
+(<config.h>)s
+0 0 0.498 r
+(#include )59.5 672.4 ms
+0.498 0 0.498 r
+(<string.h>)s
+0 0 0.498 r
+(#if !HAVE_MSG_NOSIGNAL)59.5 662.4 ms
+(#include )59.5 652.4 ms
+0.498 0 0.498 r
+(<signal.h>)s
+0 0 0.498 r
+(#endif)59.5 642.4 ms
+(#define     TYPE     )59.5 622.4 ms
+0 0.498 0 r
+(struct)s
+0 0 0.498 r
+( segwrap)s
+(#define     NEXT     sw_next)59.5 612.4 ms
+(#define     PREV     sw_prev)59.5 602.4 ms
+(#define     EMPTYQ   )59.5 592.4 ms
+0.498 0 0.498 r
+(NULL)s
+0 0 0.498 r
+(#include )59.5 582.4 ms
+0.498 0 0.498 r
+("src/queue_template")s
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 552.4 ms
+(                               Variabili locali)59.5 542.4 ms
+(*******************************************************************************/)59.5 532.4 ms
+(/* Canali. */)59.5 512.4 ms
+0 0.498 0 r
+(static)59.5 502.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( chan ch[CHANNELS];)s
+F1 sf
+0 0.498 0.498 r
+(/* Contatore statico per politica round robin. */)59.5 482.4 ms
+0 0.498 0 r
+(static)59.5 472.4 ms
+F0 sf
+0 g
+( cd_t rrcd;)s
+F1 sf
+0 0.498 0.498 r
+(/* Buffer applicazione. */)59.5 452.4 ms
+0 0.498 0 r
+(static)59.5 442.4 ms
+F0 sf
+0 g
+( cqueue_t *host_rcvbuf;)s
+F1 sf
+0 0.498 0 r
+(static)59.5 432.4 ms
+F0 sf
+0 g
+( cqueue_t *host_sndbuf;)s
+F1 sf
+0 0.498 0 r
+(static)59.5 422.4 ms
+F0 sf
+0 g
+( rqueue_t *net_rcvbuf[NETCHANNELS];)s
+F1 sf
+0 0.498 0 r
+(static)59.5 412.4 ms
+F0 sf
+0 g
+( rqueue_t *net_sndbuf[NETCHANNELS];)s
+F1 sf
+0 0.498 0.498 r
+(/* Code dei segmenti urgenti. */)59.5 392.4 ms
+0 0.498 0 r
+(static)59.5 382.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *urgentq;)s
+F1 sf
+0 0.498 0.498 r
+(/* Code urgenti per i segmenti assegnati a un particolare canale con il con il)59.5 372.4 ms
+( * ritardatore; contiente CRIT, ACK e NAK. */)59.5 362.4 ms
+0 0.498 0 r
+(static)59.5 352.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *urgentq_priv[NETCHANNELS];)s
+F1 sf
+0 0.498 0.498 r
+(/* Coda dei segmenti ricevuti dal ritardatore. */)59.5 332.4 ms
+0 0.498 0 r
+(static)59.5 322.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *joinq;)s
+F1 sf
+0 0.498 0.498 r
+(/* Ultimo seqnum inviato all ritardatore. */)59.5 302.4 ms
+0 0.498 0 r
+(static)59.5 292.4 ms
+F0 sf
+0 g
+( seq_t outseq;)s
+F1 sf
+0 0.498 0.498 r
+(/* Ultimo seqnum inviato all'host. */)59.5 282.4 ms
+0 0.498 0 r
+(static)59.5 272.4 ms
+F0 sf
+0 g
+( seq_t last_sent;)s
+F1 sf
+0 0.498 0.498 r
+(/* Ultimo ack ricevuto dal Proxy Sender. */)59.5 252.4 ms
+0 0.498 0 r
+(static)59.5 242.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *last_ack_rcvd;)s
+F1 sf
+0 0.498 0 r
+(static)59.5 232.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+( ack_handled;)s
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 202.4 ms
+(                                    Macro)59.5 192.4 ms
+(*******************************************************************************/)59.5 182.4 ms
+0 0 0.498 r
+(#define     ROTATE_RRCD     \(rrcd = \(rrcd + )59.5 162.4 ms
+0.498 0 0.498 r
+(1)s
+0 0 0.498 r
+(\) % NETCHANNELS\))s
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 132.4 ms
+(                       Prototipi delle funzioni locali)59.5 122.4 ms
+(*******************************************************************************/)59.5 112.4 ms
+0 0.498 0 r
+(static)59.5 92.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( connect_noblock \(cd_t cd\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 82.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( listen_noblock \(cd_t cd\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 72.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( host2net \()s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 62.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( urg2net \()s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 52.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( netsndbuf_rm_acked \()s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\);)s
+re sp
+%%PageTrailer
+%%Page: 2 2
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 2)59.5 792.4 ms
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 752.4 ms
+(                              Funzioni pubbliche)59.5 742.4 ms
+(*******************************************************************************/)59.5 732.4 ms
+0 0.498 0 r
+(void)59.5 712.4 ms
+F0 sf
+0 g
+(channel_activity_notice \(cd_t cd\))59.5 702.4 ms
+({)59.5 692.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 682.4 ms
+(        timeout_reset \(ch[cd].c_activity\);)59.5 672.4 ms
+(})59.5 662.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 632.4 ms
+F0 sf
+0 g
+(channel_can_read \(cd_t cd\))59.5 622.4 ms
+({)59.5 612.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 602.4 ms
+(        )59.5 582.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\))s
+(                )59.5 572.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_can_read \(host_rcvbuf\);)s
+(        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( rqueue_can_read \(net_rcvbuf[cd]\);)s
+(})59.5 552.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 522.4 ms
+F0 sf
+0 g
+(channel_can_write \(cd_t cd\))59.5 512.4 ms
+({)59.5 502.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 492.4 ms
+(        )59.5 472.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\))s
+(                )59.5 462.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_can_write \(host_sndbuf\);)s
+(        )59.5 452.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( rqueue_can_write \(net_sndbuf[cd]\);)s
+(})59.5 442.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 412.4 ms
+F0 sf
+0 g
+(channel_close \(cd_t cd\))59.5 402.4 ms
+({)59.5 392.4 ms
+(        fprintf \()59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%d)s
+0.498 0 0.498 r
+( CHIUSO)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, cd\);)s
+(        )59.5 362.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Chiusura socket. */)s
+F0 sf
+0 g
+(        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_listfd >= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                tcp_close \(&ch[cd].c_listfd\);)59.5 342.4 ms
+(        )59.5 332.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_sockfd >= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                tcp_close \(&ch[cd].c_sockfd\);)59.5 322.4 ms
+(        )59.5 302.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Svuotamento segmenti. */)s
+F0 sf
+0 g
+(        )59.5 292.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd != HOSTCD\) {)s
+(                )59.5 282.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(net_sndbuf[cd]->rq_sgmt\)\) {)s
+(                        )59.5 272.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw;)s
+(                        sw = qdequeue \(&net_sndbuf[cd]->rq_sgmt\);)59.5 262.4 ms
+(                        urgent_add \(sw\);)59.5 252.4 ms
+(                })59.5 242.4 ms
+(                )59.5 232.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(urgentq_priv[cd]\)\))s
+(                        segwrap_destroy \(qdequeue \(&urgentq_priv[cd]\)\);)59.5 222.4 ms
+(        })59.5 212.4 ms
+(        channel_invalidate \(cd\);)59.5 192.4 ms
+(})59.5 182.4 ms
+(fd_t)59.5 152.4 ms
+(channel_get_listfd \(cd_t cd\))59.5 142.4 ms
+({)59.5 132.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 122.4 ms
+(        )59.5 112.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( ch[cd].c_listfd;)s
+(})59.5 102.4 ms
+(fd_t)59.5 72.4 ms
+(channel_get_sockfd \(cd_t cd\))59.5 62.4 ms
+({)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 3 3
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 3)59.5 792.4 ms
+F0 sf
+(        assert \(VALID_CD \(cd\)\);)59.5 772.4 ms
+(        )59.5 762.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( ch[cd].c_sockfd;)s
+(})59.5 752.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 722.4 ms
+F0 sf
+0 g
+(channel_init \(cd_t cd, port_t listport, )59.5 712.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *connip, port_t connport\))s
+({)59.5 702.4 ms
+(        )59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 672.4 ms
+(        ch[cd].c_sockfd = -)59.5 652.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        ch[cd].c_listfd = -)59.5 642.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        memset \(&ch[cd].c_laddr, )59.5 622.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(ch[cd].c_laddr\)\);)s
+(        memset \(&ch[cd].c_raddr, )59.5 612.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(ch[cd].c_raddr\)\);)s
+(        )59.5 602.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(listport != )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(connip == )59.5 592.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                assert \(connport == )59.5 582.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                err = set_addr \(&ch[cd].c_laddr, )59.5 572.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(, listport\);)s
+(        } )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                assert \(connip != )59.5 552.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                assert \(connport != )59.5 542.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                err = set_addr \(&ch[cd].c_raddr, connip, connport\);)59.5 532.4 ms
+(        })59.5 522.4 ms
+(        )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                )59.5 502.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        ch[cd].c_tcp_rcvbuf_len = )59.5 482.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        ch[cd].c_tcp_sndbuf_len = )59.5 472.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        ch[cd].c_activity = )59.5 452.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        )59.5 442.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd != HOSTCD\) {)s
+(                ch[cd].c_tcp_sndbuf_len = TCP_MIN_SNDBUF_SIZE;)59.5 432.4 ms
+(                ch[cd].c_activity = timeout_create \(TOACT_VAL, channel_close,)59.5 422.4 ms
+(                                cd, FALSE\);)59.5 412.4 ms
+(        })59.5 402.4 ms
+(        )59.5 382.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+F1 sf
+0.498 0.498 0 r
+(error)59.5 362.4 ms
+F0 sf
+0 g
+(:)s
+(        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(})59.5 342.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 312.4 ms
+F0 sf
+0 g
+(channel_invalidate \(cd_t cd\))59.5 302.4 ms
+({)59.5 292.4 ms
+(        )59.5 282.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Dealloca tutte le strutture dati associate al canale. */)s
+F0 sf
+0 g
+(        )59.5 262.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\) {)s
+(                cqueue_destroy \(host_rcvbuf\);)59.5 252.4 ms
+(                cqueue_destroy \(host_sndbuf\);)59.5 242.4 ms
+(        } )59.5 232.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                rqueue_destroy \(net_rcvbuf[cd]\);)59.5 222.4 ms
+(                rqueue_destroy \(net_sndbuf[cd]\);)59.5 212.4 ms
+(                net_rcvbuf[cd] = )59.5 202.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(                net_sndbuf[cd] = )59.5 192.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        })59.5 182.4 ms
+(        )59.5 162.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Timeout attivita'. */)s
+F0 sf
+0 g
+(        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_activity != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                del_timeout \(ch[cd].c_activity, TOACT\);)59.5 142.4 ms
+(                timeout_destroy \(ch[cd].c_activity\);)59.5 132.4 ms
+(        })59.5 122.4 ms
+(        )59.5 102.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Reinizializzazione campi. */)s
+F0 sf
+0 g
+(        memset \(&ch[cd].c_laddr, )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+(\(ch[cd].c_laddr\)\);)s
+(        memset \(&ch[cd].c_raddr, )59.5 82.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+(\(ch[cd].c_raddr\)\);)s
+(        ch[cd].c_tcp_rcvbuf_len = -)59.5 62.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        ch[cd].c_tcp_sndbuf_len = -)59.5 52.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+re sp
+%%PageTrailer
+%%Page: 4 4
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 4)59.5 792.4 ms
+F0 sf
+(        ch[cd].c_activity = )59.5 762.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(})59.5 752.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 722.4 ms
+F0 sf
+0 g
+(channel_is_activable \(cd_t cd\))59.5 712.4 ms
+({)59.5 702.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 692.4 ms
+(        )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\))s
+(            || channel_is_listening \(cd\))59.5 662.4 ms
+(            || \(!addr_is_set \(&ch[cd].c_laddr\))59.5 652.4 ms
+(                && !addr_is_set \(&ch[cd].c_raddr\)\)\))59.5 642.4 ms
+(                )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(        )59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\) {)s
+(                )59.5 602.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Proxy Receiver. */)s
+F0 sf
+0 g
+(                )59.5 592.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_must_connect \(cd\)\) {)s
+(                        )59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+( ok = FALSE;)s
+(                        cd_t ncd = NETCD;)59.5 572.4 ms
+(                        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!ok && ncd < NETCHANNELS\) {)s
+(                                ok = channel_is_connected \(ncd\);)59.5 552.4 ms
+(                                ncd++;)59.5 542.4 ms
+(                        })59.5 532.4 ms
+(                        )59.5 522.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( ok;)s
+(                })59.5 512.4 ms
+(                )59.5 502.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Proxy Sender */)s
+F0 sf
+0 g
+(                )59.5 492.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 482.4 ms
+(        )59.5 462.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* NETCD */)s
+F0 sf
+0 g
+(        )59.5 442.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Proxy Sender. */)s
+F0 sf
+0 g
+(        )59.5 432.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_must_connect \(cd\)\))s
+(                )59.5 422.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( channel_is_connected \(HOSTCD\);)s
+(        )59.5 412.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Proxy Receiver. */)s
+F0 sf
+0 g
+(        )59.5 402.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(})59.5 392.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 362.4 ms
+F0 sf
+0 g
+(channel_is_connected \(cd_t cd\))59.5 352.4 ms
+({)59.5 342.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 332.4 ms
+(        )59.5 312.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_listfd < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(            && ch[cd].c_sockfd >= )59.5 302.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(            && addr_is_set \(&ch[cd].c_laddr\))59.5 292.4 ms
+(            && addr_is_set \(&ch[cd].c_raddr\)\))59.5 282.4 ms
+(                )59.5 272.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 242.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 212.4 ms
+F0 sf
+0 g
+(channel_is_connecting \(cd_t cd\))59.5 202.4 ms
+({)59.5 192.4 ms
+(        )59.5 182.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Se il socket del canale e' valido ed e' impostato solo l'addr)s
+(         * remoto e non quello locale, allora c'e' una connect non bloccante)59.5 172.4 ms
+(         * in corso. */)59.5 162.4 ms
+F0 sf
+0 g
+(        assert \(VALID_CD \(cd\)\);)59.5 142.4 ms
+(        )59.5 122.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_sockfd >= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(            && !addr_is_set \(&ch[cd].c_laddr\))59.5 112.4 ms
+(            && addr_is_set \(&ch[cd].c_raddr\)\) {)59.5 102.4 ms
+(                assert \(ch[cd].c_listfd < )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 82.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 72.4 ms
+(        )59.5 62.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 5 5
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 5)59.5 792.4 ms
+0 0.498 0 r
+(bool)59.5 752.4 ms
+F0 sf
+0 g
+(channel_is_listening \(cd_t cd\))59.5 742.4 ms
+({)59.5 732.4 ms
+(        )59.5 722.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Se il socket listening del canale e' valido ed e' impostato l'addr)s
+(         * locale ma non quello remoto, allora il canale e' in ascolto. */)59.5 712.4 ms
+F0 sf
+0 g
+(        assert \(VALID_CD \(cd\)\);)59.5 692.4 ms
+(        )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_listfd >= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(            && addr_is_set \(&ch[cd].c_laddr\))59.5 662.4 ms
+(            && !addr_is_set \(&ch[cd].c_raddr\)\) {)59.5 652.4 ms
+(                assert \(ch[cd].c_sockfd < )59.5 642.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 622.4 ms
+(        )59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 602.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 572.4 ms
+F0 sf
+0 g
+(channel_must_connect \(cd_t cd\))59.5 562.4 ms
+({)59.5 552.4 ms
+(        )59.5 542.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Il canale deve essere connesso se l'indirizzo remoto e' impostato,)s
+(         * ma il socket non e' un fd valido. */)59.5 532.4 ms
+F0 sf
+0 g
+(        assert \(VALID_CD \(cd\)\);)59.5 512.4 ms
+(        )59.5 492.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(!addr_is_set \(&ch[cd].c_laddr\))s
+(            && addr_is_set \(&ch[cd].c_raddr\))59.5 482.4 ms
+(            && ch[cd].c_sockfd < )59.5 472.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(ch[cd].c_listfd < )59.5 462.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 452.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 442.4 ms
+(        )59.5 432.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 422.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 392.4 ms
+F0 sf
+0 g
+(channel_must_listen \(cd_t cd\))59.5 382.4 ms
+({)59.5 372.4 ms
+(        )59.5 362.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Il canale deve essere messo in ascolto se l'indirizzo locale e')s
+(         * impostato, ma il socket listening non e' un fd valido. */)59.5 352.4 ms
+F0 sf
+0 g
+(        assert \(VALID_CD \(cd\)\);)59.5 332.4 ms
+(        )59.5 312.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(addr_is_set \(&ch[cd].c_laddr\))s
+(            && !addr_is_set \(&ch[cd].c_raddr\))59.5 302.4 ms
+(            && ch[cd].c_listfd < )59.5 292.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(ch[cd].c_sockfd < )59.5 282.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 272.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 262.4 ms
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 242.4 ms
+F1 sf
+0 0.498 0 r
+(char)59.5 212.4 ms
+F0 sf
+0 g
+( *)s
+(channel_name \(cd_t cd\))59.5 202.4 ms
+({)59.5 192.4 ms
+(        )59.5 182.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna una stringa allocata staticamente e terminata da '\\0' della)s
+(         * forma "xxx.xxx.xxx.xxx:yyyyy - xxx.xxx.xxx.xxx:yyyyy", dove il)59.5 172.4 ms
+(         * primo e' l'indirizzo locale, il secondo quello remoto. */)59.5 162.4 ms
+F0 sf
+0 g
+(        )59.5 142.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *bufptr;)s
+(        )59.5 132.4 ms
+F1 sf
+0 0.498 0 r
+(static)s
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( bufname[)s
+F1 sf
+0.498 0 0.498 r
+(46)s
+F0 sf
+0 g
+(];)s
+(        assert \(VALID_CD \(cd\)\);)59.5 112.4 ms
+(        memset \(bufname, )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(bufname\)\);)s
+(        )59.5 72.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Indirizzo locale. */)s
+F0 sf
+0 g
+(        bufptr = addrstr \(&ch[cd].c_laddr, bufname\);)59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Page: 6 6
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 6)59.5 792.4 ms
+F0 sf
+(        )59.5 772.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Separatore. */)s
+F0 sf
+0 g
+(        strcpy \(bufptr, )59.5 762.4 ms
+F1 sf
+0.498 0 0.498 r
+(" - ")s
+F0 sf
+0 g
+(\);)s
+(        bufptr = strchr \(bufptr, )59.5 742.4 ms
+F1 sf
+0.498 0 0 r
+('\\0')s
+F0 sf
+0 g
+(\);)s
+(        assert \(bufptr != )59.5 732.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 712.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Indirizzo remoto. */)s
+F0 sf
+0 g
+(        bufptr = addrstr \(&ch[cd].c_raddr, bufptr\);)59.5 702.4 ms
+(        )59.5 682.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Overflow? */)s
+F0 sf
+0 g
+(        assert \(bufname[)59.5 672.4 ms
+F1 sf
+0.498 0 0.498 r
+(45)s
+F0 sf
+0 g
+(] == )s
+F1 sf
+0.498 0 0 r
+('\\0')s
+F0 sf
+0 g
+(\);)s
+(        )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( bufname;)s
+(})59.5 642.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 612.4 ms
+F0 sf
+0 g
+(channel_prepare_io \(cd_t cd\))59.5 602.4 ms
+({)59.5 592.4 ms
+(        )59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 562.4 ms
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\) {)s
+(                )59.5 532.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( buflen;)s
+(                assert \(host_rcvbuf == )59.5 512.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                assert \(host_sndbuf == )59.5 502.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                buflen = tcp_get_buffer_size \(ch[cd].c_sockfd, SO_RCVBUF\);)59.5 482.4 ms
+(                host_rcvbuf = cqueue_create \(buflen\);)59.5 472.4 ms
+(                buflen = tcp_get_buffer_size \(ch[cd].c_sockfd, SO_SNDBUF\);)59.5 452.4 ms
+(                host_sndbuf = cqueue_create \(buflen\);)59.5 442.4 ms
+(        })59.5 432.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* NET */)s
+F0 sf
+0 g
+(        )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                )59.5 402.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( buflen;)s
+(                assert \(net_rcvbuf[cd] == )59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                assert \(net_sndbuf[cd] == )59.5 372.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                buflen = MAX \(SEGMAXLEN,)59.5 352.4 ms
+(                                tcp_get_buffer_size \(ch[cd].c_sockfd,)59.5 342.4 ms
+(                                        SO_RCVBUF\)\))59.5 332.4 ms
+(                        + SEGMAXLEN;)59.5 322.4 ms
+(                net_rcvbuf[cd] = rqueue_create \(buflen\);)59.5 312.4 ms
+(                buflen = SEGMAXLEN;)59.5 292.4 ms
+(                net_sndbuf[cd] = rqueue_create \(buflen\);)59.5 282.4 ms
+(                timeout_reset \(ch[cd].c_activity\);)59.5 262.4 ms
+(                add_timeout \(ch[cd].c_activity, TOACT\);)59.5 252.4 ms
+(        })59.5 242.4 ms
+(        )59.5 222.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Disabilita Nagle. */)s
+F0 sf
+0 g
+(        err = tcp_set_nagle \(ch[cd].c_sockfd, FALSE\);)59.5 212.4 ms
+(        )59.5 202.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                perror \()59.5 192.4 ms
+F1 sf
+0.498 0 0.498 r
+("tcp_set_nagle")s
+F0 sf
+0 g
+(\);)s
+(                fprintf \()59.5 182.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("!!! Canale )s
+0.498 0 0 r
+(%d)s
+0.498 0 0.498 r
+( TCP_NODELAY fallito!)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, cd\);)s
+(        })59.5 172.4 ms
+(})59.5 162.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 132.4 ms
+F0 sf
+0 g
+(channel_read \(cd_t cd\))59.5 122.4 ms
+({)59.5 112.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 102.4 ms
+(        assert \(channel_is_connected \(cd\)\);)59.5 92.4 ms
+(        assert \(channel_can_read \(cd\)\);)59.5 82.4 ms
+(        )59.5 62.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\))s
+(                )59.5 52.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_read \(ch[cd].c_sockfd, host_rcvbuf\);)s
+re sp
+%%PageTrailer
+%%Page: 7 7
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 7)59.5 792.4 ms
+F0 sf
+(        )59.5 772.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+(  rqueue_read \(ch[cd].c_sockfd, net_rcvbuf[cd]\);)s
+(})59.5 762.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 732.4 ms
+F0 sf
+0 g
+(channel_write \(cd_t cd\))59.5 722.4 ms
+({)59.5 712.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 702.4 ms
+(        assert \(channel_is_connected \(cd\)\);)59.5 692.4 ms
+(        assert \(channel_can_write \(cd\)\);)59.5 682.4 ms
+(        )59.5 662.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cd == HOSTCD\))s
+(                )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_write \(ch[cd].c_sockfd, host_sndbuf\);)s
+(        )59.5 642.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( rqueue_write \(ch[cd].c_sockfd, net_sndbuf[cd]\);)s
+(})59.5 632.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 602.4 ms
+F0 sf
+0 g
+(feed_download \()59.5 592.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 582.4 ms
+(        )59.5 572.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 562.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(\(head = getHead \(joinq\)\) != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(               && seqcmp \(seg_seq \(head->sw_seg\), last_sent + )59.5 532.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(\) == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(               && seg_pld_len \(head->sw_seg\) <= cqueue_get_aval \(host_sndbuf\)\))59.5 522.4 ms
+(        {)59.5 512.4 ms
+(                head = qdequeue \(&joinq\);)59.5 502.4 ms
+(                err = cqueue_add \(host_sndbuf,)59.5 492.4 ms
+(                                seg_pld \(head->sw_seg\),)59.5 482.4 ms
+(                                seg_pld_len \(head->sw_seg\)\);)59.5 472.4 ms
+(                assert \(!err\);)59.5 462.4 ms
+(                last_sent = seg_seq \(head->sw_seg\);)59.5 452.4 ms
+F1 sf
+0 0 0.498 r
+(#ifdef VERBOSE)59.5 442.4 ms
+F0 sf
+0 g
+(                printf \()59.5 432.4 ms
+F1 sf
+0.498 0 0.498 r
+("last sent = )s
+0.498 0 0 r
+(%d\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, last_sent\);)s
+(                segwrap_print \()59.5 422.4 ms
+F1 sf
+0.498 0 0.498 r
+("feed_download")s
+F0 sf
+0 g
+(, head\);)s
+F1 sf
+0 0 0.498 r
+(#endif)59.5 412.4 ms
+F0 sf
+0 g
+(                segwrap_destroy \(head\);)59.5 402.4 ms
+(        })59.5 392.4 ms
+(})59.5 382.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 352.4 ms
+F0 sf
+0 g
+(feed_upload \()59.5 342.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 332.4 ms
+(        assert \(last_ack_rcvd != )59.5 322.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 312.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(!ack_handled\) {)s
+(                assert \(seg_is_ack \(last_ack_rcvd->sw_seg\)\);)59.5 302.4 ms
+(                netsndbuf_rm_acked \(last_ack_rcvd\);)59.5 292.4 ms
+(                ack_handled = TRUE;)59.5 282.4 ms
+(        })59.5 272.4 ms
+(        urg2net \(\);)59.5 262.4 ms
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(urgent_empty \(\)\))s
+(                host2net \(\);)59.5 242.4 ms
+(})59.5 232.4 ms
+(cd_t)59.5 202.4 ms
+(get_cd_from \()59.5 192.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( *element, )s
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( type\))s
+({)59.5 182.4 ms
+(        cd_t cd;)59.5 172.4 ms
+(        cd_t retcd;)59.5 162.4 ms
+(        assert \(element != )59.5 142.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        retcd = -)59.5 122.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 112.4 ms
+F1 sf
+0.498 0.498 0 r
+(switch)s
+F0 sf
+0 g
+( \(type\) {)s
+(        )59.5 102.4 ms
+F1 sf
+0.498 0.498 0 r
+(case)s
+F0 sf
+0 g
+( ELRQUEUE :)s
+(                )59.5 92.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\))s
+(                        )59.5 82.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(net_rcvbuf[cd] == \(rqueue_t *\)element)s
+(                            || net_sndbuf[cd] == \(rqueue_t *\)element\))59.5 72.4 ms
+(                                retcd = cd;)59.5 62.4 ms
+(                )59.5 52.4 ms
+F1 sf
+0.498 0.498 0 r
+(break)s
+F0 sf
+0 g
+(;)s
+re sp
+%%PageTrailer
+%%Page: 8 8
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 8)59.5 792.4 ms
+F0 sf
+(        )59.5 772.4 ms
+F1 sf
+0.498 0.498 0 r
+(default)s
+F0 sf
+0 g
+(:)s
+(                assert \(FALSE\);)59.5 762.4 ms
+(        })59.5 752.4 ms
+(        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( retcd;)s
+(})59.5 732.4 ms
+(seq_t)59.5 702.4 ms
+(get_last_sent_to_host \()59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 682.4 ms
+(        )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( last_sent;)s
+(})59.5 662.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 632.4 ms
+F0 sf
+0 g
+(join_add \()59.5 622.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 612.4 ms
+(        seq_t s;)59.5 602.4 ms
+(        seq_t seqsw;)59.5 592.4 ms
+(        )59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        assert \(sw != )59.5 562.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        seqsw = seg_seq \(sw->sw_seg\);)59.5 542.4 ms
+(        )59.5 522.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Segmento vecchio, scartato. */)s
+F0 sf
+0 g
+(        )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seqcmp \(seqsw, last_sent\) <= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+F1 sf
+0 0 0.498 r
+(#ifdef VERBOSE)59.5 502.4 ms
+F0 sf
+0 g
+(                printf \()59.5 492.4 ms
+F1 sf
+0.498 0 0.498 r
+("last sent = )s
+0.498 0 0 r
+(%d\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, last_sent\);)s
+(                segwrap_print \()59.5 482.4 ms
+F1 sf
+0.498 0 0.498 r
+("join_add scarta vecchio")s
+F0 sf
+0 g
+(, sw\);)s
+F1 sf
+0 0 0.498 r
+(#endif)59.5 472.4 ms
+F0 sf
+0 g
+(                segwrap_destroy \(sw\);)59.5 462.4 ms
+(        })59.5 452.4 ms
+(        )59.5 442.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Coda joinq vuota. */)s
+F0 sf
+0 g
+(        )59.5 432.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(\(head = getHead \(joinq\)\) == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                )59.5 422.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seqcmp \(seqsw, last_sent + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(\) != )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                        )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(s = last_sent + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(; seqcmp \(s, seqsw\) < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(; s++\))s
+(                                add_nak_timeout \(s\);)59.5 402.4 ms
+(                qenqueue \(&joinq, sw\);)59.5 392.4 ms
+(        })59.5 382.4 ms
+(        )59.5 372.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Coda joinq non vuota. */)s
+F0 sf
+0 g
+(        )59.5 362.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                seq_t seqhd;)59.5 352.4 ms
+(                seq_t seqtl;)59.5 342.4 ms
+(                seqhd = seg_seq \(head->sw_seg\);)59.5 332.4 ms
+(                seqtl = seg_seq \(joinq->sw_seg\);)59.5 322.4 ms
+(                )59.5 312.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Maggiore della coda. */)s
+F0 sf
+0 g
+(                )59.5 302.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seqcmp \(seqsw, seqtl + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(\) > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                        )59.5 292.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(s = seqtl + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(; seqcmp \(s, seqsw\) < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(; s++\))s
+(                                add_nak_timeout \(s\);)59.5 282.4 ms
+(                        qenqueue \(&joinq, sw\);)59.5 272.4 ms
+(                })59.5 262.4 ms
+(                )59.5 252.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Successivo a quello in coda. */)s
+F0 sf
+0 g
+(                )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seqcmp \(seqsw, seqtl + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(\) == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                        qenqueue \(&joinq, sw\);)59.5 232.4 ms
+(                )59.5 222.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Precedente alla testa. */)s
+F0 sf
+0 g
+(                )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seqcmp \(seqsw, seqhd\) < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                        del_nak_timeout \(seqsw\);)59.5 202.4 ms
+(                        qpush \(&joinq, sw\);)59.5 192.4 ms
+(                })59.5 182.4 ms
+(                )59.5 172.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Tra testa e coda. */)s
+F0 sf
+0 g
+(                )59.5 162.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                        del_nak_timeout \(seqsw\);)59.5 152.4 ms
+(                        qinorder_insert \(&joinq, sw, segwrap_seqcmp\);)59.5 142.4 ms
+(                        )59.5 132.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Annulla inserimento se duplicato. */)s
+F0 sf
+0 g
+(                        )59.5 122.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_seq \(sw->sw_next->sw_seg\) == seqsw)s
+(                            || seg_seq \(sw->sw_prev->sw_seg\) == seqsw\) {)59.5 112.4 ms
+(                                qremove \(&joinq, sw\);)59.5 102.4 ms
+(                                segwrap_destroy \(sw\);)59.5 92.4 ms
+(                        })59.5 82.4 ms
+(                })59.5 72.4 ms
+(        })59.5 62.4 ms
+(})59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 9 9
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                               Pagina 9)59.5 792.4 ms
+0 0.498 0 r
+(bool)59.5 752.4 ms
+F0 sf
+0 g
+(urgent_empty \()59.5 742.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 732.4 ms
+(        cd_t cd;)59.5 722.4 ms
+(        )59.5 702.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\))s
+(                )59.5 692.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\))s
+(                    && \(urgent_head \(cd\) != )59.5 682.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\)\))s
+(                        )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(        )59.5 662.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(})59.5 652.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 622.4 ms
+F0 sf
+0 g
+(proxy_init \(port_t hostlistport,)59.5 612.4 ms
+(                )59.5 602.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *netconnaddr[NETCHANNELS],)s
+(                port_t netconnport[NETCHANNELS],)59.5 592.4 ms
+(                port_t netlistport[NETCHANNELS],)59.5 582.4 ms
+(                )59.5 572.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *hostconnaddr, port_t hostconnport\))s
+({)59.5 562.4 ms
+(        )59.5 552.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Inizializza le strutture dati del proxy. */)s
+F0 sf
+0 g
+(        )59.5 532.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        cd_t cd;)59.5 522.4 ms
+(        )59.5 502.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Canale con l'host e relativi buffer applicazione. */)s
+F0 sf
+0 g
+(        err = channel_init \(HOSTCD, hostlistport, hostconnaddr, hostconnport\);)59.5 492.4 ms
+(        )59.5 482.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                )59.5 472.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        host_rcvbuf = )59.5 462.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        host_sndbuf = )59.5 452.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        )59.5 432.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Canali con il ritardatore, relativi buffer applicazione e code)s
+(         * urgenti. */)59.5 422.4 ms
+F0 sf
+0 g
+(        )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\) {)s
+(                port_t listport = \(netlistport ? netlistport[cd] : )59.5 402.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                port_t connport = \(netconnport ? netconnport[cd] : )59.5 392.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 382.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *connaddr = \(netconnaddr ? netconnaddr[cd] : )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                err = channel_init \(cd, listport, connaddr, connport\);)59.5 362.4 ms
+(                )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(                net_rcvbuf[cd] = )59.5 332.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(                net_sndbuf[cd] = )59.5 322.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(                urgentq_priv[cd] = newQueue \(\);)59.5 312.4 ms
+(        })59.5 302.4 ms
+(        )59.5 282.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Contatori numeri di sequenza. */)s
+F0 sf
+0 g
+(        outseq = )59.5 272.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        last_sent = SEQMAX;)59.5 262.4 ms
+(        )59.5 242.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Code di segmenti. */)s
+F0 sf
+0 g
+(        joinq = newQueue \(\);)59.5 232.4 ms
+(        urgentq = newQueue \(\);)59.5 222.4 ms
+(        )59.5 202.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Indice round robin per routing. */)s
+F0 sf
+0 g
+(        rrcd = NETCD;)59.5 192.4 ms
+(        )59.5 172.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Gestione ack ricevuti. */)s
+F0 sf
+0 g
+(        last_ack_rcvd = segwrap_ack_create \(SEQMAX\);)59.5 162.4 ms
+(        ack_handled = TRUE;)59.5 152.4 ms
+F1 sf
+0 0 0.498 r
+(#if !HAVE_MSG_NOSIGNAL)59.5 132.4 ms
+F0 sf
+0 g
+(        )59.5 122.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ignora SIGPIPE nei sistemi che non hanno MSG_NOSIGNAL. */)s
+F0 sf
+0 g
+(        {)59.5 112.4 ms
+(                )59.5 102.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(                )59.5 92.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( sigaction act;)s
+(                act.sa_handler = )59.5 72.4 ms
+F1 sf
+0.498 0 0.498 r
+(SIG_IGN)s
+F0 sf
+0 g
+(;)s
+(                sigemptyset \(&act.sa_mask\);)59.5 62.4 ms
+(                act.sa_flags = )59.5 52.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+re sp
+%%PageTrailer
+%%Page: 10 10
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 10)59.5 792.4 ms
+F0 sf
+(                err = sigaction \()59.5 772.4 ms
+F1 sf
+0.498 0 0.498 r
+(SIGPIPE)s
+F0 sf
+0 g
+(, &act, )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 762.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                        perror \()59.5 752.4 ms
+F1 sf
+0.498 0 0.498 r
+("sigaction")s
+F0 sf
+0 g
+(\);)s
+(                        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(                })59.5 732.4 ms
+(                fprintf \()59.5 722.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Manca MSG_NOSIGNAL, tutti i SIGPIPE ")s
+F0 sf
+0 g
+(                                )59.5 712.4 ms
+F1 sf
+0.498 0 0.498 r
+("ignorati.)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(\);)s
+(        })59.5 702.4 ms
+F1 sf
+0 0 0.498 r
+(#endif)59.5 692.4 ms
+F0 sf
+0 g
+(        )59.5 682.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+F1 sf
+0.498 0.498 0 r
+(error)59.5 662.4 ms
+F0 sf
+0 g
+(:)s
+(        )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(})59.5 642.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 612.4 ms
+F0 sf
+0 g
+(proxy_is_running \()59.5 602.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 592.4 ms
+(        cd_t cd;)59.5 582.4 ms
+(        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\))s
+(                )59.5 552.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\) )s
+(                    || channel_is_activable \(cd\))59.5 542.4 ms
+(                    || channel_is_listening \(cd\))59.5 532.4 ms
+(                    || channel_is_connecting \(cd\)\))59.5 522.4 ms
+(                        )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        )59.5 492.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 482.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 452.4 ms
+F0 sf
+0 g
+(accept_connection \(cd_t cd\))59.5 442.4 ms
+({)59.5 432.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        socklen_t raddr_len;)59.5 412.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 392.4 ms
+(        assert \(ch[cd].c_sockfd < )59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ch[cd].c_listfd >= )59.5 372.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(addr_is_set \(&ch[cd].c_laddr\)\);)59.5 362.4 ms
+(        assert \(!addr_is_set \(&ch[cd].c_raddr\)\);)59.5 352.4 ms
+(        )59.5 332.4 ms
+F1 sf
+0.498 0.498 0 r
+(do)s
+F0 sf
+0 g
+( {)s
+(                raddr_len = )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(ch[cd].c_raddr\);)s
+(                ch[cd].c_sockfd = accept \(ch[cd].c_listfd,)59.5 312.4 ms
+(                                \()59.5 302.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( sockaddr *\)&ch[cd].c_raddr,)s
+(                                &raddr_len\);)59.5 292.4 ms
+(        } )59.5 282.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(ch[cd].c_sockfd < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( && errno == )s
+F1 sf
+0.498 0 0.498 r
+(EINTR)s
+F0 sf
+0 g
+(\);)s
+(        assert \(!\(ch[cd].c_sockfd < )59.5 262.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(                  && \(errno == )59.5 252.4 ms
+F1 sf
+0.498 0 0.498 r
+(EAGAIN)s
+F0 sf
+0 g
+( || errno == EWOULDBLOCK\)\)\);)s
+(        )59.5 232.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_sockfd < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                fprintf \()59.5 222.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(, accept fallita: )s
+0.498 0 0 r
+(%s\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(,)s
+(                                channel_name \(cd\), strerror \(errno\)\);)59.5 212.4 ms
+(        )59.5 192.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* A prescindere dall'esito dell'accept, chiusura del socket)s
+(         * listening. */)59.5 182.4 ms
+F0 sf
+0 g
+(        tcp_close \(&ch[cd].c_listfd\);)59.5 172.4 ms
+(        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(ch[cd].c_sockfd < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                )59.5 142.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        err = tcp_set_block \(ch[cd].c_sockfd, FALSE\);)59.5 122.4 ms
+(        assert \(!err\);)59.5 112.4 ms
+(        )59.5 92.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(})59.5 82.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 11 11
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 11)59.5 792.4 ms
+F0 sf
+(activate_channels \()59.5 772.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 762.4 ms
+(        )59.5 752.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( i;)s
+(        )59.5 742.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 722.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(i = )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(; i < CHANNELS; i++\) )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_activable \(i\)\) {)s
+(                )59.5 702.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_must_connect \(i\)\) {)s
+(                        err = connect_noblock \(i\);)59.5 692.4 ms
+(                        )59.5 682.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                                perror \()59.5 672.4 ms
+F1 sf
+0.498 0 0.498 r
+("connect_noblock")s
+F0 sf
+0 g
+(\);)s
+(                                channel_close \(i\);)59.5 662.4 ms
+(                                )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(continue)s
+F0 sf
+0 g
+(;)s
+(                        })59.5 642.4 ms
+(                        )59.5 622.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Connect gia' conclusa, recupera nome del socket. */)s
+F0 sf
+0 g
+(                        )59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(errno != )s
+F1 sf
+0.498 0 0.498 r
+(EINPROGRESS)s
+F0 sf
+0 g
+(\) {)s
+(                                tcp_sockname \(ch[i].c_sockfd,)59.5 602.4 ms
+(                                                &ch[i].c_laddr\);)59.5 592.4 ms
+(                                channel_prepare_io \(i\);)59.5 582.4 ms
+(                        })59.5 572.4 ms
+(                        printf \()59.5 562.4 ms
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+( )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(.)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, channel_name \(i\),)s
+(                                        addr_is_set \(&ch[i].c_laddr\) ?)59.5 552.4 ms
+(                                        )59.5 542.4 ms
+F1 sf
+0.498 0 0.498 r
+("connesso")s
+F0 sf
+0 g
+( : )s
+F1 sf
+0.498 0 0.498 r
+("in connessione")s
+F0 sf
+0 g
+(\);)s
+(                })59.5 532.4 ms
+(                )59.5 522.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_must_listen \(i\)\) {)s
+(                        err = listen_noblock \(i\);)59.5 512.4 ms
+(                        )59.5 502.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                                perror \()59.5 492.4 ms
+F1 sf
+0.498 0 0.498 r
+("listen_noblock")s
+F0 sf
+0 g
+(\);)s
+(                                channel_close \(i\);)59.5 482.4 ms
+(                                )59.5 472.4 ms
+F1 sf
+0.498 0.498 0 r
+(continue)s
+F0 sf
+0 g
+(;)s
+(                        })59.5 462.4 ms
+(                        printf \()59.5 452.4 ms
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+( in ascolto.)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, channel_name \(i\)\);)s
+(                })59.5 442.4 ms
+(                )59.5 432.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                        assert \(FALSE\);)59.5 422.4 ms
+(        })59.5 412.4 ms
+(})59.5 402.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 372.4 ms
+F0 sf
+0 g
+(finalize_connection \(cd_t cd\))59.5 362.4 ms
+({)59.5 352.4 ms
+(        )59.5 342.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 332.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( optval;)s
+(        socklen_t optsize;)59.5 322.4 ms
+(        assert \(VALID_CD \(cd\)\);)59.5 302.4 ms
+(        assert \(ch[cd].c_sockfd >= )59.5 292.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ch[cd].c_listfd < )59.5 282.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(!addr_is_set \(&ch[cd].c_laddr\)\);)59.5 272.4 ms
+(        assert \(addr_is_set \(&ch[cd].c_raddr\)\);)59.5 262.4 ms
+(        optsize = )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(optval\);)s
+(        )59.5 222.4 ms
+F1 sf
+0 0.498 0.498 r
+(/*)s
+(         * Verifica esito connessione.)59.5 212.4 ms
+(         */)59.5 202.4 ms
+F0 sf
+0 g
+(        err = getsockopt \(ch[cd].c_sockfd, SOL_SOCKET, SO_ERROR, &optval,)59.5 192.4 ms
+(                        &optsize\);)59.5 182.4 ms
+(        )59.5 172.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                fprintf \()59.5 162.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(, getsockopt in ")s
+F0 sf
+0 g
+(                                )59.5 152.4 ms
+F1 sf
+0.498 0 0.498 r
+("finalize_connection fallita: )s
+0.498 0 0 r
+(%s\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(,)s
+(                                channel_name \(cd\), strerror \(errno\)\);)59.5 142.4 ms
+(                )59.5 132.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        })59.5 122.4 ms
+(        )59.5 102.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(optval != )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                fprintf \()59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(, tentativo di connessione ")s
+F0 sf
+0 g
+(                                )59.5 82.4 ms
+F1 sf
+0.498 0 0.498 r
+("fallito.)s
+0.498 0 0 r
+(\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, channel_name \(cd\)\);)s
+(                )59.5 72.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        })59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Page: 12 12
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 12)59.5 792.4 ms
+F0 sf
+(        )59.5 772.4 ms
+F1 sf
+0 0.498 0.498 r
+(/*)s
+(         * Connessione riuscita.)59.5 762.4 ms
+(         */)59.5 752.4 ms
+F0 sf
+0 g
+(        tcp_sockname \(ch[cd].c_sockfd, &ch[cd].c_laddr\);)59.5 742.4 ms
+(        )59.5 722.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(})59.5 712.4 ms
+(fd_t)59.5 682.4 ms
+(set_file_descriptors \(fd_set *rdset, fd_set *wrset\))59.5 672.4 ms
+({)59.5 662.4 ms
+(        )59.5 652.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( i;)s
+(        fd_t max;)59.5 642.4 ms
+(        assert \(rdset != )59.5 622.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(wrset != )59.5 612.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        max = -)59.5 592.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 582.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(i = )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(; i < CHANNELS; i++\) {)s
+(                )59.5 572.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Dati da leggere e/o scrivere. */)s
+F0 sf
+0 g
+(                )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(i\)\) {)s
+(                        )59.5 552.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_can_read \(i\)\) {)s
+(                                FD_SET \(ch[i].c_sockfd, rdset\);)59.5 542.4 ms
+(                                max = MAX \(ch[i].c_sockfd, max\);)59.5 532.4 ms
+(                        })59.5 522.4 ms
+(                        )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_can_write \(i\)\) {)s
+(                                FD_SET \(ch[i].c_sockfd, wrset\);)59.5 502.4 ms
+(                                max = MAX \(ch[i].c_sockfd, max\);)59.5 492.4 ms
+(                        })59.5 482.4 ms
+(                })59.5 472.4 ms
+(                )59.5 462.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Connessioni da completare o accettare. */)s
+F0 sf
+0 g
+(                )59.5 452.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                        )59.5 442.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connecting \(i\)\) {)s
+(                                FD_SET \(ch[i].c_sockfd, wrset\);)59.5 432.4 ms
+(                                max = MAX \(ch[i].c_sockfd, max\);)59.5 422.4 ms
+(                        } )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_listening \(i\)\) {)s
+(                                FD_SET \(ch[i].c_listfd, rdset\);)59.5 402.4 ms
+(                                max = MAX \(ch[i].c_listfd, max\);)59.5 392.4 ms
+(                        })59.5 382.4 ms
+(                })59.5 372.4 ms
+(        })59.5 362.4 ms
+(        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( max;)s
+(})59.5 342.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 312.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(set_last_ack_rcvd \()59.5 302.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 292.4 ms
+(        )59.5 282.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *old_ack;)s
+(        assert \(last_ack_rcvd != )59.5 262.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_seqcmp \(last_ack_rcvd, ack\) < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                old_ack = last_ack_rcvd;)59.5 242.4 ms
+(                last_ack_rcvd = ack;)59.5 232.4 ms
+(                ack_handled = FALSE;)59.5 222.4 ms
+(        } )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                old_ack = )59.5 202.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        )59.5 182.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( old_ack;)s
+(})59.5 172.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 142.4 ms
+F0 sf
+0 g
+(urgent_add \()59.5 132.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 122.4 ms
+(        cd_t destcd;)59.5 112.4 ms
+(        assert \(sw != )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 72.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Segmento duplicato, gia' assegnato a un canale. */)s
+F0 sf
+0 g
+(        )59.5 62.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_is_assigned \(sw\)\) {)s
+(                assert \(VALID_CD \(sw->sw_assigned\)\);)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 13 13
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 13)59.5 792.4 ms
+F0 sf
+(                destcd = sw->sw_assigned;)59.5 772.4 ms
+(                )59.5 762.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(destcd\)\))s
+(                        qinorder_insert \(&urgentq_priv[destcd], sw,)59.5 752.4 ms
+(                                        &segwrap_urgcmp\);)59.5 742.4 ms
+(                )59.5 732.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                        segwrap_destroy \(sw\);)59.5 722.4 ms
+(        })59.5 712.4 ms
+(        )59.5 702.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Segmento da clonare e assegnare a ogni coda urgente dei canali con)s
+(         * il ritardatore. */)59.5 692.4 ms
+F0 sf
+0 g
+(        )59.5 682.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_is_clonable \(sw\)\) {)s
+(                )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(destcd = NETCD; destcd < NETCD + NETCHANNELS; destcd++\))s
+(                        )59.5 662.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(destcd\)\) {)s
+(                                sw->sw_assigned = destcd;)59.5 652.4 ms
+(                                qinorder_insert \(&urgentq_priv[destcd],)59.5 642.4 ms
+(                                                segwrap_clone \(sw\),)59.5 632.4 ms
+(                                                &segwrap_urgcmp\);)59.5 622.4 ms
+(                        })59.5 612.4 ms
+(                segwrap_destroy \(sw\);)59.5 602.4 ms
+(        })59.5 592.4 ms
+(        )59.5 582.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Segmento standard, da accodare alla coda urgente generica. */)s
+F0 sf
+0 g
+(        )59.5 572.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                qinorder_insert \(&urgentq, sw, segwrap_urgcmp\);)59.5 562.4 ms
+(})59.5 552.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 522.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(urgent_head \(cd_t cd\))59.5 512.4 ms
+({)59.5 502.4 ms
+(        )59.5 492.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna un puntatore al segmento piu' urgente presente nelle code:)s
+(         * prima controlla quella assegnata al canale specificato, se vuota)59.5 482.4 ms
+(         * controlla quella generica.)59.5 472.4 ms
+(         * Ritorna NULL se sono tutte vuote. */)59.5 462.4 ms
+F0 sf
+0 g
+(        )59.5 442.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 422.4 ms
+(        head = getHead \(urgentq_priv[cd]\);)59.5 402.4 ms
+(        )59.5 392.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                head = getHead \(urgentq\);)59.5 382.4 ms
+(        )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( head;)s
+(})59.5 362.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 332.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(urgent_remove \(cd_t cd\))59.5 322.4 ms
+({)59.5 312.4 ms
+(        )59.5 302.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Come urgent_head, in piu' rimuove il segwrap dalla coda che lo)s
+(         * conteneva. */)59.5 292.4 ms
+F0 sf
+0 g
+(        )59.5 272.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *rmvd;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 252.4 ms
+(        rmvd = qdequeue \(&urgentq_priv[cd]\);)59.5 232.4 ms
+(        )59.5 222.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rmvd == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                rmvd = qdequeue \(&urgentq\);)59.5 212.4 ms
+(        )59.5 202.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( rmvd;)s
+(})59.5 192.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 162.4 ms
+F0 sf
+0 g
+(urgent_rm_acked \()59.5 152.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 142.4 ms
+(        )59.5 132.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( cd;)s
+(        )59.5 122.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *rmvdq;)s
+(        assert \(ack != )59.5 102.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 82.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\) {)s
+(                rmvdq = qremove_all_that \(&urgentq_priv[cd],)59.5 72.4 ms
+(                                &segwrap_is_acked, ack\);)59.5 62.4 ms
+(                )59.5 52.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(rmvdq\)\))s
+re sp
+%%PageTrailer
+%%Page: 14 14
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 14)59.5 792.4 ms
+F0 sf
+(                        segwrap_destroy \(qdequeue \(&rmvdq\)\);)59.5 772.4 ms
+(        })59.5 762.4 ms
+(        rmvdq = qremove_all_that \(&urgentq, &segwrap_is_acked, ack\);)59.5 752.4 ms
+(        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(rmvdq\)\))s
+(                segwrap_destroy \(qdequeue \(&rmvdq\)\);)59.5 732.4 ms
+(})59.5 722.4 ms
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 692.4 ms
+(                               Funzioni locali)59.5 682.4 ms
+(*******************************************************************************/)59.5 672.4 ms
+0 0.498 0 r
+(static)59.5 652.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+(connect_noblock \(cd_t cd\))59.5 642.4 ms
+({)59.5 632.4 ms
+(        )59.5 622.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Connessione non bloccante. Crea un socket, lo imposta non bloccante)s
+(         * ed esegue una connect \(senza bind\) usando la struct sockaddr_in del)59.5 612.4 ms
+(         * canale.)59.5 602.4 ms
+(         *)59.5 592.4 ms
+(         * Ritorna -1 se fallisce, 0 se riesce subito o e' in corso. In)59.5 582.4 ms
+(         * quest'ultimo caso, errno = EINPROGRESS. */)59.5 572.4 ms
+F0 sf
+0 g
+(        )59.5 552.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 542.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( chan *chptr;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 522.4 ms
+(        assert \(!addr_is_set \(&ch[cd].c_laddr\)\);)59.5 512.4 ms
+(        assert \(addr_is_set \(&ch[cd].c_raddr\)\);)59.5 502.4 ms
+(        assert \(ch[cd].c_listfd < )59.5 492.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ch[cd].c_sockfd < )59.5 482.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        chptr = &ch[cd];)59.5 462.4 ms
+(        chptr->c_sockfd = xtcp_socket \(\);)59.5 452.4 ms
+(        err = tcp_set_block \(chptr->c_sockfd, FALSE\);)59.5 432.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        )59.5 392.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(chptr->c_tcp_rcvbuf_len > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                err = tcp_set_buffer_size \(chptr->c_sockfd, SO_RCVBUF,)59.5 382.4 ms
+(                                chptr->c_tcp_rcvbuf_len\);)59.5 372.4 ms
+(                )59.5 362.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 342.4 ms
+(        )59.5 332.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(chptr->c_tcp_sndbuf_len > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                err = tcp_set_buffer_size \(chptr->c_sockfd, SO_SNDBUF,)59.5 322.4 ms
+(                                chptr->c_tcp_sndbuf_len\);)59.5 312.4 ms
+(                )59.5 302.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\))s
+(                        )59.5 292.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 282.4 ms
+(        )59.5 262.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Tentativo di connessione. */)s
+F0 sf
+0 g
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(do)s
+F0 sf
+0 g
+( {)s
+(                err = connect \(chptr->c_sockfd,)59.5 242.4 ms
+(                                \()59.5 232.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( sockaddr *\)&chptr->c_raddr,)s
+(                                )59.5 222.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(chptr->c_raddr\)\);)s
+(        } )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(err == -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+( && errno == )s
+F1 sf
+0.498 0 0.498 r
+(EINTR)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 192.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(!err || errno == )s
+F1 sf
+0.498 0 0.498 r
+(EINPROGRESS)s
+F0 sf
+0 g
+(\))s
+(                )59.5 182.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+F1 sf
+0.498 0.498 0 r
+(error)59.5 162.4 ms
+F0 sf
+0 g
+(:)s
+(        fprintf \()59.5 152.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(, errore di connessione: )s
+0.498 0 0 r
+(%s\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(,)s
+(                        channel_name \(cd\), strerror \(errno\)\);)59.5 142.4 ms
+(        tcp_close \(&chptr->c_sockfd\);)59.5 132.4 ms
+(        )59.5 122.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(})59.5 112.4 ms
+F1 sf
+0 0.498 0 r
+(static)59.5 82.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+(listen_noblock \(cd_t cd\))59.5 72.4 ms
+({)59.5 62.4 ms
+(        )59.5 52.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+re sp
+%%PageTrailer
+%%Page: 15 15
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 15)59.5 792.4 ms
+F0 sf
+(        )59.5 772.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *errmsg;)s
+(        )59.5 762.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( chan *chptr;)s
+(        assert \(VALID_CD \(cd\)\);)59.5 742.4 ms
+(        assert \(addr_is_set \(&ch[cd].c_laddr\)\);)59.5 732.4 ms
+(        assert \(!addr_is_set \(&ch[cd].c_raddr\)\);)59.5 722.4 ms
+(        assert \(ch[cd].c_listfd < )59.5 712.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ch[cd].c_sockfd < )59.5 702.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        chptr = &ch[cd];)59.5 682.4 ms
+(        chptr->c_listfd = xtcp_socket \(\);)59.5 672.4 ms
+(        err = tcp_set_reusable \(chptr->c_listfd, TRUE\);)59.5 652.4 ms
+(        )59.5 642.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                errmsg = )59.5 632.4 ms
+F1 sf
+0.498 0 0.498 r
+("tcp_set_reusable fallita")s
+F0 sf
+0 g
+(;)s
+(                )59.5 622.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 612.4 ms
+(        err = bind \(chptr->c_listfd, \()59.5 592.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( sockaddr *\)&chptr->c_laddr,)s
+(                        )59.5 582.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(chptr->c_laddr\)\);)s
+(        )59.5 572.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                errmsg = )59.5 562.4 ms
+F1 sf
+0.498 0 0.498 r
+("bind fallita")s
+F0 sf
+0 g
+(;)s
+(                )59.5 552.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 542.4 ms
+(        )59.5 522.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(chptr->c_tcp_rcvbuf_len > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                err = tcp_set_buffer_size \(chptr->c_listfd, SO_RCVBUF,)59.5 512.4 ms
+(                                chptr->c_tcp_rcvbuf_len\);)59.5 502.4 ms
+(                )59.5 492.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                        errmsg = )59.5 482.4 ms
+F1 sf
+0.498 0 0.498 r
+("tcp_set_buffer_size SO_RCVBUF fallita")s
+F0 sf
+0 g
+(;)s
+(                        )59.5 472.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(                })59.5 462.4 ms
+(        })59.5 452.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(chptr->c_tcp_sndbuf_len > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                err = tcp_set_buffer_size \(chptr->c_listfd, SO_SNDBUF,)59.5 412.4 ms
+(                                chptr->c_tcp_sndbuf_len\);)59.5 402.4 ms
+(                )59.5 392.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                        errmsg = )59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+("tcp_set_buffer_size SO_SNDBUF fallita")s
+F0 sf
+0 g
+(;)s
+(                        )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(                })59.5 362.4 ms
+(        })59.5 352.4 ms
+(        err = tcp_set_block \(chptr->c_listfd, FALSE\);)59.5 332.4 ms
+(        )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                errmsg = )59.5 312.4 ms
+F1 sf
+0.498 0 0.498 r
+("tcp_set_block fallita")s
+F0 sf
+0 g
+(;)s
+(                )59.5 302.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 292.4 ms
+(        err = listen \(chptr->c_listfd, )59.5 272.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 262.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(err\) {)s
+(                errmsg = )59.5 252.4 ms
+F1 sf
+0.498 0 0.498 r
+("listen fallita")s
+F0 sf
+0 g
+(;)s
+(                )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( error;)s
+(        })59.5 232.4 ms
+(        )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+F1 sf
+0.498 0.498 0 r
+(error)59.5 192.4 ms
+F0 sf
+0 g
+(:)s
+(        fprintf \()59.5 182.4 ms
+F1 sf
+0.498 0 0.498 r
+(stderr)s
+F0 sf
+0 g
+(, )s
+F1 sf
+0.498 0 0.498 r
+("Canale )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(, )s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+(: )s
+0.498 0 0 r
+(%s\\n)s
+0.498 0 0.498 r
+(")s
+F0 sf
+0 g
+(, channel_name \(cd\), errmsg,)s
+(                        strerror \(errno\)\);)59.5 172.4 ms
+(        tcp_close \(&chptr->c_listfd\);)59.5 162.4 ms
+(        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(})59.5 142.4 ms
+F1 sf
+0 0.498 0 r
+(static)59.5 112.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(host2net \()59.5 102.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 92.4 ms
+(        )59.5 82.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( needmask;)s
+(        )59.5 72.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( host_nbytes;)s
+(        len_t pldlen;)59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Page: 16 16
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 16)59.5 792.4 ms
+F0 sf
+(        needmask = )59.5 772.4 ms
+F1 sf
+0.498 0 0.498 r
+(0x7)s
+F0 sf
+0 g
+(;)s
+(        host_nbytes = cqueue_get_used \(host_rcvbuf\);)59.5 762.4 ms
+(        pldlen = MIN \(host_nbytes, PLDDEFLEN\);)59.5 752.4 ms
+(        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(needmask != )s
+F1 sf
+0.498 0 0.498 r
+(0x0)s
+F0 sf
+0 g
+( && host_nbytes > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                )59.5 732.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(rrcd\))s
+(                    && urgent_head \(rrcd\) == )59.5 722.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(                    && rqueue_get_aval \(net_sndbuf[rrcd]\) >= \(HDRMAXLEN)59.5 712.4 ms
+(                                                              + pldlen\)\) {)59.5 702.4 ms
+(                        )59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *newsw;)s
+(                        newsw = segwrap_create \(\);)59.5 672.4 ms
+(                        segwrap_fill \(newsw, host_rcvbuf, pldlen,)59.5 662.4 ms
+(                                        outseq++\);)59.5 652.4 ms
+(                        rqueue_add \(net_sndbuf[rrcd], newsw\);)59.5 632.4 ms
+(                        host_nbytes = cqueue_get_used \(host_rcvbuf\);)59.5 612.4 ms
+(                        pldlen = MIN \(host_nbytes, PLDDEFLEN\);)59.5 602.4 ms
+(                } )59.5 592.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                        needmask &= ~\()59.5 582.4 ms
+F1 sf
+0.498 0 0.498 r
+(0x1)s
+F0 sf
+0 g
+( << rrcd\);)s
+(                ROTATE_RRCD;)59.5 572.4 ms
+(        })59.5 562.4 ms
+(})59.5 552.4 ms
+F1 sf
+0 0.498 0 r
+(static)59.5 522.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(urg2net \()59.5 512.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 502.4 ms
+(        )59.5 492.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Trasferisce i segwrap dalla struttura dei segmenti urgenti ai)s
+(         * buffer dei canali di rete in maniera round robin, finche' ci sono)59.5 482.4 ms
+(         * segmenti urgenti oppure i buffer si riempono. */)59.5 472.4 ms
+F0 sf
+0 g
+(        )59.5 452.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 442.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( needmask;)s
+(        cd_t cd;)59.5 432.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+( do_reorg;)s
+(        )59.5 412.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw;)s
+(        )59.5 392.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* I net_sndbuf contengono i segmenti in ordine di urgenza. Se il piu')s
+(         * urgente della urgentq_priv e' piu' urgente dell'ultimo segmento di)59.5 382.4 ms
+(         * una qualsiasi rqueue bisogna inserirlo in mezzo: si travasano tutte)59.5 372.4 ms
+(         * le rqueue nelle code urgenti. */)59.5 362.4 ms
+F0 sf
+0 g
+(        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(do_reorg = FALSE, cd = NETCD;)s
+(             cd < NETCD + NETCHANNELS && !do_reorg;)59.5 342.4 ms
+(             cd++\))59.5 332.4 ms
+(                )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\))s
+(                    && rqueue_get_used \(net_sndbuf[cd]\) > )59.5 312.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(                    && urgent_head \(cd\) != )59.5 302.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(                    && segwrap_urgcmp \(net_sndbuf[cd]->rq_sgmt,)59.5 292.4 ms
+(                            urgent_head \(cd\)\) > )59.5 282.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                        do_reorg = TRUE;)59.5 272.4 ms
+(        )59.5 252.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(!do_reorg\))s
+(                )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(goto)s
+F0 sf
+0 g
+( transfer;)s
+(        )59.5 222.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Riorganizzazione buffer. */)s
+F0 sf
+0 g
+(        )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCD + NETCHANNELS; cd++\))s
+(                )59.5 202.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\))s
+(                    && rqueue_get_used \(net_sndbuf[cd]\) > )59.5 192.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                        )59.5 182.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *unsentq;)s
+(                        )59.5 172.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Taglio e travaso. */)s
+F0 sf
+0 g
+(                        unsentq = rqueue_cut_unsent \(net_sndbuf[cd]\);)59.5 162.4 ms
+(                        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(\(sw = qdequeue \(&unsentq\)\) != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                                urgent_add \(sw\);)59.5 142.4 ms
+(                })59.5 132.4 ms
+(        )59.5 112.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Riempimento net_sndbuf. */)s
+0.498 0.498 0 r
+(transfer)59.5 102.4 ms
+F0 sf
+0 g
+(:)s
+(        needmask = )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(0x7)s
+F0 sf
+0 g
+(;)s
+(        )59.5 82.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(needmask != )s
+F1 sf
+0.498 0 0.498 r
+(0x0)s
+F0 sf
+0 g
+(\) {)s
+(                )59.5 72.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(rrcd\))s
+(                    && \(sw = urgent_head \(rrcd\)\) != )59.5 62.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(                    && sw->sw_seglen <= rqueue_get_aval \(net_sndbuf[rrcd]\)\) {)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 17 17
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/channel.c                                                              Pagina 17)59.5 792.4 ms
+F0 sf
+(                        sw = urgent_remove \(rrcd\);)59.5 772.4 ms
+(                        assert \(sw != )59.5 762.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                        err = rqueue_add \(net_sndbuf[rrcd], sw\);)59.5 752.4 ms
+(                        assert \(!err\);)59.5 742.4 ms
+(                } )59.5 732.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                        needmask &= ~\()59.5 722.4 ms
+F1 sf
+0.498 0 0.498 r
+(0x1)s
+F0 sf
+0 g
+( << rrcd\);)s
+(                ROTATE_RRCD;)59.5 712.4 ms
+(        })59.5 702.4 ms
+(})59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(static)59.5 662.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(netsndbuf_rm_acked \()59.5 652.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 642.4 ms
+(        cd_t cd;)59.5 632.4 ms
+(        )59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(for)s
+F0 sf
+0 g
+( \(cd = NETCD; cd < NETCHANNELS; cd++\))s
+(                )59.5 602.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(channel_is_connected \(cd\)\))s
+(                        rqueue_rm_acked \(net_sndbuf[cd], ack\);)59.5 592.4 ms
+(})59.5 582.4 ms
+re sp
+%%PageTrailer
+%%Trailer
+%%Pages: 17
+%%EOF
+

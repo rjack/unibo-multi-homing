@@ -1,0 +1,1826 @@
+%!PS-Adobe-3.0
+%%Title: src/segment.c
+%%For: jack
+%%Creator: VIM - Vi IMproved 7.1 (2007 May 12)
+%%CreationDate: Fri Mar 14 13:25:10 2008
+%%DocumentData: Clean8Bit
+%%Orientation: Portrait
+%%Pages: (atend)
+%%PageOrder: Ascend
+%%BoundingBox: 59 49 564 800
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%DocumentSuppliedResources: procset VIM-Prolog 1.4 1
+%%+ encoding VIM-latin1 1.0 0
+%%Requirements: duplex collate color
+%%EndComments
+%%BeginDefaults
+%%PageResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%PageMedia: A4
+%%EndDefaults
+%%BeginProlog
+%%BeginResource: procset VIM-Prolog
+%%BeginDocument: /usr/share/vim/vim71/print/prolog.ps
+%!PS-Adobe-3.0 Resource-ProcSet
+%%Title: VIM-Prolog
+%%Version: 1.4 1
+%%EndComments
+% Editing of this file is NOT RECOMMENDED.  You run a very good risk of causing
+% all PostScript printing from VIM failing if you do.  PostScript is not called
+% a write-only language for nothing!
+/packedarray where not{userdict begin/setpacking/pop load def/currentpacking
+false def end}{pop}ifelse/CP currentpacking def true setpacking
+/bd{bind def}bind def/ld{load def}bd/ed{exch def}bd/d/def ld
+/db{dict begin}bd/cde{currentdict end}bd
+/T true d/F false d
+/SO null d/sv{/SO save d}bd/re{SO restore}bd
+/L2 systemdict/languagelevel 2 copy known{get exec}{pop pop 1}ifelse 2 ge d
+/m/moveto ld/s/show ld /ms{m s}bd /g/setgray ld/r/setrgbcolor ld/sp{showpage}bd
+/gs/gsave ld/gr/grestore ld/cp/currentpoint ld
+/ul{gs UW setlinewidth cp UO add 2 copy newpath m 3 1 roll add exch lineto
+stroke gr}bd
+/bg{gs r cp BO add 4 -2 roll rectfill gr}bd
+/sl{90 rotate 0 exch translate}bd
+L2{
+/sspd{mark exch{setpagedevice}stopped cleartomark}bd
+/nc{1 db/NumCopies ed cde sspd}bd
+/sps{3 db/Orientation ed[3 1 roll]/PageSize ed/ImagingBBox null d cde sspd}bd
+/dt{2 db/Tumble ed/Duplex ed cde sspd}bd
+/c{1 db/Collate ed cde sspd}bd
+}{
+/nc{/#copies ed}bd
+/sps{statusdict/setpage get exec}bd
+/dt{statusdict/settumble 2 copy known{get exec}{pop pop pop}ifelse
+statusdict/setduplexmode 2 copy known{get exec}{pop pop pop}ifelse}bd
+/c{pop}bd
+}ifelse
+/ffs{findfont exch scalefont d}bd/sf{setfont}bd
+/ref{1 db findfont dup maxlength dict/NFD ed{exch dup/FID ne{exch NFD 3 1 roll
+put}{pop pop}ifelse}forall/Encoding findresource dup length 256 eq{NFD/Encoding
+3 -1 roll put}{pop}ifelse NFD dup/FontType get 3 ne{/CharStrings}{/CharProcs}
+ifelse 2 copy known{2 copy get dup maxlength dict copy[/questiondown/space]{2
+copy known{2 copy get 2 index/.notdef 3 -1 roll put pop exit}if pop}forall put
+}{pop pop}ifelse dup NFD/FontName 3 -1 roll put NFD definefont pop end}bd
+CP setpacking
+(\004)cvn{}bd
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%BeginResource: encoding VIM-latin1
+%%BeginDocument: /usr/share/vim/vim71/print/latin1.ps
+%!PS-Adobe-3.0 Resource-Encoding
+%%Title: VIM-latin1
+%%Version: 1.0 0
+%%EndComments
+/VIM-latin1[
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash
+/zero /one /two /three /four /five /six /seven
+/eight /nine /colon /semicolon /less /equal /greater /question
+/at /A /B /C /D /E /F /G
+/H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+/grave /a /b /c /d /e /f /g
+/h /i /j /k /l /m /n /o
+/p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis]
+/Encoding defineresource pop
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%EndProlog
+%%BeginSetup
+595 842 0 sps
+1 nc
+T F dt
+T c
+%%IncludeResource: font Courier
+/_F0 /VIM-latin1 /Courier ref
+/F0 10 /_F0 ffs
+%%IncludeResource: font Courier-Bold
+/_F1 /VIM-latin1 /Courier-Bold ref
+/F1 10 /_F1 ffs
+%%IncludeResource: font Courier-Oblique
+/_F2 /VIM-latin1 /Courier-Oblique ref
+/F2 10 /_F2 ffs
+%%IncludeResource: font Courier-BoldOblique
+/_F3 /VIM-latin1 /Courier-BoldOblique ref
+/F3 10 /_F3 ffs
+/UO -1 d
+/UW 0.5 d
+/BO -2.5 d
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 1)59.5 792.4 ms
+0 0 0.498 r
+(#include )59.5 772.4 ms
+0.498 0 0.498 r
+("h/types.h")s
+0 0 0.498 r
+(#include )59.5 762.4 ms
+0.498 0 0.498 r
+("h/segment.h")s
+0 0 0.498 r
+(#include )59.5 752.4 ms
+0.498 0 0.498 r
+("h/channel.h")s
+0 0 0.498 r
+(#include )59.5 742.4 ms
+0.498 0 0.498 r
+("h/cqueue.h")s
+0 0 0.498 r
+(#include )59.5 732.4 ms
+0.498 0 0.498 r
+("h/crono.h")s
+0 0 0.498 r
+(#include )59.5 722.4 ms
+0.498 0 0.498 r
+("h/seghash.h")s
+0 0 0.498 r
+(#include )59.5 712.4 ms
+0.498 0 0.498 r
+("h/util.h")s
+0 0 0.498 r
+(#include )59.5 692.4 ms
+0.498 0 0.498 r
+(<config.h>)s
+0 0 0.498 r
+(#include )59.5 682.4 ms
+0.498 0 0.498 r
+(<string.h>)s
+0 0 0.498 r
+(#define     TYPE     )59.5 662.4 ms
+0 0.498 0 r
+(struct)s
+0 0 0.498 r
+( segwrap)s
+(#define     NEXT     sw_next)59.5 652.4 ms
+(#define     PREV     sw_prev)59.5 642.4 ms
+(#define     EMPTYQ   )59.5 632.4 ms
+0.498 0 0.498 r
+(NULL)s
+0 0 0.498 r
+(#include )59.5 622.4 ms
+0.498 0 0.498 r
+("src/queue_template")s
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 592.4 ms
+(                               Variabili locali)59.5 582.4 ms
+(*******************************************************************************/)59.5 572.4 ms
+(/* Coda dei segwrap inutilizzati. */)59.5 552.4 ms
+0 0.498 0 r
+(static)59.5 542.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *swcache;)s
+F1 sf
+0 0.498 0.498 r
+(/* Tabella hash dei segwrap spediti. */)59.5 532.4 ms
+0 0 0.498 r
+(#define     HT_SENT_SIZE     )59.5 522.4 ms
+0.498 0 0.498 r
+(10)s
+0 0.498 0 r
+(static)59.5 512.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ht_sent[HT_SENT_SIZE];)s
+F1 sf
+0 0.498 0 r
+(static)59.5 492.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+( init_done = FALSE;)s
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 462.4 ms
+(                       Prototipi delle funzioni locali)59.5 452.4 ms
+(*******************************************************************************/)59.5 442.4 ms
+0 0.498 0 r
+(static)59.5 422.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( handle_rcvd_ack \()s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 412.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( handle_rcvd_nak \()s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *nak\);)s
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 382.4 ms
+(                              Funzioni pubbliche)59.5 372.4 ms
+(*******************************************************************************/)59.5 362.4 ms
+0 0.498 0 r
+(void)59.5 342.4 ms
+F0 sf
+0 g
+(handle_rcvd_segment \()59.5 332.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *rcvd\))s
+({)59.5 322.4 ms
+(        seq_t seq;)59.5 312.4 ms
+(        assert \(rcvd != )59.5 292.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        seq = seg_seq \(rcvd->sw_seg\);)59.5 272.4 ms
+F1 sf
+0 0 0.498 r
+(#ifdef VERBOSE)59.5 252.4 ms
+F0 sf
+0 g
+(        segwrap_print \()59.5 242.4 ms
+F1 sf
+0.498 0 0.498 r
+("RCV")s
+F0 sf
+0 g
+(, rcvd\);)s
+F1 sf
+0 0 0.498 r
+(#endif)59.5 232.4 ms
+F0 sf
+0 g
+(        )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_nak \(rcvd->sw_seg\)\))s
+(                handle_rcvd_nak \(rcvd\);)59.5 202.4 ms
+(        )59.5 192.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_ack \(rcvd->sw_seg\)\))s
+(                handle_rcvd_ack \(rcvd\);)59.5 182.4 ms
+(        )59.5 172.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                assert \(seg_pld \(rcvd->sw_seg\) != )59.5 162.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                join_add \(rcvd\);)59.5 152.4 ms
+(        })59.5 142.4 ms
+(})59.5 132.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 102.4 ms
+F0 sf
+0 g
+(handle_sent_segment \()59.5 92.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sent\))s
+({)59.5 82.4 ms
+(        assert \(sent != )59.5 72.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+F1 sf
+0 0 0.498 r
+(#ifdef VERBOSE)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 2 2
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 2)59.5 792.4 ms
+F0 sf
+(        segwrap_print \()59.5 772.4 ms
+F1 sf
+0.498 0 0.498 r
+("SND")s
+F0 sf
+0 g
+(, sent\);)s
+F1 sf
+0 0 0.498 r
+(#endif)59.5 762.4 ms
+F0 sf
+0 g
+(        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_pld \(sent->sw_seg\) == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                segwrap_destroy \(sent\);)59.5 732.4 ms
+(        )59.5 722.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                )59.5 712.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *old;)s
+(                )59.5 692.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* ht_sent non deve contenere due segwrap con lo stesso)s
+(                 * seqnum. */)59.5 682.4 ms
+F0 sf
+0 g
+(                old = seghash_remove \(ht_sent, HT_SENT_SIZE,)59.5 672.4 ms
+(                                seg_seq \(sent->sw_seg\)\);)59.5 662.4 ms
+(                )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(old != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                        segwrap_destroy \(old\);)59.5 642.4 ms
+(                seghash_add \(ht_sent, HT_SENT_SIZE, sent\);)59.5 632.4 ms
+(        })59.5 622.4 ms
+(})59.5 612.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 582.4 ms
+F0 sf
+0 g
+(init_segment_module \()59.5 572.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 562.4 ms
+(        assert \(init_done == FALSE\);)59.5 552.4 ms
+(        swcache = newQueue \(\);)59.5 532.4 ms
+(        seghash_init \(ht_sent, HT_SENT_SIZE\);)59.5 522.4 ms
+(        init_done = TRUE;)59.5 502.4 ms
+(})59.5 492.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 462.4 ms
+F0 sf
+0 g
+(seg_is_ack \(seg_t *seg\))59.5 452.4 ms
+({)59.5 442.4 ms
+(        assert \(seg != )59.5 432.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 422.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(seg[FLG] & ACKFLAG ? TRUE : FALSE\);)s
+(})59.5 412.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 382.4 ms
+F0 sf
+0 g
+(seg_is_critical \(seg_t *seg\))59.5 372.4 ms
+({)59.5 362.4 ms
+(        assert \(seg != )59.5 352.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(seg[FLG] & CRTFLAG ? TRUE : FALSE\);)s
+(})59.5 332.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 302.4 ms
+F0 sf
+0 g
+(seg_is_nak \(seg_t *seg\))59.5 292.4 ms
+({)59.5 282.4 ms
+(        assert \(seg != )59.5 272.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 262.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(seg[FLG] & NAKFLAG ? TRUE : FALSE\);)s
+(})59.5 252.4 ms
+(pld_t *)59.5 222.4 ms
+(seg_pld \(seg_t *seg\))59.5 212.4 ms
+({)59.5 202.4 ms
+(        )59.5 192.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna il puntatore al campo pld di seg, oppure NULL se il payload)s
+(         * e' assente. */)59.5 182.4 ms
+F0 sf
+0 g
+(        assert \(seg != )59.5 162.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg[FLG] & PLDFLAG\))s
+(                )59.5 142.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(seg[FLG] & LENFLAG ? &seg[LEN + )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(] : &seg[LEN]\);)s
+(        )59.5 132.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(})59.5 122.4 ms
+(len_t)59.5 92.4 ms
+(seg_pld_len \(seg_t *seg\))59.5 82.4 ms
+({)59.5 72.4 ms
+(        )59.5 62.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna il valore del campo len di seg, oppure 0 se il payload e')s
+(         * assente. */)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 3 3
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 3)59.5 792.4 ms
+F0 sf
+(        assert \(seg != )59.5 762.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 752.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg[FLG] & PLDFLAG\))s
+(                )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(seg[FLG] & LENFLAG ? seg[LEN] : PLDDEFLEN\);)s
+(        assert \(seg_pld \(seg\) == )59.5 732.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 722.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(})59.5 712.4 ms
+(seq_t)59.5 682.4 ms
+(seg_seq \(seg_t *seg\))59.5 672.4 ms
+({)59.5 662.4 ms
+(        )59.5 652.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna il numero di sequenza di seg. */)s
+F0 sf
+0 g
+(        assert \(seg != )59.5 642.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( seg[SEQ];)s
+(})59.5 622.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 592.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(segwrap_clone \()59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 572.4 ms
+(        )59.5 562.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *clone;)s
+(        assert \(sw != )59.5 542.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        clone = segwrap_create \(\);)59.5 522.4 ms
+(        memcpy \(clone, sw, )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \()s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap\)\);)s
+(        )59.5 502.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( clone;)s
+(})59.5 492.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 462.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(segwrap_create \()59.5 452.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 442.4 ms
+(        )59.5 432.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna un nuovo segwrap, recuperandolo dalla cache di quelli)s
+(         * inutilizzati oppure, se questa e' vuota, allocandone uno nuovo.)59.5 422.4 ms
+(         * Il segwrap viene marcato con il timestamp dell'istante attuale. */)59.5 412.4 ms
+F0 sf
+0 g
+(        )59.5 392.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *newsw;)s
+(        )59.5 382.4 ms
+F1 sf
+0 0.498 0 r
+(static)s
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( timeval now;)s
+(        assert \(init_done == TRUE\);)59.5 362.4 ms
+(        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(isEmpty \(swcache\)\) {)s
+(                newsw = xmalloc \()59.5 332.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \()s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap\)\);)s
+(                newsw->sw_prev = )59.5 322.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(                newsw->sw_next = )59.5 312.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        } )59.5 302.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                newsw = qdequeue \(&swcache\);)59.5 292.4 ms
+(        newsw->sw_assigned = -)59.5 272.4 ms
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 252.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Timestamp. */)s
+F0 sf
+0 g
+(        gettime \(&now\);)59.5 242.4 ms
+(        newsw->sw_tstamp = tv2d \(&now, FALSE\);)59.5 232.4 ms
+(        )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( newsw;)s
+(})59.5 202.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 172.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(segwrap_ack_create \(seq_t ackseq\))59.5 162.4 ms
+({)59.5 152.4 ms
+(        )59.5 142.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack;)s
+(        ack = segwrap_create \(\);)59.5 122.4 ms
+(        ack->sw_seg[FLG] = )59.5 112.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( | ACKFLAG;)s
+(        ack->sw_seg[SEQ] = ackseq;)59.5 102.4 ms
+(        ack->sw_seglen = ACKLEN;)59.5 92.4 ms
+(        )59.5 72.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( ack;)s
+(})59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Page: 4 4
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 4)59.5 792.4 ms
+0 0.498 0 r
+(struct)59.5 772.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(segwrap_nak_create \(seq_t nakseq\))59.5 762.4 ms
+({)59.5 752.4 ms
+(        )59.5 742.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *nak;)s
+(        nak = segwrap_create \(\);)59.5 722.4 ms
+(        nak->sw_seg[FLG] = )59.5 712.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( | NAKFLAG;)s
+(        nak->sw_seg[SEQ] = nakseq;)59.5 702.4 ms
+(        nak->sw_seglen = NAKLEN;)59.5 692.4 ms
+(        )59.5 672.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( nak;)s
+(})59.5 662.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 632.4 ms
+F0 sf
+0 g
+(segwrap_destroy \()59.5 622.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 612.4 ms
+(        assert \(init_done == TRUE\);)59.5 602.4 ms
+(        qenqueue \(&swcache, sw\);)59.5 592.4 ms
+(})59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 552.4 ms
+F0 sf
+0 g
+(segwrap_fill \()59.5 542.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw, cqueue_t *src, len_t pldlen, seq_t seqnum\))s
+({)59.5 532.4 ms
+(        )59.5 522.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Riempe il segmento del segwrap sw con i dati presi dalla coda src.)s
+(         * Il segmento avra' payload lungo pldlen, il numero di sequenza)59.5 512.4 ms
+(         * seqnum e le flag PLDFLAG e LENFLAG appropriate. */)59.5 502.4 ms
+F0 sf
+0 g
+(        )59.5 482.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        pld_t *pld;)59.5 472.4 ms
+(        assert \(sw != )59.5 452.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(src != )59.5 442.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(pldlen > )59.5 432.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(cqueue_get_used \(src\) >= pldlen\);)59.5 422.4 ms
+(        )59.5 402.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Flags. */)s
+F0 sf
+0 g
+(        sw->sw_seg[FLG] = )59.5 392.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( | PLDFLAG;)s
+(        )59.5 382.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(pldlen != PLDDEFLEN\) {)s
+(                )59.5 372.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Payload non standard, flag e campo len. */)s
+F0 sf
+0 g
+(                sw->sw_seg[FLG] |= LENFLAG;)59.5 362.4 ms
+(                sw->sw_seg[LEN] = pldlen;)59.5 352.4 ms
+(        })59.5 342.4 ms
+(        )59.5 332.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Seqnum. */)s
+F0 sf
+0 g
+(        sw->sw_seg[SEQ] = seqnum;)59.5 322.4 ms
+(        )59.5 312.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Payload. */)s
+F0 sf
+0 g
+(        pld = seg_pld \(sw->sw_seg\);)59.5 302.4 ms
+(        err = cqueue_remove \(src, pld, pldlen\);)59.5 292.4 ms
+(        assert \(!err\);)59.5 282.4 ms
+(        )59.5 272.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Seqlen. */)s
+F0 sf
+0 g
+(        sw->sw_seglen = FLGLEN + SEQLEN)59.5 262.4 ms
+(                + \(pldlen == PLDDEFLEN ? )59.5 252.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( : LENLEN\) + pldlen;)s
+(})59.5 242.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 212.4 ms
+F0 sf
+0 g
+(segwrap_flush_cache \()59.5 202.4 ms
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(\))s
+({)59.5 192.4 ms
+(        )59.5 182.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *cur;)s
+(        )59.5 162.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(\(cur = qdequeue \(&swcache\)\) != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                xfree \(cur\);)59.5 152.4 ms
+(        assert \(isEmpty \(swcache\)\);)59.5 132.4 ms
+(})59.5 122.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 92.4 ms
+F0 sf
+0 g
+(segwrap_is_acked \()59.5 82.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw, )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 72.4 ms
+(        assert \(sw != )59.5 62.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ack != )59.5 52.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+re sp
+%%PageTrailer
+%%Page: 5 5
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 5)59.5 792.4 ms
+F0 sf
+(        )59.5 762.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_seqcmp \(sw, ack\) <= )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                )59.5 752.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 732.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 702.4 ms
+F0 sf
+0 g
+(segwrap_is_assigned \()59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 682.4 ms
+(        assert \(sw != )59.5 672.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 652.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(sw->sw_assigned < )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                )59.5 642.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(        )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(})59.5 622.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 592.4 ms
+F0 sf
+0 g
+(segwrap_is_clonable \()59.5 582.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 572.4 ms
+(        assert \(sw != )59.5 562.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_ack \(sw->sw_seg\))s
+(            || seg_is_nak \(sw->sw_seg\))59.5 532.4 ms
+(            || seg_is_critical \(sw->sw_seg\)\))59.5 522.4 ms
+(                )59.5 512.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        )59.5 502.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 492.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 462.4 ms
+F0 sf
+0 g
+(segwrap_prio \()59.5 452.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 442.4 ms
+(        )59.5 432.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna)s
+(         * 0 se sw e' un NAK)59.5 422.4 ms
+(         * 1 se sw e' un segmento dati da rispedire)59.5 412.4 ms
+(         * 2 se sw e' un ACK)59.5 402.4 ms
+(         * 3 se sw e' un segmento dati. */)59.5 392.4 ms
+F0 sf
+0 g
+(        )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_nak \(sw->sw_seg\)\))s
+(                )59.5 362.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        )59.5 352.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_ack \(sw->sw_seg\)\))s
+(                )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(2)s
+F0 sf
+0 g
+(;)s
+(        assert \(seg_pld \(sw->sw_seg\) != )59.5 322.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 312.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_critical \(sw->sw_seg\)\))s
+(                )59.5 302.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 292.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(3)s
+F0 sf
+0 g
+(;)s
+(})59.5 282.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 252.4 ms
+F0 sf
+0 g
+(segwrap_print \()59.5 242.4 ms
+F1 sf
+0 0.498 0 r
+(char)s
+F0 sf
+0 g
+( *tag, )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 232.4 ms
+(        )59.5 222.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* int i; */)s
+F0 sf
+0 g
+(        seg_t *pld;)59.5 212.4 ms
+(        len_t pldlen;)59.5 202.4 ms
+(        pld = seg_pld \(sw->sw_seg\);)59.5 182.4 ms
+(        pldlen = seg_pld_len \(sw->sw_seg\);)59.5 172.4 ms
+(        )59.5 152.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Flag, seqnum, pldlen e seglen. */)s
+F0 sf
+0 g
+(        printf \()59.5 142.4 ms
+F1 sf
+0.498 0 0.498 r
+(")s
+0.498 0 0 r
+(%s)s
+0.498 0 0.498 r
+( )s
+0.498 0 0 r
+(%u)s
+0.498 0 0.498 r
+(,)s
+0.498 0 0 r
+(%d)s
+0.498 0 0.498 r
+(,)s
+0.498 0 0 r
+(%d)s
+0.498 0 0.498 r
+(/)s
+0.498 0 0 r
+(%d)s
+0.498 0 0.498 r
+( ")s
+F0 sf
+0 g
+(, tag, sw->sw_seg[FLG], seg_seq \(sw->sw_seg\),)s
+(                        pldlen, sw->sw_seglen\);)59.5 132.4 ms
+(        putchar \()59.5 112.4 ms
+F1 sf
+0.498 0 0 r
+('\\n')s
+F0 sf
+0 g
+(\);)s
+(})59.5 102.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 72.4 ms
+F0 sf
+0 g
+(segwrap_seqcmp \()59.5 62.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw_1, )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw_2\))s
+({)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 6 6
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 6)59.5 792.4 ms
+F0 sf
+(        assert \(sw_1 != )59.5 772.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw_2 != )59.5 762.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 752.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( seqcmp \(seg_seq \(sw_1->sw_seg\), seg_seq \(sw_2->sw_seg\)\);)s
+(})59.5 742.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 712.4 ms
+F0 sf
+0 g
+(segwrap_urgcmp \()59.5 702.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw_1, )s
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw_2\))s
+({)59.5 692.4 ms
+(        )59.5 682.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna -1 se sw_1 e' piu' urgente di sw_2, 1 altrimenti.)s
+(         * L'ordine di urgenza per tipo e'dato da segwrap_prio.)59.5 672.4 ms
+(         * A parita' di tipo e' piu' urgente quello con timestamp minore.)59.5 662.4 ms
+(         * A parita' di timestamp, quello con il seqnum minore. */)59.5 652.4 ms
+F0 sf
+0 g
+(        )59.5 632.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Controllo priorita'. */)s
+F0 sf
+0 g
+(        )59.5 622.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_prio \(sw_1\) < segwrap_prio \(sw_2\)\))s
+(                )59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 602.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(segwrap_prio \(sw_1\) > segwrap_prio \(sw_2\)\))s
+(                )59.5 592.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 572.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Priorita' identica, controllo timestamp. */)s
+F0 sf
+0 g
+(        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(sw_1->sw_tstamp < sw_2->sw_tstamp\))s
+(                )59.5 552.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(sw_1->sw_tstamp > sw_2->sw_tstamp\))s
+(                )59.5 532.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 512.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Timestamp identico, controllo seqnum. */)s
+F0 sf
+0 g
+(        assert \(segwrap_seqcmp \(sw_1, sw_2\) != )59.5 502.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 492.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( segwrap_seqcmp \(sw_1, sw_2\);)s
+(})59.5 482.4 ms
+F1 sf
+0 0.498 0 r
+(int)59.5 452.4 ms
+F0 sf
+0 g
+(seqcmp \(seq_t a, seq_t b\))59.5 442.4 ms
+({)59.5 432.4 ms
+(        )59.5 422.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna -1 o 1 a seconda che b rispettivamente segua o preceda a)s
+(         * nell'ordine dei numeri di sequenza. Se a == b ritorna 0. */)59.5 412.4 ms
+F0 sf
+0 g
+(        )59.5 392.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(a == b\))s
+(                )59.5 382.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        )59.5 362.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(\(a < b && \(b - a\) > \(SEQMAX / )s
+F1 sf
+0.498 0 0.498 r
+(2)s
+F0 sf
+0 g
+(\)\))s
+(             || \(a > b && \(a - b\) < \(SEQMAX / )59.5 352.4 ms
+F1 sf
+0.498 0 0.498 r
+(2)s
+F0 sf
+0 g
+(\)\)\))s
+(                )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(        )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( -)s
+F1 sf
+0.498 0 0.498 r
+(1)s
+F0 sf
+0 g
+(;)s
+(})59.5 312.4 ms
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 282.4 ms
+(                               Funzioni locali)59.5 272.4 ms
+(*******************************************************************************/)59.5 262.4 ms
+0 0.498 0 r
+(static)59.5 242.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(handle_rcvd_ack \()59.5 232.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 222.4 ms
+(        )59.5 212.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Rimuove e dealloca tutti i segmenti con seqnum minore o uguale ad)s
+(         * ack da tutte le strutture dati del proxy. */)59.5 202.4 ms
+F0 sf
+0 g
+(        )59.5 182.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *old_ack;)s
+(        assert \(init_done\);)59.5 162.4 ms
+(        old_ack = set_last_ack_rcvd \(ack\);)59.5 142.4 ms
+(        )59.5 132.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(old_ack != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                seghash_rm_acked \(ht_sent, HT_SENT_SIZE, ack\);)59.5 122.4 ms
+(                urgent_rm_acked \(ack\);)59.5 112.4 ms
+(                segwrap_destroy \(old_ack\);)59.5 102.4 ms
+(        } )59.5 92.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                segwrap_destroy \(ack\);)59.5 82.4 ms
+(})59.5 72.4 ms
+re sp
+%%PageTrailer
+%%Page: 7 7
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/segment.c                                                               Pagina 7)59.5 792.4 ms
+0 0.498 0 r
+(static)59.5 772.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(handle_rcvd_nak \()59.5 762.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *nak\))s
+({)59.5 752.4 ms
+(        )59.5 742.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Recupera il segmento con il seqnum indicato dal nak e lo)s
+(         * aggiunge ai segmenti urgenti, dopo aver impostato CRTFLAG. */)59.5 732.4 ms
+F0 sf
+0 g
+(        )59.5 712.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *urg;)s
+(        urg = seghash_remove \(ht_sent, HT_SENT_SIZE, seg_seq \(nak->sw_seg\)\);)59.5 692.4 ms
+(        )59.5 682.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(urg != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                urg->sw_seg[FLG] |= CRTFLAG;)59.5 672.4 ms
+(                urgent_add \(urg\);)59.5 662.4 ms
+(        })59.5 652.4 ms
+(        segwrap_destroy \(nak\);)59.5 642.4 ms
+(})59.5 632.4 ms
+re sp
+%%PageTrailer
+%%Trailer
+%%Pages: 7
+%%EOF
+

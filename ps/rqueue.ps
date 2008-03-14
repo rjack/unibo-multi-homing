@@ -1,0 +1,1644 @@
+%!PS-Adobe-3.0
+%%Title: src/rqueue.c
+%%For: jack
+%%Creator: VIM - Vi IMproved 7.1 (2007 May 12)
+%%CreationDate: Fri Mar 14 13:24:49 2008
+%%DocumentData: Clean8Bit
+%%Orientation: Portrait
+%%Pages: (atend)
+%%PageOrder: Ascend
+%%BoundingBox: 59 49 564 800
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%DocumentSuppliedResources: procset VIM-Prolog 1.4 1
+%%+ encoding VIM-latin1 1.0 0
+%%Requirements: duplex collate color
+%%EndComments
+%%BeginDefaults
+%%PageResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%PageMedia: A4
+%%EndDefaults
+%%BeginProlog
+%%BeginResource: procset VIM-Prolog
+%%BeginDocument: /usr/share/vim/vim71/print/prolog.ps
+%!PS-Adobe-3.0 Resource-ProcSet
+%%Title: VIM-Prolog
+%%Version: 1.4 1
+%%EndComments
+% Editing of this file is NOT RECOMMENDED.  You run a very good risk of causing
+% all PostScript printing from VIM failing if you do.  PostScript is not called
+% a write-only language for nothing!
+/packedarray where not{userdict begin/setpacking/pop load def/currentpacking
+false def end}{pop}ifelse/CP currentpacking def true setpacking
+/bd{bind def}bind def/ld{load def}bd/ed{exch def}bd/d/def ld
+/db{dict begin}bd/cde{currentdict end}bd
+/T true d/F false d
+/SO null d/sv{/SO save d}bd/re{SO restore}bd
+/L2 systemdict/languagelevel 2 copy known{get exec}{pop pop 1}ifelse 2 ge d
+/m/moveto ld/s/show ld /ms{m s}bd /g/setgray ld/r/setrgbcolor ld/sp{showpage}bd
+/gs/gsave ld/gr/grestore ld/cp/currentpoint ld
+/ul{gs UW setlinewidth cp UO add 2 copy newpath m 3 1 roll add exch lineto
+stroke gr}bd
+/bg{gs r cp BO add 4 -2 roll rectfill gr}bd
+/sl{90 rotate 0 exch translate}bd
+L2{
+/sspd{mark exch{setpagedevice}stopped cleartomark}bd
+/nc{1 db/NumCopies ed cde sspd}bd
+/sps{3 db/Orientation ed[3 1 roll]/PageSize ed/ImagingBBox null d cde sspd}bd
+/dt{2 db/Tumble ed/Duplex ed cde sspd}bd
+/c{1 db/Collate ed cde sspd}bd
+}{
+/nc{/#copies ed}bd
+/sps{statusdict/setpage get exec}bd
+/dt{statusdict/settumble 2 copy known{get exec}{pop pop pop}ifelse
+statusdict/setduplexmode 2 copy known{get exec}{pop pop pop}ifelse}bd
+/c{pop}bd
+}ifelse
+/ffs{findfont exch scalefont d}bd/sf{setfont}bd
+/ref{1 db findfont dup maxlength dict/NFD ed{exch dup/FID ne{exch NFD 3 1 roll
+put}{pop pop}ifelse}forall/Encoding findresource dup length 256 eq{NFD/Encoding
+3 -1 roll put}{pop}ifelse NFD dup/FontType get 3 ne{/CharStrings}{/CharProcs}
+ifelse 2 copy known{2 copy get dup maxlength dict copy[/questiondown/space]{2
+copy known{2 copy get 2 index/.notdef 3 -1 roll put pop exit}if pop}forall put
+}{pop pop}ifelse dup NFD/FontName 3 -1 roll put NFD definefont pop end}bd
+CP setpacking
+(\004)cvn{}bd
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%BeginResource: encoding VIM-latin1
+%%BeginDocument: /usr/share/vim/vim71/print/latin1.ps
+%!PS-Adobe-3.0 Resource-Encoding
+%%Title: VIM-latin1
+%%Version: 1.0 0
+%%EndComments
+/VIM-latin1[
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash
+/zero /one /two /three /four /five /six /seven
+/eight /nine /colon /semicolon /less /equal /greater /question
+/at /A /B /C /D /E /F /G
+/H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+/grave /a /b /c /d /e /f /g
+/h /i /j /k /l /m /n /o
+/p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis]
+/Encoding defineresource pop
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%EndProlog
+%%BeginSetup
+595 842 0 sps
+1 nc
+T F dt
+T c
+%%IncludeResource: font Courier
+/_F0 /VIM-latin1 /Courier ref
+/F0 10 /_F0 ffs
+%%IncludeResource: font Courier-Bold
+/_F1 /VIM-latin1 /Courier-Bold ref
+/F1 10 /_F1 ffs
+%%IncludeResource: font Courier-Oblique
+/_F2 /VIM-latin1 /Courier-Oblique ref
+/F2 10 /_F2 ffs
+%%IncludeResource: font Courier-BoldOblique
+/_F3 /VIM-latin1 /Courier-BoldOblique ref
+/F3 10 /_F3 ffs
+/UO -1 d
+/UW 0.5 d
+/BO -2.5 d
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 1)59.5 792.4 ms
+0 0 0.498 r
+(#include )59.5 772.4 ms
+0.498 0 0.498 r
+("h/rqueue.h")s
+0 0 0.498 r
+(#include )59.5 762.4 ms
+0.498 0 0.498 r
+("h/cqueue.h")s
+0 0 0.498 r
+(#include )59.5 752.4 ms
+0.498 0 0.498 r
+("h/channel.h")s
+0 0 0.498 r
+(#include )59.5 742.4 ms
+0.498 0 0.498 r
+("h/segment.h")s
+0 0 0.498 r
+(#include )59.5 732.4 ms
+0.498 0 0.498 r
+("h/types.h")s
+0 0 0.498 r
+(#include )59.5 722.4 ms
+0.498 0 0.498 r
+("h/util.h")s
+0 0 0.498 r
+(#include )59.5 702.4 ms
+0.498 0 0.498 r
+(<config.h>)s
+0 0 0.498 r
+(#define     TYPE     )59.5 672.4 ms
+0 0.498 0 r
+(struct)s
+0 0 0.498 r
+( segwrap)s
+(#define     NEXT     sw_next)59.5 662.4 ms
+(#define     PREV     sw_prev)59.5 652.4 ms
+(#define     EMPTYQ   )59.5 642.4 ms
+0.498 0 0.498 r
+(NULL)s
+0 0 0.498 r
+(#include )59.5 632.4 ms
+0.498 0 0.498 r
+("src/queue_template")s
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 602.4 ms
+(                               Funzioni locali)59.5 592.4 ms
+(*******************************************************************************/)59.5 582.4 ms
+0 0.498 0 r
+(static)59.5 562.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( consolidate \(rqueue_t *rq\);)s
+F1 sf
+0 0.498 0 r
+(static)59.5 552.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+( is_first_partially_sent \(rqueue_t *rq\);)s
+F1 sf
+0 0.498 0 r
+(bool)59.5 542.4 ms
+F0 sf
+0 g
+( is_consistent \(rqueue_t *rq\);)s
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 512.4 ms
+(                              Funzioni pubbliche)59.5 502.4 ms
+(*******************************************************************************/)59.5 492.4 ms
+0 0.498 0 r
+(int)59.5 462.4 ms
+F0 sf
+0 g
+(rqueue_add \(rqueue_t *rq, )59.5 452.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw\))s
+({)59.5 442.4 ms
+(        )59.5 432.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Accoda sw alla coda rq e lo copia nel buffer.)s
+(         * La coda deve risultare in ordine di urgenza e sw deve poter essere)59.5 422.4 ms
+(         * contenuto nel buffer. */)59.5 412.4 ms
+F0 sf
+0 g
+(        )59.5 392.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        assert \(rq != )59.5 372.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw != )59.5 362.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw->sw_next == )59.5 352.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw->sw_prev == )59.5 342.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw->sw_seglen > )59.5 332.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(sw->sw_seglen <= cqueue_get_aval \(rq->rq_data\)\);)59.5 322.4 ms
+(        assert \(isEmpty \(rq->rq_sgmt\))59.5 312.4 ms
+(                || \(isLast \(rq->rq_sgmt, rq->rq_sgmt\) )59.5 302.4 ms
+(                    && is_first_partially_sent \(rq\)\))59.5 292.4 ms
+(                || segwrap_urgcmp \(rq->rq_sgmt, sw\) < )59.5 282.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(is_consistent \(rq\)\);)59.5 262.4 ms
+(        )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rqueue_get_used \(rq\) == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                rq->rq_nbytes = sw->sw_seglen;)59.5 232.4 ms
+(        qenqueue \(&rq->rq_sgmt, sw\);)59.5 212.4 ms
+(        err = cqueue_add \(rq->rq_data, sw->sw_seg, sw->sw_seglen\);)59.5 202.4 ms
+(        assert \(!err\);)59.5 192.4 ms
+(        assert \(is_consistent \(rq\)\);)59.5 172.4 ms
+(        )59.5 162.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(})59.5 152.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 122.4 ms
+F0 sf
+0 g
+(rqueue_can_read \(rqueue_t *rq\))59.5 112.4 ms
+({)59.5 102.4 ms
+(        assert \(rq != )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 82.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_can_read \(rq->rq_data\);)s
+(})59.5 72.4 ms
+re sp
+%%PageTrailer
+%%Page: 2 2
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 2)59.5 792.4 ms
+0 0.498 0 r
+(bool)59.5 772.4 ms
+F0 sf
+0 g
+(rqueue_can_write \(rqueue_t *rq\))59.5 762.4 ms
+({)59.5 752.4 ms
+(        assert \(rq != )59.5 742.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(is_consistent \(rq\)\);)59.5 732.4 ms
+(        )59.5 722.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqueue_can_write \(\()s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+( *\)rq->rq_data\);)s
+(})59.5 712.4 ms
+(rqueue_t *)59.5 682.4 ms
+(rqueue_create \()59.5 672.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( len\))s
+({)59.5 662.4 ms
+(        rqueue_t *newrq;)59.5 652.4 ms
+(        assert \(len > )59.5 632.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        newrq = xmalloc \()59.5 612.4 ms
+F1 sf
+0.498 0.498 0 r
+(sizeof)s
+F0 sf
+0 g
+( \(rqueue_t\)\);)s
+(        newrq->rq_data = cqueue_create \(len\);)59.5 602.4 ms
+(        newrq->rq_sgmt = newQueue \(\);)59.5 592.4 ms
+(        newrq->rq_nbytes = )59.5 582.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        assert \(is_consistent \(newrq\)\);)59.5 562.4 ms
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( newrq;)s
+(})59.5 532.4 ms
+F1 sf
+0 0.498 0 r
+(struct)59.5 502.4 ms
+F0 sf
+0 g
+( segwrap *)s
+(rqueue_cut_unsent \(rqueue_t *rq\))59.5 492.4 ms
+({)59.5 482.4 ms
+(        )59.5 472.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ritorna una coda contenente i segmenti non ancora spediti, che)s
+(         * vengono rimossi da rq_sgmt. Il buffer circolare viene modificato di)59.5 462.4 ms
+(         * conseguenza.)59.5 452.4 ms
+(         * Puo' ritornare una coda vuota. */)59.5 442.4 ms
+F0 sf
+0 g
+(        )59.5 422.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        )59.5 412.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *rmvdq;)s
+(        assert \(rq != )59.5 392.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(is_consistent \(rq\)\);)59.5 382.4 ms
+(        head = getHead \(rq->rq_sgmt\);)59.5 362.4 ms
+(        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(rqueue_get_used \(rq\) == )59.5 332.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( newQueue \(\);)s
+(        })59.5 312.4 ms
+(        assert \(rqueue_get_used \(rq\) > )59.5 302.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        rmvdq = rq->rq_sgmt;)59.5 282.4 ms
+(        rq->rq_sgmt = newQueue \(\);)59.5 272.4 ms
+(        )59.5 262.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rq->rq_nbytes < head->sw_seglen\) {)s
+(                qenqueue \(&rq->rq_sgmt, qdequeue \(&rmvdq\)\);)59.5 252.4 ms
+(                assert \(isLast \(rq->rq_sgmt, rq->rq_sgmt\)\);)59.5 242.4 ms
+(        } )59.5 232.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                rq->rq_nbytes = )59.5 222.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        consolidate \(rq\);)59.5 202.4 ms
+(        assert \(is_consistent \(rq\)\);)59.5 192.4 ms
+(        )59.5 172.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( rmvdq;)s
+(})59.5 162.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 132.4 ms
+F0 sf
+0 g
+(rqueue_destroy \(rqueue_t *rq\))59.5 122.4 ms
+({)59.5 112.4 ms
+(        assert \(rq != )59.5 102.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(isEmpty \(rq->rq_sgmt\)\);)59.5 92.4 ms
+(        cqueue_destroy \(rq->rq_data\);)59.5 72.4 ms
+(        xfree \(rq\);)59.5 62.4 ms
+(})59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 3 3
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 3)59.5 792.4 ms
+0 0.498 0 r
+(size_t)59.5 752.4 ms
+F0 sf
+0 g
+(rqueue_get_aval \(rqueue_t *rq\))59.5 742.4 ms
+({)59.5 732.4 ms
+(        )59.5 722.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( cqaval;)s
+(        assert \(rq != )59.5 702.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        cqaval = cqueue_get_aval \(rq->rq_data\);)59.5 692.4 ms
+F1 sf
+0 0 0.498 r
+(#ifndef NDEBUG)59.5 672.4 ms
+F0 sf
+0 g
+(        )59.5 662.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cqaval == rq->rq_data->cq_len\) {)s
+(                assert \(isEmpty \(rq->rq_sgmt\)\);)59.5 652.4 ms
+(                assert \(rq->rq_nbytes == )59.5 642.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        } )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                )59.5 622.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(                head = getHead \(rq->rq_sgmt\);)59.5 612.4 ms
+(                assert \(!isEmpty \(rq->rq_sgmt\)\);)59.5 602.4 ms
+(                assert \(rq->rq_nbytes > )59.5 592.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                assert \(head->sw_seglen >= rq->rq_nbytes\);)59.5 582.4 ms
+(        })59.5 572.4 ms
+F1 sf
+0 0 0.498 r
+(#endif)59.5 562.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0.498 r
+(/* NDEBUG */)s
+F0 sf
+0 g
+(        )59.5 542.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqaval;)s
+(})59.5 532.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)59.5 502.4 ms
+F0 sf
+0 g
+(rqueue_get_used \(rqueue_t *rq\))59.5 492.4 ms
+({)59.5 482.4 ms
+(        )59.5 472.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( cqused;)s
+(        assert \(rq != )59.5 452.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        cqused = cqueue_get_used \(rq->rq_data\);)59.5 432.4 ms
+F1 sf
+0 0 0.498 r
+(#ifndef NDEBUG)59.5 412.4 ms
+F0 sf
+0 g
+(        )59.5 402.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cqused == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(isEmpty \(rq->rq_sgmt\)\);)59.5 392.4 ms
+(                assert \(rq->rq_nbytes == )59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        } )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( {)s
+(                )59.5 362.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(                head = getHead \(rq->rq_sgmt\);)59.5 352.4 ms
+(                assert \(!isEmpty \(rq->rq_sgmt\)\);)59.5 342.4 ms
+(                assert \(rq->rq_nbytes > )59.5 332.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                assert \(head->sw_seglen >= rq->rq_nbytes\);)59.5 322.4 ms
+(        })59.5 302.4 ms
+F1 sf
+0 0 0.498 r
+(#endif)59.5 292.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0.498 r
+(/* NDEBUG */)s
+F0 sf
+0 g
+(        )59.5 272.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( cqused;)s
+(})59.5 262.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)59.5 232.4 ms
+F0 sf
+0 g
+(rqueue_read \(fd_t fd, rqueue_t *rq\))59.5 222.4 ms
+({)59.5 212.4 ms
+(        )59.5 202.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Chiama cqueue_read su fd e rq->rq_data e gestisce i segmenti letti)s
+(         * completamente.)59.5 192.4 ms
+(         * Ritorna esattamente il valore e l'errno di cqueue_read. */)59.5 182.4 ms
+F0 sf
+0 g
+(        )59.5 162.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( errno_s;)s
+(        )59.5 152.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( err;)s
+(        )59.5 142.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( nread;)s
+(        assert \(fd >= )59.5 122.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(rq != )59.5 112.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(isEmpty \(rq->rq_sgmt\)\);)59.5 102.4 ms
+(        assert \(rq->rq_nbytes == )59.5 92.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(rqueue_can_read \(rq\)\);)59.5 82.4 ms
+(        nread = cqueue_read \(fd, rq->rq_data\);)59.5 62.4 ms
+(        errno_s = errno;)59.5 52.4 ms
+re sp
+%%PageTrailer
+%%Page: 4 4
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 4)59.5 792.4 ms
+F0 sf
+(        )59.5 762.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(nread > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                )59.5 752.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( seglen;)s
+F1 sf
+0 0 0.498 r
+(#ifdef VERBOSE)59.5 742.4 ms
+F0 sf
+0 g
+(                )59.5 732.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* printf \("rqueue_read %d bytes\\n", nread\); */)s
+0 0 0.498 r
+(#endif)59.5 722.4 ms
+F0 sf
+0 g
+(                )59.5 702.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(\(seglen = cqueue_seglen \(rq->rq_data\)\) > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                        )59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *sw;)s
+(                        sw = segwrap_create \(\);)59.5 682.4 ms
+(                        sw->sw_seglen = seglen;)59.5 672.4 ms
+(                        err = cqueue_remove \(rq->rq_data, sw->sw_seg, seglen\);)59.5 662.4 ms
+(                        assert \(!err\);)59.5 652.4 ms
+(                        channel_activity_notice \(get_cd_from \(rq, ELRQUEUE\)\);)59.5 642.4 ms
+(                        handle_rcvd_segment \(sw\);)59.5 632.4 ms
+(                })59.5 622.4 ms
+(        })59.5 612.4 ms
+(        errno = errno_s;)59.5 592.4 ms
+(        )59.5 582.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( nread;)s
+(})59.5 572.4 ms
+F1 sf
+0 0.498 0 r
+(void)59.5 542.4 ms
+F0 sf
+0 g
+(rqueue_rm_acked \(rqueue_t *rq, )59.5 532.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *ack\))s
+({)59.5 522.4 ms
+(        )59.5 512.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Rimuove e distrugge tutti i segwrap che non devono piu' essere)s
+(         * spediti perche' hanno il seqnum minore o uguale ad ack, tranne il)59.5 502.4 ms
+(         * primo se e' parzialmente spedito.)59.5 492.4 ms
+(         * Se necessario, consolida rq. */)59.5 482.4 ms
+F0 sf
+0 g
+(        )59.5 462.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        )59.5 452.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *rmvdq;)s
+(        assert \(rq != )59.5 432.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(ack != )59.5 422.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(is_consistent \(rq\)\);)59.5 412.4 ms
+(        head = getHead \(rq->rq_sgmt\);)59.5 392.4 ms
+(        )59.5 382.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+(;)s
+(        assert \(rqueue_get_used \(rq\) > )59.5 352.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 332.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Se il primo e' stato spedito parzialmente lo salva a parte e lo)s
+(         * ripristina successivamente alla pulizia. */)59.5 322.4 ms
+F0 sf
+0 g
+(        )59.5 312.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rq->rq_nbytes < head->sw_seglen\))s
+(                head = qdequeue \(&rq->rq_sgmt\);)59.5 302.4 ms
+(        )59.5 292.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                head = )59.5 282.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(;)s
+(        )59.5 262.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Rimozione acked. */)s
+F0 sf
+0 g
+(        rmvdq = qremove_all_that \(&rq->rq_sgmt, &segwrap_is_acked, ack\);)59.5 252.4 ms
+(        )59.5 232.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                qpush \(&rq->rq_sgmt, head\);)59.5 222.4 ms
+(        )59.5 212.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+( )s
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(\(head = getHead \(rq->rq_sgmt\)\) == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                rq->rq_nbytes = )59.5 202.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        )59.5 192.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                rq->rq_nbytes = head->sw_seglen;)59.5 182.4 ms
+(        )59.5 162.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Se sono stati rimossi dei segmenti, la coda va riportata in uno)s
+(         * stato coerente. */)59.5 152.4 ms
+F0 sf
+0 g
+(        )59.5 142.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(!isEmpty \(rmvdq\)\))s
+(                consolidate \(rq\);)59.5 132.4 ms
+(        )59.5 112.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Deallocazione rimossi. */)s
+F0 sf
+0 g
+(        )59.5 102.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(rmvdq\)\))s
+(                segwrap_destroy \(qdequeue \(&rmvdq\)\);)59.5 92.4 ms
+(        assert \(is_consistent \(rq\)\);)59.5 72.4 ms
+(})59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Page: 5 5
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 5)59.5 792.4 ms
+0 0.498 0 r
+(size_t)59.5 762.4 ms
+F0 sf
+0 g
+(rqueue_write \(fd_t fd, rqueue_t *rq\))59.5 752.4 ms
+({)59.5 742.4 ms
+(        )59.5 732.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Chiama cqueue_write su fd e rq->rq_data e gestisce di conseguenza)s
+(         * la coda dei segwrap uscenti.)59.5 722.4 ms
+(         * Ritorna esattamente il valore e l'errno di cqueue_write. */)59.5 712.4 ms
+F0 sf
+0 g
+(        )59.5 692.4 ms
+F1 sf
+0 0.498 0 r
+(int)s
+F0 sf
+0 g
+( errno_s;)s
+(        )59.5 682.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( nsent;)s
+(        )59.5 672.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( retval;)s
+(        assert \(fd >= )59.5 652.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(rq != )59.5 642.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        assert \(rqueue_can_write \(rq\)\);)59.5 632.4 ms
+(        assert \(rq->rq_nbytes > )59.5 622.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        assert \(is_consistent \(rq\)\);)59.5 612.4 ms
+(        retval = nsent = cqueue_write \(fd, rq->rq_data\);)59.5 592.4 ms
+(        errno_s = errno;)59.5 582.4 ms
+(        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(nsent > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                )59.5 552.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( min;)s
+(                min = MIN \(nsent, rq->rq_nbytes\);)59.5 532.4 ms
+(                nsent -= min;)59.5 522.4 ms
+(                rq->rq_nbytes -= min;)59.5 512.4 ms
+(                )59.5 492.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Se primo segmento spedito completamente, lo rimuove e lo)s
+(                 * gestisce. */)59.5 482.4 ms
+F0 sf
+0 g
+(                )59.5 472.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rq->rq_nbytes == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\) {)s
+(                        )59.5 462.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(                        head = qdequeue \(&rq->rq_sgmt\);)59.5 442.4 ms
+(                        assert \(head != )59.5 432.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(                        )59.5 412.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(seg_is_ack \(head->sw_seg\)\))s
+(                                channel_activity_notice \(get_cd_from \(rq,)59.5 402.4 ms
+(                                                        ELRQUEUE\)\);)59.5 392.4 ms
+(                        handle_sent_segment \(head\);)59.5 382.4 ms
+(                        )59.5 362.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Ricalcola rq_nbytes. */)s
+F0 sf
+0 g
+(                        head = getHead \(rq->rq_sgmt\);)59.5 352.4 ms
+(                        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                                rq->rq_nbytes = head->sw_seglen;)59.5 332.4 ms
+(                        )59.5 322.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                                assert \(nsent == )59.5 312.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                })59.5 302.4 ms
+(        })59.5 292.4 ms
+(        assert \(is_consistent \(rq\)\);)59.5 272.4 ms
+(        errno = errno_s;)59.5 252.4 ms
+(        )59.5 242.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( retval;)s
+(})59.5 232.4 ms
+F1 sf
+0 0.498 0.498 r
+(/*******************************************************************************)59.5 202.4 ms
+(                               Funzioni locali)59.5 192.4 ms
+(*******************************************************************************/)59.5 182.4 ms
+0 0.498 0 r
+(static)59.5 162.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(void)s
+F0 sf
+0 g
+(consolidate \(rqueue_t *rq\))59.5 152.4 ms
+({)59.5 142.4 ms
+(        )59.5 132.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* Riporta rq_data in uno stato coerente con rq_sgmt.)s
+(         * Se il segmento in testa e' stato parzialmente spedito lo ignora,)59.5 122.4 ms
+(         * perche' assume che le altre funzioni non lo modifichino. */)59.5 112.4 ms
+F0 sf
+0 g
+(        )59.5 92.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        )59.5 82.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *tmp;)s
+(        )59.5 72.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( todrop;)s
+(        assert \(rq != )59.5 52.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+re sp
+%%PageTrailer
+%%Page: 6 6
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(src/rqueue.c                                                                Pagina 6)59.5 792.4 ms
+F0 sf
+(        todrop = cqueue_get_used \(rq->rq_data\);)59.5 762.4 ms
+(        )59.5 752.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(todrop == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                )59.5 742.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+(;)s
+(        tmp = rq->rq_sgmt;)59.5 722.4 ms
+(        rq->rq_sgmt = newQueue \(\);)59.5 712.4 ms
+(        head = getHead \(tmp\);)59.5 702.4 ms
+F1 sf
+0 0 0.498 r
+(#ifndef NDEBUG)59.5 692.4 ms
+F0 sf
+0 g
+(        )59.5 682.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                assert \(rq->rq_nbytes == )59.5 672.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 662.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                assert \(rq->rq_nbytes > )59.5 652.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+F1 sf
+0 0 0.498 r
+(#endif)59.5 642.4 ms
+F0 sf
+0 g
+(        )59.5 632.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+( && head->sw_seglen > rq->rq_nbytes\) {)s
+(                qenqueue \(&rq->rq_sgmt, qdequeue \(&tmp\)\);)59.5 622.4 ms
+(                todrop -= rq->rq_nbytes;)59.5 612.4 ms
+(        } )59.5 602.4 ms
+F1 sf
+0.498 0.498 0 r
+(else)s
+F0 sf
+0 g
+(                rq->rq_nbytes = )59.5 592.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        assert \(todrop >= )59.5 572.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(        )59.5 562.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(todrop > )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\))s
+(                cqueue_drop_tail \(rq->rq_data, todrop\);)59.5 552.4 ms
+(        )59.5 532.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(!isEmpty \(tmp\)\))s
+(                rqueue_add \(rq, qdequeue \(&tmp\)\);)59.5 522.4 ms
+(})59.5 502.4 ms
+F1 sf
+0 0.498 0 r
+(static)59.5 472.4 ms
+F0 sf
+0 g
+( )s
+F1 sf
+0 0.498 0 r
+(bool)s
+F0 sf
+0 g
+(is_first_partially_sent \(rqueue_t * rq\))59.5 462.4 ms
+({)59.5 452.4 ms
+(        )59.5 442.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        assert \(rq != )59.5 422.4 ms
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\);)s
+(        head = getHead \(rq->rq_sgmt\);)59.5 402.4 ms
+(        )59.5 392.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head != )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\) {)s
+(                assert \(rq->rq_nbytes > )59.5 382.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(\);)s
+(                )59.5 372.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(rq->rq_nbytes < head->sw_seglen\))s
+(                        )59.5 362.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( TRUE;)s
+(        })59.5 352.4 ms
+(        )59.5 342.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( FALSE;)s
+(})59.5 332.4 ms
+F1 sf
+0 0.498 0 r
+(bool)59.5 302.4 ms
+F0 sf
+0 g
+(is_consistent \(rqueue_t *rq\))59.5 292.4 ms
+({)59.5 282.4 ms
+(        )59.5 272.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( sgmt_tot;)s
+(        )59.5 262.4 ms
+F1 sf
+0 0.498 0 r
+(size_t)s
+F0 sf
+0 g
+( data_tot;)s
+(        )59.5 252.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *cur;)s
+(        )59.5 242.4 ms
+F1 sf
+0 0.498 0 r
+(struct)s
+F0 sf
+0 g
+( segwrap *head;)s
+(        data_tot = rqueue_get_used \(rq\);)59.5 222.4 ms
+(        sgmt_tot = )59.5 212.4 ms
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+(;)s
+(        cur = head = getHead \(rq->rq_sgmt\);)59.5 202.4 ms
+(        )59.5 192.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(cur == )s
+F1 sf
+0.498 0 0.498 r
+(NULL)s
+F0 sf
+0 g
+(\))s
+(                )59.5 182.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(data_tot == )s
+F1 sf
+0.498 0 0.498 r
+(0)s
+F0 sf
+0 g
+( ? TRUE : FALSE\);)s
+(        )59.5 162.4 ms
+F1 sf
+0 0.498 0.498 r
+(/* cur e head != NULL */)s
+F0 sf
+0 g
+(        )59.5 152.4 ms
+F1 sf
+0.498 0.498 0 r
+(do)s
+F0 sf
+0 g
+( {)s
+(                sgmt_tot += cur->sw_seglen;)59.5 142.4 ms
+(                cur = getNext \(cur\);)59.5 132.4 ms
+(        } )59.5 122.4 ms
+F1 sf
+0.498 0.498 0 r
+(while)s
+F0 sf
+0 g
+( \(cur != head\);)s
+(        )59.5 102.4 ms
+F1 sf
+0.498 0.498 0 r
+(if)s
+F0 sf
+0 g
+( \(head->sw_seglen != rq->rq_nbytes\))s
+(                sgmt_tot -= \(head->sw_seglen - rq->rq_nbytes\);)59.5 92.4 ms
+(        )59.5 72.4 ms
+F1 sf
+0.498 0.498 0 r
+(return)s
+F0 sf
+0 g
+( \(data_tot == sgmt_tot ? TRUE : FALSE\);)s
+(})59.5 62.4 ms
+re sp
+%%PageTrailer
+%%Trailer
+%%Pages: 6
+%%EOF
+
